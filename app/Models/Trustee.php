@@ -7,8 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'job_title', 'base_salary'])]
-class engineer extends Model
+#[Fillable(['user_id', 'kinship_relation'])]
+class Trustee extends Model
 {
   use HasFactory;
 

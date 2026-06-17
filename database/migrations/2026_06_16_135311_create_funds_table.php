@@ -14,7 +14,7 @@ return new class extends Migration
   {
     Schema::create('funds', function (Blueprint $table) {
       $table->id();
-      $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
+      $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
       $table->string('name');
       $table->decimal('balance', 15, 2)->default(0.00);
       $table->timestamps();

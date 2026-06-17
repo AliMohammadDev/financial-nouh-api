@@ -14,7 +14,8 @@ return new class extends Migration
   {
     Schema::create('trustees', function (Blueprint $table) {
       $table->id();
-      $table->foreignIdFor(User::class)->constrained();
+      $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
+
       $table->string('kinship_relation');
       $table->timestamps();
     });
