@@ -23,7 +23,9 @@ class UpdateFundRequest extends FormRequest
   public function rules(): array
   {
     return [
-      //
+      'user_id' => 'sometimes|required|exists:users,id',
+      'name'    => 'sometimes|required|string|max:255',
+      'balance' => 'sometimes|required|numeric|min:0',
     ];
   }
 }

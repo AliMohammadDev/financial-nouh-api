@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable(['user_id', 'name', 'balance'])]
-class fund extends Model
+class Fund extends Model
 {
   use HasFactory;
 
