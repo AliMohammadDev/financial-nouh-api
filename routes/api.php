@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\FundController;
+use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\MaterialController;
 use App\Http\Controllers\Api\User\ClientController;
 use App\Http\Controllers\Api\User\CraftsmenController;
 use App\Http\Controllers\Api\User\EmployeeController;
@@ -15,18 +17,14 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-
 Route::apiResource('clients', ClientController::class);
-
 Route::apiResource('craftsmen', CraftsmenController::class);
-
 Route::apiResource('employees', EmployeeController::class);
-
 Route::apiResource('engineers', EngineerController::class);
-
 Route::apiResource('suppliers', SupplierController::class);
-
 Route::apiResource('trustees', TrusteeController::class);
-
-
 Route::apiResource('funds', FundController::class);
+
+
+Route::apiResource('items', ItemController::class);
+Route::apiResource('materials', MaterialController::class);
