@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\FundController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\MaterialController;
+use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\User\ClientController;
 use App\Http\Controllers\Api\User\CraftsmenController;
 use App\Http\Controllers\Api\User\EmployeeController;
@@ -28,3 +29,9 @@ Route::apiResource('funds', FundController::class);
 
 Route::apiResource('items', ItemController::class);
 Route::apiResource('materials', MaterialController::class);
+
+
+Route::apiResource('projects', ProjectController::class);
+
+Route::post('projects/{project}/funds', [ProjectController::class, 'attachFund']);
+Route::delete('project-funds/{projectFund}', [ProjectController::class, 'detachFund']);

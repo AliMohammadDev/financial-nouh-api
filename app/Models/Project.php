@@ -8,18 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id'])]
-class Client extends Model
+#[Fillable(['client_id', 'name', 'expected_cost', 'status'])]
+class Project extends Model
 {
   use HasFactory;
 
-  public function user(): BelongsTo
+  public function client(): BelongsTo
   {
-    return $this->belongsTo(User::class);
+    return $this->belongsTo(Client::class);
   }
 
-  public function projects(): HasMany
+  public function projectFunds(): HasMany
   {
-    return $this->hasMany(Project::class);
+    return $this->hasMany(ProjectFund::class);
   }
 }
