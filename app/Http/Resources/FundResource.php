@@ -19,7 +19,7 @@ class FundResource extends JsonResource
       'name'       => $this->name,
       'balance'    => (float) $this->balance,
       'user'       => $this->whenLoaded('user'),
-      'created_at' => $this->created_at?->toIso8601String(),
+      'created_at' => $this->created_at?->format('Y-m-d'),
     ];
   }
 }

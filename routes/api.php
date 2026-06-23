@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\EmployeePaymentController;
+use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\FundController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\MaterialController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\ProjectFundController;
 use App\Http\Controllers\Api\User\ClientController;
 use App\Http\Controllers\Api\User\CraftsmenController;
 use App\Http\Controllers\Api\User\EmployeeController;
@@ -18,6 +21,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
+// users
 Route::apiResource('clients', ClientController::class);
 Route::apiResource('craftsmen', CraftsmenController::class);
 Route::apiResource('employees', EmployeeController::class);
@@ -32,6 +36,7 @@ Route::apiResource('materials', MaterialController::class);
 
 
 Route::apiResource('projects', ProjectController::class);
+Route::apiResource('project-funds', ProjectFundController::class);
 
-Route::post('projects/{project}/funds', [ProjectController::class, 'attachFund']);
-Route::delete('project-funds/{projectFund}', [ProjectController::class, 'detachFund']);
+Route::apiResource('employee-payments', EmployeePaymentController::class);
+Route::apiResource('expenses', ExpenseController::class);

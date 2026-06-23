@@ -17,7 +17,7 @@ class ClientResource extends JsonResource
     return [
       'id'         => $this->id,
       'user'       => new UserResource($this->whenLoaded('user')),
-      'created_at' => $this->created_at?->toIso8601String(),
+      'created_at' => $this->created_at?->format('Y-m-d'),
     ];
   }
 }
