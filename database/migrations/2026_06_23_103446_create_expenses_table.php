@@ -18,6 +18,7 @@ return new class extends Migration
       $table->morphs('expenseable');
       $table->text('description')->nullable();
       $table->decimal('amount', 15, 2);
+      $table->string('currency')->default('USD');
       $table->boolean('is_posted')->default(false);
       $table->foreignIdFor(Employee::class)->constrained()->cascadeOnDelete();
       $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();

@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Expense;
 
+use App\Enums\Currency;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateExpenseRequest extends FormRequest
 {
@@ -27,6 +29,7 @@ class UpdateExpenseRequest extends FormRequest
       'expenseable_id'    => 'sometimes|integer',
       'description'         => 'sometimes|string',
       'amount'            => 'sometimes|numeric|min:0',
+      'currency' => ['sometimes', new Enum(Currency::class)],
       'is_posted'         => 'nullable|boolean',
       'employee_id'  => 'sometimes|exists:employees,id',
       'user_id'  => 'sometimes|exists:users,id',

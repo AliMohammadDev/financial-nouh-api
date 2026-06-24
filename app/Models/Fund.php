@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'name', 'balance'])]
+#[Fillable(['user_id', 'name', 'balance_usd', 'balance_syp'])]
 class Fund extends Model
 {
   use HasFactory;
@@ -18,8 +19,8 @@ class Fund extends Model
     return $this->belongsTo(User::class);
   }
 
-  public function projectFunds(): HasMany
+  public function expenses(): MorphMany
   {
-    return $this->hasMany(ProjectFund::class);
+    return $this->morphMany(Expense::class, 'expenseable');
   }
 }
