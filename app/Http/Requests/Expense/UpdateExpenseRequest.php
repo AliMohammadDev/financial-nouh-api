@@ -29,6 +29,7 @@ class UpdateExpenseRequest extends FormRequest
       'amount'            => 'sometimes|numeric|min:0',
       'is_posted'         => 'nullable|boolean',
       'employee_id'  => 'sometimes|exists:employees,id',
+      'user_id'  => 'sometimes|exists:users,id',
     ];
   }
 }

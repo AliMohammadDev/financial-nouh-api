@@ -10,12 +10,12 @@ class ExpenseService
 {
   public function findAll(): Collection
   {
-    return Expense::with(['employee.user', 'expenseable'])->get();
+    return Expense::with(['employee.user', 'createdBy', 'expenseable'])->get();
   }
 
   public function findOne(int $id): Expense
   {
-    return Expense::with(['employee.user', 'expenseable'])->findOrFail($id);
+    return Expense::with(['employee.user', 'createdBy', 'expenseable'])->findOrFail($id);
   }
   public function create(array $data): Expense
   {
@@ -31,7 +31,7 @@ class ExpenseService
       $expense->update($data);
     });
 
-    return $expense->load(['employee.user', 'expenseable']);
+    return $expense->load(['employee.user', 'createdBy', 'expenseable']);
   }
 
   public function delete(int $id): bool

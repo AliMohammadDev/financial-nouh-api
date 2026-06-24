@@ -29,6 +29,7 @@ class CreateExpenseRequest extends FormRequest
       'amount'            => 'required|numeric|min:0',
       'is_posted'         => 'nullable|boolean',
       'employee_id'  => 'required|exists:employees,id',
+      'user_id'  => 'required|exists:users,id',
 
     ];
   }

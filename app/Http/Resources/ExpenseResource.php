@@ -24,7 +24,12 @@ class ExpenseResource extends JsonResource
       'employee'          => $this->relationLoaded('employee') && $this->employee->relationLoaded('user')
         ? $this->employee->user?->name
         : null,
+
+      'created_by'        => $this->relationLoaded('createdBy')
+        ? $this->createdBy?->name
+        : null,
       'created_at'        => $this->created_at?->format('Y-m-d'),
+
     ];
   }
 }
