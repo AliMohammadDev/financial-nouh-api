@@ -25,7 +25,8 @@ class CreateFundRequest extends FormRequest
     return [
       'user_id' => 'required|exists:users,id',
       'name'    => 'required|string|max:255',
-      'balance' => 'required|numeric|min:0',
+      'balance_usd' => 'nullable|numeric|min:0',
+      'balance_syp' => 'nullable|numeric|min:0',
     ];
   }
 }

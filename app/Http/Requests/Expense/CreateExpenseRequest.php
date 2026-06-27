@@ -31,7 +31,7 @@ class CreateExpenseRequest extends FormRequest
       'amount'            => 'required|numeric|min:0',
       'currency' => ['required', new Enum(Currency::class)],
       'is_posted'         => 'nullable|boolean',
-      'employee_id'  => 'required|exists:employees,id',
+      'employee_id'  => 'nullable|exists:employees,id',
       'user_id'  => 'required|exists:users,id',
 
     ];

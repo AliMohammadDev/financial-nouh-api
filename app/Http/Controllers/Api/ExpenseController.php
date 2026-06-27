@@ -33,7 +33,6 @@ class ExpenseController extends Controller
     return response()->json(new ExpenseResource($payment));
   }
 
-
   public function show(int $id): JsonResponse
   {
     $expense = $this->expenseService->findOne($id);

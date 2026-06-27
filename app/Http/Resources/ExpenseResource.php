@@ -21,10 +21,9 @@ class ExpenseResource extends JsonResource
       'description'         => $this->description,
       'amount'            => (float) $this->amount,
       'is_posted'         => (bool) $this->is_posted,
-      'employee'          => $this->relationLoaded('employee') && $this->employee->relationLoaded('user')
+      'employee'          => ($this->employee && $this->employee->relationLoaded('user'))
         ? $this->employee->user?->name
         : null,
-
       'created_by'        => $this->relationLoaded('createdBy')
         ? $this->createdBy?->name
         : null,

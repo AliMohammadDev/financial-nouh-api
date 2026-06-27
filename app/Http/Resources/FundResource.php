@@ -17,7 +17,8 @@ class FundResource extends JsonResource
     return [
       'id'         => $this->id,
       'name'       => $this->name,
-      'balance'    => (float) $this->balance,
+      'balance_usd' => (float) $this->balance_usd,
+      'balance_syp' => (float) $this->balance_syp,
       'user'       => $this->whenLoaded('user'),
       'created_at' => $this->created_at?->format('Y-m-d'),
     ];
