@@ -8,29 +8,37 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CurrencyResource extends JsonResource
 {
-  /**
-   * Transform the resource into an array.
-   *
-   * @return array<string, mixed>
-   */
   public function toArray(Request $request): array
   {
-    $fund = $this->whenPivotLoaded('currency_funds', function () {
-      return Fund::with('user')->find($this->pivot->fund_id);
-    });
+    $balance = null;
+    $user = null;
+
+    if ($this->resource->pivot) {
+      $balance = $this->pivot->balance;
+
+      if (isset($this->pivot->fund_id) && $this->pivot->getTable() === 'currency_funds') {
+        $fund = Fund::with('user')->find($this->pivot->fund_id);
+        if ($fund && $fund->user) {
+          $user = [
+            'id'           => $fund->user->id,
+            'name'         => $fund->user->name,
+            'email'        => $fund->user->email,
+            'phone_number' => $fund->user->phone_number,
+          ];
+        }
+      } elseif (isset($this->pivot->project_fund_id) || $this->pivot->getTable() === 'project_fund_currencies') {
+        $balance = $this->pivot->balance;
+      } elseif (isset($this->pivot->company_fund_id) || $this->pivot->getTable() === 'company_fund_currencies') {
+        $balance = $this->pivot->balance;
+      }
+    }
+
     return [
       'id'         => $this->id,
       'currency'   => $this->currency,
       'symbol'     => $this->symbol,
-      'balance'    => $this->whenPivotLoaded('currency_funds', function () {
-        return $this->pivot->balance;
-      }),
-      'user'       => $fund && $fund->relationLoaded('user') ? [
-        'id'           => $fund->user->id,
-        'name'         => $fund->user->name,
-        'email'        => $fund->user->email,
-        'phone_number' => $fund->user->phone_number,
-      ] : null,
+      'balance'    => $balance,
+      'user'       => $user,
       'created_at' => $this->created_at?->format('Y-m-d'),
     ];
   }

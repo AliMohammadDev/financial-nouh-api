@@ -25,8 +25,6 @@ class UpdateProjectFundRequest extends FormRequest
     return [
       'project_id'  => 'sometimes|exists:projects,id',
       'name'        => 'sometimes|string|max:255',
-      'type'        => 'sometimes|string',
-      'currency'    => 'sometimes|string|in:USD,SYP',
     ];
   }
 }

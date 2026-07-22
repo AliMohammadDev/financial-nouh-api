@@ -20,22 +20,18 @@ class UserSeeder extends Seeder
    */
   public function run(): void
   {
-    // 1. إنشاء 10 عملاء (Clients)
     User::factory(10)->create()->each(function ($user) {
       Client::create(['user_id' => $user->id]);
     });
 
-    // 2. إنشاء 5 حرفيين (Craftsmen)
     User::factory(5)->create()->each(function ($user) {
       Craftsmen::create(['user_id' => $user->id]);
     });
 
-    // 3. إنشاء 8 عمال مياومة (Daily Workers)
     User::factory(8)->create()->each(function ($user) {
       DailyWorker::create(['user_id' => $user->id]);
     });
 
-    // 4. إنشاء 5 موظفين (Employees) مع عناوين وظيفية وهمية
     User::factory(5)->create()->each(function ($user) {
       Employee::create([
         'user_id'   => $user->id,
@@ -43,7 +39,6 @@ class UserSeeder extends Seeder
       ]);
     });
 
-    // 5. إنشاء 4 مهندسين (Engineers) مع رواتب وعناوين وظيفية وهمية
     User::factory(4)->create()->each(function ($user) {
       Engineer::create([
         'user_id'     => $user->id,
@@ -52,12 +47,10 @@ class UserSeeder extends Seeder
       ]);
     });
 
-    // 6. إنشاء 5 موردين (Suppliers)
     User::factory(5)->create()->each(function ($user) {
       Supplier::create(['user_id' => $user->id]);
     });
 
-    // 7. إنشاء 3 أمناء/أوصياء (Trustees) مع تحديد صلة القرابة وهمياً
     User::factory(3)->create()->each(function ($user) {
       Trustee::create([
         'user_id'          => $user->id,

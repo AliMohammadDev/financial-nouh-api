@@ -12,6 +12,7 @@ class CurrencyFund extends Pivot
 {
   protected $table = 'currency_funds';
 
+
   public function currency(): BelongsTo
   {
     return $this->belongsTo(Currency::class);

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\ProjectFund;
+namespace App\Http\Requests\CompanyFund;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateProjectFundRequest extends FormRequest
+class UpdateCompanyFundRequest extends FormRequest
 {
   /**
    * Determine if the user is authorized to make this request.
@@ -23,8 +23,7 @@ class CreateProjectFundRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'project_id'  => 'required|exists:projects,id',
-      'name'        => 'required|string|max:255',
+      'name' => ['sometimes', 'string', 'max:255'],
     ];
   }
 }

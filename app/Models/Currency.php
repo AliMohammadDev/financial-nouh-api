@@ -18,4 +18,20 @@ class Currency extends Model
       ->withPivot(['balance'])
       ->withTimestamps();
   }
+
+  public function projectFunds(): BelongsToMany
+  {
+    return $this->belongsToMany(ProjectFund::class, 'project_fund_currencies')
+      ->using(ProjectFundCurrency::class)
+      ->withPivot(['balance'])
+      ->withTimestamps();
+  }
+
+  public function companyFunds(): BelongsToMany
+  {
+    return $this->belongsToMany(CompanyFund::class, 'company_fund_currencies')
+      ->using(CompanyFundCurrency::class)
+      ->withPivot(['balance'])
+      ->withTimestamps();
+  }
 }

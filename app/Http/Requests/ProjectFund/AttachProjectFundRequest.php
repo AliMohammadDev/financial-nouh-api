@@ -5,7 +5,7 @@ namespace App\Http\Requests\ProjectFund;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateProjectFundRequest extends FormRequest
+class AttachProjectFundRequest extends FormRequest
 {
   /**
    * Determine if the user is authorized to make this request.
@@ -23,8 +23,8 @@ class CreateProjectFundRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'project_id'  => 'required|exists:projects,id',
-      'name'        => 'required|string|max:255',
+      'currency_id' => ['required', 'exists:currencies,id'],
+      'balance'     => ['required', 'numeric', 'min:0'],
     ];
   }
 }

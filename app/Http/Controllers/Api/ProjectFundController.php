@@ -6,8 +6,11 @@ use App\Http\Requests\ProjectFund\CreateProjectFundRequest;
 use App\Http\Requests\ProjectFund\UpdateProjectFundRequest;
 use App\Http\Resources\ProjectFundResource;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ProjectFund\AttachProjectFundRequest;
+use App\Models\ProjectFund;
 use App\Service\ProjectFundService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ProjectFundController extends Controller
@@ -16,12 +19,16 @@ class ProjectFundController extends Controller
     private ProjectFundService $fundService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    $funds = $this->fundService->findAll();
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $funds = $this->fundService->findAll($paginate, $perPage, $page);
+
     return response()->json(ProjectFundResource::collection($funds));
   }
-
   public function store(CreateProjectFundRequest $request): JsonResponse
   {
     $fund = $this->fundService->create($request->validated());
@@ -45,6 +52,16 @@ class ProjectFundController extends Controller
     $this->fundService->delete($id);
     return response()->json([
       'message' => 'Project fund deleted successfully'
+    ], Response::HTTP_OK);
+  }
+
+  public function attachCurrency(AttachProjectFundRequest $request, ProjectFund $projectFund): JsonResponse
+  {
+    $updatedFund = $this->fundService->attachCurrency($projectFund, $request->validated());
+
+    return response()->json([
+      'message' => 'Currency attached to project fund successfully',
+      'data'    => new ProjectFundResource($updatedFund)
     ], Response::HTTP_OK);
   }
 }

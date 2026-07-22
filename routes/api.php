@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\EmployeePaymentController;
+use App\Http\Controllers\Api\CompanyFundController; // <-- إضافة الـ Controller
 use App\Http\Controllers\Api\User\CraftsmenController;
 use App\Http\Controllers\Api\User\EmployeeController;
 use App\Http\Controllers\Api\User\EngineerController;
@@ -49,6 +50,14 @@ Route::apiResource('materials', MaterialController::class);
 // ==========================================
 Route::apiResource('projects', ProjectController::class);
 Route::apiResource('project-funds', ProjectFundController::class);
+Route::post('project-funds/{projectFund}/currencies', [ProjectFundController::class, 'attachCurrency']);
+
+
+// ==========================================
+// Company Funds Management
+// ==========================================
+Route::apiResource('company-funds', CompanyFundController::class);
+Route::post('company-funds/{companyFund}/currencies', [CompanyFundController::class, 'attachCurrency']);
 
 
 // ==========================================

@@ -2,12 +2,12 @@
 
 namespace App\Service;
 
-use App\Models\ProjectFund;
+use App\Models\CompanyFund;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
-class ProjectFundService
+class CompanyFundService
 {
   public function findAll(
     bool $paginate = false,
@@ -16,7 +16,7 @@ class ProjectFundService
     array $columns = ["*"]
   ): LengthAwarePaginator|Collection {
 
-    $query = ProjectFund::with(['project', 'currencies'])
+    $query = CompanyFund::with(['currencies'])
       ->latest();
 
     if ($paginate) {
@@ -30,21 +30,21 @@ class ProjectFundService
     return $query->get($columns);
   }
 
-  public function findOne(int $id): ProjectFund
+  public function findOne(int $id): CompanyFund
   {
-    return ProjectFund::with(['project', 'currencies'])->findOrFail($id);
+    return CompanyFund::with(['currencies'])->findOrFail($id);
   }
 
-  public function create(array $data): ProjectFund
+  public function create(array $data): CompanyFund
   {
     return DB::transaction(function () use ($data) {
-      return ProjectFund::create($data);
+      return CompanyFund::create($data);
     });
   }
 
-  public function update(int $id, array $data): ProjectFund
+  public function update(int $id, array $data): CompanyFund
   {
-    $fund = ProjectFund::findOrFail($id);
+    $fund = CompanyFund::findOrFail($id);
 
     DB::transaction(function () use ($fund, $data) {
       $fund->update($data);
@@ -55,20 +55,20 @@ class ProjectFundService
 
   public function delete(int $id): bool
   {
-    $fund = ProjectFund::findOrFail($id);
+    $fund = CompanyFund::findOrFail($id);
     return DB::transaction(function () use ($fund) {
       return (bool) $fund->delete();
     });
   }
 
-  public function attachCurrency(ProjectFund $projectFund, array $data): ProjectFund
+  public function attachCurrency(CompanyFund $companyFund, array $data): CompanyFund
   {
-    return DB::transaction(function () use ($projectFund, $data) {
-      $projectFund->currencies()->syncWithoutDetaching([
+    return DB::transaction(function () use ($companyFund, $data) {
+      $companyFund->currencies()->syncWithoutDetaching([
         $data['currency_id'] => ['balance' => $data['balance']]
       ]);
 
-      return $projectFund->load(['project', 'currencies']);
+      return $companyFund->load(['currencies']);
     });
   }
 }
