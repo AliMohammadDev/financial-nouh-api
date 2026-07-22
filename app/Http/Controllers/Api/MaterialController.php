@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Material\CreateMaterialRequest;
 use App\Http\Requests\Material\UpdateMaterialRequest;
 use App\Http\Resources\MaterialResource;
+use App\Models\Material;
 use App\Service\MaterialService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class MaterialController extends Controller
@@ -16,9 +18,14 @@ class MaterialController extends Controller
     private MaterialService $materialService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    $materials = $this->materialService->findAll();
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $materials = $this->materialService->findAll($paginate, $perPage, $page);
+
     return response()->json(MaterialResource::collection($materials));
   }
 
@@ -28,21 +35,21 @@ class MaterialController extends Controller
     return response()->json(new MaterialResource($material), Response::HTTP_CREATED);
   }
 
-  public function show(int $id): JsonResponse
+  public function show(Material $material): JsonResponse
   {
-    $material = $this->materialService->findOne($id);
-    return response()->json(new MaterialResource($material));
+    $materialWithRelations = $this->materialService->findOne($material);
+    return response()->json(new MaterialResource($materialWithRelations));
   }
 
-  public function update(UpdateMaterialRequest $request, int $id): JsonResponse
+  public function update(UpdateMaterialRequest $request, Material $material): JsonResponse
   {
-    $material = $this->materialService->update($id, $request->validated());
-    return response()->json(new MaterialResource($material));
+    $updatedMaterial = $this->materialService->update($material, $request->validated());
+    return response()->json(new MaterialResource($updatedMaterial));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(Material $material): JsonResponse
   {
-    $this->materialService->delete($id);
+    $this->materialService->delete($material);
     return response()->json([
       'message' => 'Material deleted successfully'
     ], Response::HTTP_OK);

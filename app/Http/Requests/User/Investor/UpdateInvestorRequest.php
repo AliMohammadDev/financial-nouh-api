@@ -25,8 +25,10 @@ class UpdateInvestorRequest extends FormRequest
    */
   public function rules(): array
   {
-    $investor = Investor::find($this->route('investor'));
-    return array_merge($this->userUpdateRules($investor?->user_id), [
+    $investor = $this->route('investor');
+    $userId = $investor?->user_id;
+
+    return array_merge($this->userUpdateRules($userId), [
       'investment_ratio' => 'sometimes|required|numeric|min:0|max:100',
     ]);
   }

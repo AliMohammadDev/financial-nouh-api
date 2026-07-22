@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Item\CreateItemRequest;
 use App\Http\Requests\Item\UpdateItemRequest;
 use App\Http\Resources\ItemResource;
+use App\Models\Item;
 use App\Service\ItemService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ItemController extends Controller
@@ -16,9 +18,14 @@ class ItemController extends Controller
     private ItemService $itemService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    $items = $this->itemService->findAll();
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $items = $this->itemService->findAll($paginate, $perPage, $page);
+
     return response()->json(ItemResource::collection($items));
   }
 
@@ -28,21 +35,21 @@ class ItemController extends Controller
     return response()->json(new ItemResource($item), Response::HTTP_CREATED);
   }
 
-  public function show(int $id): JsonResponse
+  public function show(Item $item): JsonResponse
   {
-    $item = $this->itemService->findOne($id);
-    return response()->json(new ItemResource($item));
+    $itemWithRelations = $this->itemService->findOne($item);
+    return response()->json(new ItemResource($itemWithRelations));
   }
 
-  public function update(UpdateItemRequest $request, int $id): JsonResponse
+  public function update(UpdateItemRequest $request, Item $item): JsonResponse
   {
-    $item = $this->itemService->update($id, $request->validated());
-    return response()->json(new ItemResource($item));
+    $updatedItem = $this->itemService->update($item, $request->validated());
+    return response()->json(new ItemResource($updatedItem));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(Item $item): JsonResponse
   {
-    $this->itemService->delete($id);
+    $this->itemService->delete($item);
     return response()->json([
       'message' => 'Structural item and its materials deleted successfully'
     ], Response::HTTP_OK);

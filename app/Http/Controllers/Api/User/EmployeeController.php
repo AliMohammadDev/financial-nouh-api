@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Employee\CreateEmployeeRequest;
 use App\Http\Requests\User\Employee\UpdateEmployeeRequest;
 use App\Http\Resources\User\EmployeeResource;
+use App\Models\Employee;
 use App\Service\User\EmployeeService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class EmployeeController extends Controller
@@ -16,9 +18,14 @@ class EmployeeController extends Controller
     private EmployeeService $employeeService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    $employees = $this->employeeService->findAll();
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $employees = $this->employeeService->findAll($paginate, $perPage, $page);
+
     return response()->json(EmployeeResource::collection($employees));
   }
 
@@ -28,21 +35,21 @@ class EmployeeController extends Controller
     return response()->json(new EmployeeResource($employee), Response::HTTP_CREATED);
   }
 
-  public function show(int $id): JsonResponse
+  public function show(Employee $employee): JsonResponse
   {
-    $employee = $this->employeeService->findOne($id);
-    return response()->json(new EmployeeResource($employee));
+    $employeeWithRelations = $this->employeeService->findOne($employee);
+    return response()->json(new EmployeeResource($employeeWithRelations));
   }
 
-  public function update(UpdateEmployeeRequest $request, int $id): JsonResponse
+  public function update(UpdateEmployeeRequest $request, Employee $employee): JsonResponse
   {
-    $employee = $this->employeeService->update($id, $request->validated());
-    return response()->json(new EmployeeResource($employee));
+    $updatedEmployee = $this->employeeService->update($employee, $request->validated());
+    return response()->json(new EmployeeResource($updatedEmployee));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(Employee $employee): JsonResponse
   {
-    $this->employeeService->delete($id);
+    $this->employeeService->delete($employee);
     return response()->json([
       'message' => 'Employee deleted successfully'
     ], Response::HTTP_OK);

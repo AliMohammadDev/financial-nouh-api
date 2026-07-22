@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Trustee\CreateTrusteeRequest;
 use App\Http\Requests\User\Trustee\UpdateTrusteeRequest;
 use App\Http\Resources\User\TrusteeResource;
+use App\Models\Trustee;
 use App\Service\User\TrusteeService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class TrusteeController extends Controller
@@ -16,9 +18,14 @@ class TrusteeController extends Controller
     private TrusteeService $trusteeService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    $trustees = $this->trusteeService->findAll();
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $trustees = $this->trusteeService->findAll($paginate, $perPage, $page);
+
     return response()->json(TrusteeResource::collection($trustees));
   }
 
@@ -28,21 +35,21 @@ class TrusteeController extends Controller
     return response()->json(new TrusteeResource($trustee), Response::HTTP_CREATED);
   }
 
-  public function show(int $id): JsonResponse
+  public function show(Trustee $trustee): JsonResponse
   {
-    $trustee = $this->trusteeService->findOne($id);
-    return response()->json(new TrusteeResource($trustee));
+    $trusteeWithRelations = $this->trusteeService->findOne($trustee);
+    return response()->json(new TrusteeResource($trusteeWithRelations));
   }
 
-  public function update(UpdateTrusteeRequest $request, int $id): JsonResponse
+  public function update(UpdateTrusteeRequest $request, Trustee $trustee): JsonResponse
   {
-    $trustee = $this->trusteeService->update($id, $request->validated());
-    return response()->json(new TrusteeResource($trustee));
+    $updatedTrustee = $this->trusteeService->update($trustee, $request->validated());
+    return response()->json(new TrusteeResource($updatedTrustee));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(Trustee $trustee): JsonResponse
   {
-    $this->trusteeService->delete($id);
+    $this->trusteeService->delete($trustee);
     return response()->json([
       'message' => 'Trustee deleted successfully'
     ], Response::HTTP_OK);

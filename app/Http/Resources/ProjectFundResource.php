@@ -21,8 +21,6 @@ class ProjectFundResource extends JsonResource
       'type'        => $this->type,
       'project' => new ProjectResource($this->whenLoaded('project')),
       'currency'    => $this->currency,
-      'balance_usd' => (float) $this->balance_usd,
-      'balance_syp' => (float) $this->balance_syp,
       'created_at'  => $this->created_at?->format('Y-m-d'),
     ];
   }

@@ -27,8 +27,6 @@ class UpdateProjectFundRequest extends FormRequest
       'name'        => 'sometimes|string|max:255',
       'type'        => 'sometimes|string',
       'currency'    => 'sometimes|string|in:USD,SYP',
-      'balance_usd' => 'nullable|numeric|min:0',
-      'balance_syp' => 'nullable|numeric|min:0',
     ];
   }
 }

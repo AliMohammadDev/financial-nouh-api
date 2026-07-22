@@ -26,8 +26,9 @@ class UpdateSupplierRequest extends FormRequest
    */
   public function rules(): array
   {
-    $supplier = Supplier::find($this->route('supplier'));
+    $supplier = $this->route('supplier');
+    $userId = $supplier?->user_id;
 
-    return array_merge($this->userUpdateRules($supplier?->user_id), []);
+    return array_merge($this->userUpdateRules($userId), []);
   }
 }

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['project_id', 'name', 'type', 'currency', 'balance_usd', 'balance_syp'])]
+#[Fillable(['project_id', 'name'])]
 class ProjectFund extends Model
 {
   use HasFactory;

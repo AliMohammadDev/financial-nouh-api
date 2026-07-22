@@ -1,66 +1,95 @@
 <?php
 
-
 namespace App\Service;
 
 use App\Models\Project;
 use App\Models\ProjectFund;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
-class  ProjectService
+class ProjectService
 {
-  public function findAll(): Collection
-  {
-    return Project::with(['client.user', 'projectFunds.fund'])->get();
+  public function findAll(
+    bool $paginate = false,
+    int $perPage = 10,
+    int $page = 1,
+    array $columns = ["*"]
+  ): LengthAwarePaginator|Collection {
+
+    $filters = [
+      AllowedFilter::callback('search', function ($query, $value) {
+        $query->where('name', 'like', "%{$value}%")
+          ->orWhere('status', 'like', "%{$value}%")
+          ->orWhereHas('client.user', function ($q) use ($value) {
+            $q->where('name', 'like', "%{$value}%")
+              ->orWhere('email', 'like', "%{$value}%");
+          });
+      }),
+    ];
+
+    $query = QueryBuilder::for(Project::class)
+      ->with(['client.user', 'projectFunds'])
+      ->allowedFilters(...$filters)
+      ->defaultSort('-created_at');
+
+    if ($paginate) {
+      return $query->paginate(
+        perPage: $perPage,
+        page: $page,
+        columns: $columns,
+      );
+    }
+
+    return $query->get($columns);
   }
 
-  public function findOne(int $id): Project
+  public function findOne(Project $project): Project
   {
-    return Project::with(['client.user', 'projectFunds.fund'])->findOrFail($id);
+    return $project->load(['client.user', 'projectFunds']);
   }
 
   public function create(array $data): Project
   {
     return DB::transaction(function () use ($data) {
-      return Project::create($data);
+      $project = Project::create($data);
+      return $project->load(['client.user', 'projectFunds']);
     });
   }
 
-  public function update(int $id, array $data): Project
+  public function update(Project $project, array $data): Project
   {
-    $Project = Project::findOrFail($id);
-
-    DB::transaction(function () use ($Project, $data) {
-      $Project->update($data);
+    DB::transaction(function () use ($project, $data) {
+      $project->update($data);
     });
 
-    return $Project->load(['client.user', 'projectFunds.fund']);
+    return $project->load(['client.user', 'projectFunds']);
   }
 
-  public function delete(int $id): bool
+  public function delete(Project $project): bool
   {
-    $Project = Project::findOrFail($id);
-
-    return DB::transaction(function () use ($Project) {
-      return (bool) $Project->delete();
+    return DB::transaction(function () use ($project) {
+      return (bool) $project->delete();
     });
   }
 
   // project funds
-  public function attachFund(int $projectId, array $data): ProjectFund
+  public function attachFund(Project $project, array $data): ProjectFund
   {
-    return DB::transaction(function () use ($projectId, $data) {
+    return DB::transaction(function () use ($project, $data) {
       return ProjectFund::firstOrCreate([
-        'project_id' => $projectId,
-        'fund_id'    => $data['fund_id']
+        'project_id' => $project->id,
+        'name'       => $data['name'] ?? 'Main Fund',
+        'type'       => $data['type'] ?? 'general',
+        'currency'   => $data['currency'] ?? 'usd',
       ]);
     });
   }
 
-  public function detachFund(int $projectFundId): bool
+  public function detachFund(ProjectFund $projectFund): bool
   {
-    $projectFund = ProjectFund::findOrFail($projectFundId);
     return DB::transaction(function () use ($projectFund) {
       return (bool) $projectFund->delete();
     });

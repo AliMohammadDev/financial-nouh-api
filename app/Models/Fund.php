@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'name', 'balance_usd', 'balance_syp'])]
+#[Fillable(['user_id', 'name'])]
 class Fund extends Model
 {
   use HasFactory;
@@ -22,5 +22,12 @@ class Fund extends Model
   public function expenses(): MorphMany
   {
     return $this->morphMany(Expense::class, 'expenseable');
+  }
+
+  public function currencies(): BelongsToMany
+  {
+    return $this->belongsToMany(Currency::class, 'currency_funds')
+      ->withPivot(['balance'])
+      ->withTimestamps();
   }
 }

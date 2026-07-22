@@ -5,19 +5,52 @@ namespace App\Service\User;
 use App\Models\Investor;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class InvestorService
 {
-  public function findAll(): Collection
-  {
-    return Investor::with('user')->get();
+  public function findAll(
+    bool $paginate = false,
+    int $perPage = 10,
+    int $page = 1,
+    array $columns = ["*"]
+  ): LengthAwarePaginator|Collection {
+
+    $filters = [
+      AllowedFilter::callback('search', function ($query, $value) {
+        $query->whereHas('user', function ($q) use ($value) {
+          $q->where('name', 'like', "%{$value}%")
+            ->orWhere('email', 'like', "%{$value}%")
+            ->orWhere('phone_number', 'like', "%{$value}%");
+        });
+      }),
+    ];
+
+    $query = QueryBuilder::for(Investor::class)
+      ->with([
+        'user.funds.currencies',
+      ])
+      ->allowedFilters(...$filters)
+      ->defaultSort('-created_at');
+
+    if ($paginate) {
+      return $query->paginate(
+        perPage: $perPage,
+        page: $page,
+        columns: $columns,
+      );
+    }
+
+    return $query->get($columns);
   }
 
-  public function findOne(int $id): Investor
+  public function findOne(Investor $investor): Investor
   {
-    return Investor::with('user')->findOrFail($id);
+    return $investor->load('user');
   }
 
   public function create(array $data): Investor
@@ -33,10 +66,8 @@ class InvestorService
     });
   }
 
-  public function update(int $id, array $data): Investor
+  public function update(Investor $investor, array $data): Investor
   {
-    $investor = Investor::findOrFail($id);
-
     DB::transaction(function () use ($investor, $data) {
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
@@ -44,10 +75,8 @@ class InvestorService
         unset($data['password']);
       }
 
-      // تحديث بيانات الـ User
       $investor->user()->update(array_diff_key($data, ['investment_ratio' => 1]));
 
-      // تحديث نسبة الاستثمار في جدول الـ Investor
       if (isset($data['investment_ratio'])) {
         $investor->update(['investment_ratio' => $data['investment_ratio']]);
       }
@@ -56,9 +85,8 @@ class InvestorService
     return $investor->load('user');
   }
 
-  public function delete(int $id): bool
+  public function delete(Investor $investor): bool
   {
-    $investor = Investor::findOrFail($id);
     return DB::transaction(function () use ($investor) {
       return (bool) $investor->user()->delete();
     });

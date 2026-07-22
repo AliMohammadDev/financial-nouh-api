@@ -1,16 +1,12 @@
 <?php
 
-namespace App\Http\Requests\User\Client;
+namespace App\Http\Requests\Currency;
 
-use App\Http\Trait\User\HasUserValidation;
-use App\Models\Client;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateClientRequest extends FormRequest
+class UpdateCurrencyRequest extends FormRequest
 {
-  use HasUserValidation;
-
   /**
    * Determine if the user is authorized to make this request.
    */
@@ -26,9 +22,11 @@ class UpdateClientRequest extends FormRequest
    */
   public function rules(): array
   {
-    $client = $this->route('client');
-    $userId = $client?->user_id;
+    $currencyId = $this->route('currency')?->id ?? $this->route('currency');
 
-    return array_merge($this->userUpdateRules($userId), []);
+    return [
+      'currency' => ['sometimes', 'required', 'string', 'max:50', 'unique:currencies,currency,' . $currencyId],
+      'symbol'   => ['sometimes', 'required', 'string', 'max:10'],
+    ];
   }
 }

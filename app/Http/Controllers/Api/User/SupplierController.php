@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Supplier\CreateSupplierRequest;
 use App\Http\Requests\User\Supplier\UpdateSupplierRequest;
 use App\Http\Resources\User\SupplierResource;
+use App\Models\Supplier;
 use App\Service\User\SupplierService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class SupplierController extends Controller
@@ -16,9 +18,14 @@ class SupplierController extends Controller
     private SupplierService $supplierService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    $suppliers = $this->supplierService->findAll();
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $suppliers = $this->supplierService->findAll($paginate, $perPage, $page);
+
     return response()->json(SupplierResource::collection($suppliers));
   }
 
@@ -28,21 +35,21 @@ class SupplierController extends Controller
     return response()->json(new SupplierResource($supplier), Response::HTTP_CREATED);
   }
 
-  public function show(int $id): JsonResponse
+  public function show(Supplier $supplier): JsonResponse
   {
-    $supplier = $this->supplierService->findOne($id);
-    return response()->json(new SupplierResource($supplier));
+    $supplierWithRelations = $this->supplierService->findOne($supplier);
+    return response()->json(new SupplierResource($supplierWithRelations));
   }
 
-  public function update(UpdateSupplierRequest $request, int $id): JsonResponse
+  public function update(UpdateSupplierRequest $request, Supplier $supplier): JsonResponse
   {
-    $supplier = $this->supplierService->update($id, $request->validated());
-    return response()->json(new SupplierResource($supplier));
+    $updatedSupplier = $this->supplierService->update($supplier, $request->validated());
+    return response()->json(new SupplierResource($updatedSupplier));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(Supplier $supplier): JsonResponse
   {
-    $this->supplierService->delete($id);
+    $this->supplierService->delete($supplier);
     return response()->json([
       'message' => 'Supplier deleted successfully'
     ], Response::HTTP_OK);

@@ -6,17 +6,25 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Investor\CreateInvestorRequest;
 use App\Http\Requests\User\Investor\UpdateInvestorRequest;
 use App\Http\Resources\User\InvestorResource;
+use App\Models\Investor;
 use App\Service\User\InvestorService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class InvestorController extends Controller
 {
   public function __construct(private InvestorService $investorService) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    return response()->json(InvestorResource::collection($this->investorService->findAll()));
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $investors = $this->investorService->findAll($paginate, $perPage, $page);
+
+    return response()->json(InvestorResource::collection($investors));
   }
 
   public function store(CreateInvestorRequest $request): JsonResponse
@@ -25,20 +33,21 @@ class InvestorController extends Controller
     return response()->json(new InvestorResource($investor), Response::HTTP_CREATED);
   }
 
-  public function show(int $id): JsonResponse
+  public function show(Investor $investor): JsonResponse
   {
-    return response()->json(new InvestorResource($this->investorService->findOne($id)));
+    $investorWithRelations = $this->investorService->findOne($investor);
+    return response()->json(new InvestorResource($investorWithRelations));
   }
 
-  public function update(UpdateInvestorRequest $request, int $id): JsonResponse
+  public function update(UpdateInvestorRequest $request, Investor $investor): JsonResponse
   {
-    $investor = $this->investorService->update($id, $request->validated());
-    return response()->json(new InvestorResource($investor));
+    $updatedInvestor = $this->investorService->update($investor, $request->validated());
+    return response()->json(new InvestorResource($updatedInvestor));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(Investor $investor): JsonResponse
   {
-    $this->investorService->delete($id);
+    $this->investorService->delete($investor);
     return response()->json(['message' => 'Investor deleted successfully'], Response::HTTP_OK);
   }
 }

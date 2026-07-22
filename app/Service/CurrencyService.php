@@ -2,14 +2,14 @@
 
 namespace App\Service;
 
-use App\Models\Item;
+use App\Models\Currency;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class ItemService
+class CurrencyService
 {
   public function findAll(
     bool $paginate = false,
@@ -20,13 +20,12 @@ class ItemService
 
     $filters = [
       AllowedFilter::callback('search', function ($query, $value) {
-        $query->where('name', 'like', "%{$value}%")
-          ->orWhere('description', 'like', "%{$value}%");
+        $query->where('currency', 'like', "%{$value}%")
+          ->orWhere('symbol', 'like', "%{$value}%");
       }),
     ];
 
-    $query = QueryBuilder::for(Item::class)
-      ->with('materials')
+    $query = QueryBuilder::for(Currency::class)
       ->allowedFilters(...$filters)
       ->defaultSort('-created_at');
 
@@ -41,31 +40,31 @@ class ItemService
     return $query->get($columns);
   }
 
-  public function findOne(Item $item): Item
+  public function findOne(Currency $currency): Currency
   {
-    return $item->load('materials');
+    return $currency;
   }
 
-  public function create(array $data): Item
+  public function create(array $data): Currency
   {
     return DB::transaction(function () use ($data) {
-      return Item::create($data);
+      return Currency::create($data);
     });
   }
 
-  public function update(Item $item, array $data): Item
+  public function update(Currency $currency, array $data): Currency
   {
-    DB::transaction(function () use ($item, $data) {
-      $item->update($data);
+    DB::transaction(function () use ($currency, $data) {
+      $currency->update($data);
     });
 
-    return $item->load('materials');
+    return $currency;
   }
 
-  public function delete(Item $item): bool
+  public function delete(Currency $currency): bool
   {
-    return DB::transaction(function () use ($item) {
-      return (bool) $item->delete();
+    return DB::transaction(function () use ($currency) {
+      return (bool) $currency->delete();
     });
   }
 }

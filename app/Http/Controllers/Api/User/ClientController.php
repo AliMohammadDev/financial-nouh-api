@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Client\CreateClientRequest;
 use App\Http\Requests\User\Client\UpdateClientRequest;
 use App\Http\Resources\User\ClientResource;
+use App\Models\Client;
 use App\Service\User\ClientService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ClientController extends Controller
@@ -16,9 +18,14 @@ class ClientController extends Controller
     private ClientService $clientService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    $clients = $this->clientService->findAll();
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $clients = $this->clientService->findAll($paginate, $perPage, $page);
+
     return response()->json(ClientResource::collection($clients));
   }
 
@@ -28,21 +35,21 @@ class ClientController extends Controller
     return response()->json(new ClientResource($client), Response::HTTP_CREATED);
   }
 
-  public function show(int $id): JsonResponse
+  public function show(Client $client): JsonResponse
   {
-    $client = $this->clientService->findOne($id);
-    return response()->json(new ClientResource($client));
+    $clientWithRelations = $this->clientService->findOne($client);
+    return response()->json(new ClientResource($clientWithRelations));
   }
 
-  public function update(UpdateClientRequest $request, int $id): JsonResponse
+  public function update(UpdateClientRequest $request, Client $client): JsonResponse
   {
-    $client = $this->clientService->update($id, $request->validated());
-    return response()->json(new ClientResource($client));
+    $updatedClient = $this->clientService->update($client, $request->validated());
+    return response()->json(new ClientResource($updatedClient));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(Client $client): JsonResponse
   {
-    $this->clientService->delete($id);
+    $this->clientService->delete($client);
     return response()->json([
       'message' => 'Client deleted successfully'
     ], Response::HTTP_OK);

@@ -30,9 +30,8 @@ class User extends Authenticatable
       'password' => 'hashed',
     ];
   }
-
   public function funds(): HasMany
   {
-    return $this->hasMany(fund::class);
+    return $this->hasMany(Fund::class);
   }
 }

@@ -3,8 +3,6 @@
 namespace App\Http\Requests\User\Admin;
 
 use App\Http\Trait\User\HasUserValidation;
-use App\Models\Admin;
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateAdminRequest extends FormRequest
@@ -25,7 +23,9 @@ class UpdateAdminRequest extends FormRequest
    */
   public function rules(): array
   {
-    $admin = Admin::find($this->route('admin'));
-    return array_merge($this->userUpdateRules($admin?->user_id), []);
+    $admin = $this->route('admin');
+    $userId = $admin?->user_id;
+
+    return array_merge($this->userUpdateRules($userId), []);
   }
 }

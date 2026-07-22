@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\EmployeePayment\CreateEmployeePaymentRequest;
 use App\Http\Requests\EmployeePayment\UpdateEmployeePaymentRequest;
 use App\Http\Resources\EmployeePaymentResource;
+use App\Models\EmployeePayment;
 use App\Service\EmployeePaymentService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class EmployeePaymentController extends Controller
@@ -16,9 +18,14 @@ class EmployeePaymentController extends Controller
     private EmployeePaymentService $paymentService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    $payments = $this->paymentService->findAll();
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $payments = $this->paymentService->findAll($paginate, $perPage, $page);
+
     return response()->json(EmployeePaymentResource::collection($payments));
   }
 
@@ -28,21 +35,21 @@ class EmployeePaymentController extends Controller
     return response()->json(new EmployeePaymentResource($payment), Response::HTTP_CREATED);
   }
 
-  public function show(int $id): JsonResponse
+  public function show(EmployeePayment $employeePayment): JsonResponse
   {
-    $payment = $this->paymentService->findOne($id);
-    return response()->json(new EmployeePaymentResource($payment));
+    $paymentWithRelations = $this->paymentService->findOne($employeePayment);
+    return response()->json(new EmployeePaymentResource($paymentWithRelations));
   }
 
-  public function update(UpdateEmployeePaymentRequest $request, int $id): JsonResponse
+  public function update(UpdateEmployeePaymentRequest $request, EmployeePayment $employeePayment): JsonResponse
   {
-    $payment = $this->paymentService->update($id, $request->validated());
-    return response()->json(new EmployeePaymentResource($payment));
+    $updatedPayment = $this->paymentService->update($employeePayment, $request->validated());
+    return response()->json(new EmployeePaymentResource($updatedPayment));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(EmployeePayment $employeePayment): JsonResponse
   {
-    $this->paymentService->delete($id);
+    $this->paymentService->delete($employeePayment);
     return response()->json([
       'message' => 'Employee payment deleted successfully'
     ], Response::HTTP_OK);

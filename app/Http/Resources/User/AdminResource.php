@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\User;
 
+use App\Http\Resources\CurrencyResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -17,6 +18,9 @@ class AdminResource extends JsonResource
     return [
       'id'         => $this->id,
       'user'       => new UserResource($this->whenLoaded('user')),
+
+      'currencies' => CurrencyResource::collection($this->whenLoaded('currencies')),
+
       'created_at' => $this->created_at?->format('Y-m-d'),
     ];
   }

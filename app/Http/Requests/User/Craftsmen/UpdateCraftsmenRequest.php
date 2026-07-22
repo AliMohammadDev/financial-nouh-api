@@ -26,7 +26,9 @@ class UpdateCraftsmenRequest extends FormRequest
    */
   public function rules(): array
   {
-    $craftsman = Craftsmen::find($this->route('craftsman'));
-    return array_merge($this->userUpdateRules($craftsman?->user_id), []);
+    $craftsman = $this->route('craftsman');
+    $userId = $craftsman?->user_id;
+
+    return array_merge($this->userUpdateRules($userId), []);
   }
 }

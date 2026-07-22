@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Craftsmen\CreateCraftsmenRequest;
 use App\Http\Requests\User\Craftsmen\UpdateCraftsmenRequest;
 use App\Http\Resources\User\CraftsmenResource;
+use App\Models\Craftsmen;
 use App\Service\User\CraftsmenService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class CraftsmenController extends Controller
@@ -16,9 +18,14 @@ class CraftsmenController extends Controller
     private CraftsmenService $craftsmenService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    $craftsmen = $this->craftsmenService->findAll();
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $craftsmen = $this->craftsmenService->findAll($paginate, $perPage, $page);
+
     return response()->json(CraftsmenResource::collection($craftsmen));
   }
 
@@ -28,21 +35,21 @@ class CraftsmenController extends Controller
     return response()->json(new CraftsmenResource($craftsman), Response::HTTP_CREATED);
   }
 
-  public function show(int $id): JsonResponse
+  public function show(Craftsmen $craftsman): JsonResponse
   {
-    $craftsman = $this->craftsmenService->findOne($id);
-    return response()->json(new CraftsmenResource($craftsman));
+    $craftsmanWithRelations = $this->craftsmenService->findOne($craftsman);
+    return response()->json(new CraftsmenResource($craftsmanWithRelations));
   }
 
-  public function update(UpdateCraftsmenRequest $request, int $id): JsonResponse
+  public function update(UpdateCraftsmenRequest $request, Craftsmen $craftsman): JsonResponse
   {
-    $craftsman = $this->craftsmenService->update($id, $request->validated());
-    return response()->json(new CraftsmenResource($craftsman));
+    $updatedCraftsman = $this->craftsmenService->update($craftsman, $request->validated());
+    return response()->json(new CraftsmenResource($updatedCraftsman));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(Craftsmen $craftsman): JsonResponse
   {
-    $this->craftsmenService->delete($id);
+    $this->craftsmenService->delete($craftsman);
     return response()->json([
       'message' => 'Craftsman deleted successfully'
     ], Response::HTTP_OK);

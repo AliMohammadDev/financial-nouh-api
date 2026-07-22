@@ -27,8 +27,6 @@ class CreateProjectFundRequest extends FormRequest
       'name'        => 'required|string|max:255',
       'type'        => 'required|string',
       'currency'    => 'required|string|in:USD,SYP',
-      'balance_usd' => 'nullable|numeric|min:0',
-      'balance_syp' => 'nullable|numeric|min:0',
     ];
   }
 }

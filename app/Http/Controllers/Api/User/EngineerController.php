@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\User\Engineer\CreateEngineerRequest;
 use App\Http\Requests\User\Engineer\UpdateEngineerRequest;
 use App\Http\Resources\User\EngineerResource;
+use App\Models\Engineer;
 use App\Service\User\EngineerService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class EngineerController extends Controller
@@ -16,9 +18,14 @@ class EngineerController extends Controller
     private EngineerService $engineerService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request): JsonResponse
   {
-    $engineers = $this->engineerService->findAll();
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $engineers = $this->engineerService->findAll($paginate, $perPage, $page);
+
     return response()->json(EngineerResource::collection($engineers));
   }
 
@@ -28,21 +35,21 @@ class EngineerController extends Controller
     return response()->json(new EngineerResource($engineer), Response::HTTP_CREATED);
   }
 
-  public function show(int $id): JsonResponse
+  public function show(Engineer $engineer): JsonResponse
   {
-    $engineer = $this->engineerService->findOne($id);
-    return response()->json(new EngineerResource($engineer));
+    $engineerWithRelations = $this->engineerService->findOne($engineer);
+    return response()->json(new EngineerResource($engineerWithRelations));
   }
 
-  public function update(UpdateEngineerRequest $request, int $id): JsonResponse
+  public function update(UpdateEngineerRequest $request, Engineer $engineer): JsonResponse
   {
-    $engineer = $this->engineerService->update($id, $request->validated());
-    return response()->json(new EngineerResource($engineer));
+    $updatedEngineer = $this->engineerService->update($engineer, $request->validated());
+    return response()->json(new EngineerResource($updatedEngineer));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(Engineer $engineer): JsonResponse
   {
-    $this->engineerService->delete($id);
+    $this->engineerService->delete($engineer);
     return response()->json([
       'message' => 'Engineer deleted successfully'
     ], Response::HTTP_OK);

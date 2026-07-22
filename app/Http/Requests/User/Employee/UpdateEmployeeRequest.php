@@ -26,9 +26,11 @@ class UpdateEmployeeRequest extends FormRequest
    */
   public function rules(): array
   {
-    $employee = Employee::find($this->route('employee'));
-    return array_merge($this->userUpdateRules($employee?->user_id), [
-      'job_title' => ['sometimes', 'required', 'string', 'max:255'],
+    $employee = $this->route('employee');
+    $userId = $employee?->user_id;
+
+    return array_merge($this->userUpdateRules($userId), [
+      'job_title' => ['sometimes', 'required', 'string', 'max:255']
     ]);
   }
 }

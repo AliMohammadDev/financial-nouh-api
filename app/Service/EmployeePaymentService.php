@@ -4,44 +4,71 @@ namespace App\Service;
 
 use App\Models\EmployeePayment;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class EmployeePaymentService
 {
-  public function findAll(): Collection
-  {
-    return EmployeePayment::with('employee.user')->get();
+  public function findAll(
+    bool $paginate = false,
+    int $perPage = 10,
+    int $page = 1,
+    array $columns = ["*"]
+  ): LengthAwarePaginator|Collection {
+
+    $filters = [
+      AllowedFilter::callback('search', function ($query, $value) {
+        $query->whereHas('employee.user', function ($q) use ($value) {
+          $q->where('name', 'like', "%{$value}%")
+            ->orWhere('email', 'like', "%{$value}%");
+        });
+      }),
+    ];
+
+    $query = QueryBuilder::for(EmployeePayment::class)
+      ->with('employee.user')
+      ->allowedFilters(...$filters)
+      ->defaultSort('-created_at');
+
+    if ($paginate) {
+      return $query->paginate(
+        perPage: $perPage,
+        page: $page,
+        columns: $columns,
+      );
+    }
+
+    return $query->get($columns);
   }
 
-  public function findOne(int $id): EmployeePayment
+  public function findOne(EmployeePayment $employeePayment): EmployeePayment
   {
-    return EmployeePayment::with('employee.user')->findOrFail($id);
+    return $employeePayment->load('employee.user');
   }
 
   public function create(array $data): EmployeePayment
   {
     return DB::transaction(function () use ($data) {
-      return EmployeePayment::create($data);
+      $payment = EmployeePayment::create($data);
+      return $payment->load('employee.user');
     });
   }
 
-  public function update(int $id, array $data): EmployeePayment
+  public function update(EmployeePayment $employeePayment, array $data): EmployeePayment
   {
-    $payment = EmployeePayment::findOrFail($id);
-
-    DB::transaction(function () use ($payment, $data) {
-      $payment->update($data);
+    DB::transaction(function () use ($employeePayment, $data) {
+      $employeePayment->update($data);
     });
 
-    return $payment->load('employee.user');
+    return $employeePayment->load('employee.user');
   }
 
-  public function delete(int $id): bool
+  public function delete(EmployeePayment $employeePayment): bool
   {
-    $payment = EmployeePayment::findOrFail($id);
-
-    return DB::transaction(function () use ($payment) {
-      return (bool) $payment->delete();
+    return DB::transaction(function () use ($employeePayment) {
+      return (bool) $employeePayment->delete();
     });
   }
 }

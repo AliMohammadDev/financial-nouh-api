@@ -1,6 +1,7 @@
 <?php
 
-use App\Models\User;
+use App\Models\Currency;
+use App\Models\Fund;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,12 +13,16 @@ return new class extends Migration
    */
   public function up(): void
   {
-    Schema::create('funds', function (Blueprint $table) {
+    Schema::create('currency_funds', function (Blueprint $table) {
       $table->id();
-      $table->foreignIdFor(User::class)
+      $table->foreignIdFor(Currency::class)
         ->constrained()
         ->cascadeOnDelete();
-      $table->string('name');
+      $table->foreignIdFor(Fund::class)
+        ->constrained()
+        ->cascadeOnDelete();
+      $table->decimal('balance', 15, 2)
+        ->default(0.00);
       $table->timestamps();
     });
   }
@@ -27,6 +32,6 @@ return new class extends Migration
    */
   public function down(): void
   {
-    Schema::dropIfExists('funds');
+    Schema::dropIfExists('currency_funds');
   }
 };

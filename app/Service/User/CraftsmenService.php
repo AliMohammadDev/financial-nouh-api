@@ -5,19 +5,52 @@ namespace App\Service\User;
 use App\Models\Craftsmen;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class CraftsmenService
 {
-  public function findAll(): Collection
-  {
-    return Craftsmen::with('user')->get();
+  public function findAll(
+    bool $paginate = false,
+    int $perPage = 10,
+    int $page = 1,
+    array $columns = ["*"]
+  ): LengthAwarePaginator|Collection {
+
+    $filters = [
+      AllowedFilter::callback('search', function ($query, $value) {
+        $query->whereHas('user', function ($q) use ($value) {
+          $q->where('name', 'like', "%{$value}%")
+            ->orWhere('email', 'like', "%{$value}%")
+            ->orWhere('phone_number', 'like', "%{$value}%");
+        });
+      }),
+    ];
+
+    $query = QueryBuilder::for(Craftsmen::class)
+      ->with([
+        'user.funds.currencies',
+      ])
+      ->allowedFilters(...$filters)
+      ->defaultSort('-created_at');
+
+    if ($paginate) {
+      return $query->paginate(
+        perPage: $perPage,
+        page: $page,
+        columns: $columns,
+      );
+    }
+
+    return $query->get($columns);
   }
 
-  public function findOne(int $id): Craftsmen
+  public function findOne(Craftsmen $craftsmen): Craftsmen
   {
-    return Craftsmen::with('user')->findOrFail($id);
+    return $craftsmen->load('user');
   }
 
   public function create(array $data): Craftsmen
@@ -27,37 +60,33 @@ class CraftsmenService
 
       $user = User::create($data);
 
-      $Craftsmen = Craftsmen::create([
+      $craftsmen = Craftsmen::create([
         'user_id' => $user->id,
       ]);
 
-      return $Craftsmen->load('user');
+      return $craftsmen->load('user');
     });
   }
 
-  public function update(int $id, array $data): Craftsmen
+  public function update(Craftsmen $craftsmen, array $data): Craftsmen
   {
-    $Craftsmen = Craftsmen::findOrFail($id);
-
-    DB::transaction(function () use ($Craftsmen, $data) {
+    DB::transaction(function () use ($craftsmen, $data) {
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
       } else {
         unset($data['password']);
       }
 
-      $Craftsmen->user()->update($data);
+      $craftsmen->user()->update($data);
     });
 
-    return $Craftsmen->load('user');
+    return $craftsmen->load('user');
   }
 
-  public function delete(int $id): bool
+  public function delete(Craftsmen $craftsmen): bool
   {
-    $Craftsmen = Craftsmen::findOrFail($id);
-
-    return DB::transaction(function () use ($Craftsmen) {
-      return (bool) $Craftsmen->user()->delete();
+    return DB::transaction(function () use ($craftsmen) {
+      return (bool) $craftsmen->user()->delete();
     });
   }
 }
