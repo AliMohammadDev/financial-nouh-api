@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\FundController;
+use App\Http\Controllers\Api\ProjectTeamController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -53,6 +54,7 @@ Route::apiResource('materials', MaterialController::class);
 Route::apiResource('projects', ProjectController::class);
 Route::apiResource('project-funds', ProjectFundController::class);
 Route::post('project-funds/{projectFund}/currencies', [ProjectFundController::class, 'attachCurrency']);
+Route::apiResource('project-teams', ProjectTeamController::class);
 
 Route::apiResource('departments', DepartmentController::class);
 

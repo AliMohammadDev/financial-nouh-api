@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Resources\User;
+namespace App\Http\Resources;
 
-use App\Http\Resources\CurrencyResource;
+use App\Http\Resources\User\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class AdminResource extends JsonResource
+class ProjectTeamResource extends JsonResource
 {
   /**
    * Transform the resource into an array.
@@ -17,9 +17,13 @@ class AdminResource extends JsonResource
   {
     return [
       'id'         => $this->id,
+      'name'       => $this->name,
+      'user_id'    => $this->user_id,
+      'project_id' => $this->project_id,
       'user'       => new UserResource($this->whenLoaded('user')),
-      'currencies' => CurrencyResource::collection($this->whenLoaded('currencies')),
+      'project'    => new ProjectResource($this->whenLoaded('project')),
       'created_at' => $this->created_at?->format('Y-m-d'),
+
     ];
   }
 }

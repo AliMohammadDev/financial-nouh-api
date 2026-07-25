@@ -22,9 +22,37 @@ class UserResource extends JsonResource
       'phone_number' => $this->phone_number,
       'address'      => $this->address,
 
-      'funds'        => FundResource::collection($this->whenLoaded('funds')),
+      'role_type'    => $this->getRoleType(),
+      'role_details' => $this->getRoleDetails(),
 
-      'created_at' => $this->created_at?->format('Y-m-d'),
+      'funds'        => FundResource::collection($this->whenLoaded('funds')),
+      'created_at'   => $this->created_at?->format('Y-m-d'),
     ];
+  }
+
+  private function getRoleType(): string
+  {
+    if ($this->relationLoaded('admin') && $this->admin) return 'admin';
+    if ($this->relationLoaded('client') && $this->client) return 'client';
+    if ($this->relationLoaded('employee') && $this->employee) return 'employee';
+    if ($this->relationLoaded('craftsmen') && $this->craftsmen) return 'craftsmen';
+    if ($this->relationLoaded('engineer') && $this->craftsmen) return 'engineer';
+    if ($this->relationLoaded('supplier') && $this->supplier) return 'supplier';
+    if ($this->relationLoaded('trustee') && $this->trustee) return 'trustee';
+
+    return 'user';
+  }
+
+  private function getRoleDetails()
+  {
+    if ($this->relationLoaded('client') && $this->client) return $this->client;
+    if ($this->relationLoaded('employee') && $this->employee) return $this->employee;
+    if ($this->relationLoaded('craftsmen') && $this->craftsmen) return $this->craftsmen;
+    if ($this->relationLoaded('admin') && $this->admin) return $this->admin;
+    if ($this->relationLoaded('engineer') && $this->craftsmen) return 'engineer';
+    if ($this->relationLoaded('supplier') && $this->supplier) return $this->supplier;
+    if ($this->relationLoaded('trustee') && $this->trustee) return $this->trustee;
+
+    return null;
   }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Project;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,21 +13,13 @@ return new class extends Migration
    */
   public function up(): void
   {
-    Schema::create('directories', function (Blueprint $table) {
+    Schema::create('project_teams', function (Blueprint $table) {
       $table->id();
-      $table->string('dir_name');
-      $table->string('dir_path')->nullable();
-
-      $table->foreignId('parent_dir_id')
-        ->nullable()
-        ->constrained('directories')
-        ->cascadeOnDelete();
-
+      $table->string('name');
+      $table->foreignIdFor(User::class)
+        ->constrained();
       $table->foreignIdFor(Project::class)
-        ->nullable()
-        ->constrained()
-        ->cascadeOnDelete();
-
+        ->constrained();
       $table->timestamps();
     });
   }
@@ -36,6 +29,6 @@ return new class extends Migration
    */
   public function down(): void
   {
-    Schema::dropIfExists('directories');
+    Schema::dropIfExists('project_teams');
   }
 };

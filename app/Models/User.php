@@ -34,4 +34,39 @@ class User extends Authenticatable
   {
     return $this->hasMany(Fund::class);
   }
+
+  public function admin()
+  {
+    return $this->hasOne(Admin::class);
+  }
+
+  public function client()
+  {
+    return $this->hasOne(Client::class);
+  }
+
+  public function employee()
+  {
+    return $this->hasOne(Employee::class);
+  }
+
+  public function engineer()
+  {
+    return $this->hasOne(Engineer::class);
+  }
+
+  public function craftsmen()
+  {
+    return $this->hasOne(Craftsmen::class);
+  }
+
+  public function supplier()
+  {
+    return $this->hasOne(Supplier::class);
+  }
+
+  public function trustee()
+  {
+    return $this->hasOne(Trustee::class);
+  }
 }

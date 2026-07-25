@@ -27,4 +27,9 @@ class Project extends Model
   {
     return $this->hasMany(ProjectFund::class);
   }
+
+  public function projectTeams(): HasMany
+  {
+    return $this->hasMany(ProjectTeam::class, 'project_id');
+  }
 }

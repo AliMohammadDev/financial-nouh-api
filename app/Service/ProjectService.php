@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
+use Illuminate\Validation\ValidationException;
 
 class ProjectService
 {
@@ -70,11 +71,16 @@ class ProjectService
 
   public function delete(Project $project): bool
   {
+    if ($project->projectTeams()->exists()) {
+      throw ValidationException::withMessages([
+        'project' => ['You have to delete project teams first before deleting this project.'],
+      ]);
+    }
+
     return DB::transaction(function () use ($project) {
       return (bool) $project->delete();
     });
   }
-
   // project funds
   public function attachFund(Project $project, array $data): ProjectFund
   {
