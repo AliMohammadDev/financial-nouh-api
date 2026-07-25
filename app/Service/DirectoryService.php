@@ -7,6 +7,8 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class DirectoryService
 {
@@ -16,7 +18,20 @@ class DirectoryService
     int $page = 1,
     array $columns = ["*"]
   ): LengthAwarePaginator|Collection {
-    $query = Directory::with(['project', 'children', 'media'])->latest();
+
+    $filters = [
+      AllowedFilter::callback('search', function ($query, $value) {
+        $query->where('dir_name', 'like', "%{$value}%");
+      }),
+      AllowedFilter::exact('project_id'),
+      AllowedFilter::exact('parent_dir_id'),
+    ];
+
+
+    $query = QueryBuilder::for(Directory::class)
+      ->with(['project', 'children', 'media'])
+      ->allowedFilters(...$filters)
+      ->defaultSort('-created_at');
 
     if ($paginate) {
       return $query->paginate(perPage: $perPage, page: $page, columns: $columns);

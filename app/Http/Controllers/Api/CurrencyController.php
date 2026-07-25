@@ -18,7 +18,7 @@ class CurrencyController extends Controller
     private CurrencyService $currencyService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class CurrencyController extends Controller
 
     $currencies = $this->currencyService->findAll($paginate, $perPage, $page);
 
-    return response()->json(CurrencyResource::collection($currencies));
+    return CurrencyResource::collection($currencies);
   }
 
   public function store(CreateCurrencyRequest $request): JsonResponse

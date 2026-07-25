@@ -18,7 +18,7 @@ class EmployeePaymentController extends Controller
     private EmployeePaymentService $paymentService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class EmployeePaymentController extends Controller
 
     $payments = $this->paymentService->findAll($paginate, $perPage, $page);
 
-    return response()->json(EmployeePaymentResource::collection($payments));
+    return EmployeePaymentResource::collection($payments);
   }
 
   public function store(CreateEmployeePaymentRequest $request): JsonResponse

@@ -18,13 +18,13 @@ class ProjectTeamController extends Controller
     private ProjectTeamService $projectTeamService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
     $page     = $request->input('page', 1);
     $teams = $this->projectTeamService->findAll($paginate, $perPage, $page);
-    return response()->json(ProjectTeamResource::collection($teams));
+    return ProjectTeamResource::collection($teams);
   }
 
   public function store(CreateProjectTeamRequest $request): JsonResponse

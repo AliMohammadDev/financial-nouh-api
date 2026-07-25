@@ -18,7 +18,7 @@ class MaterialController extends Controller
     private MaterialService $materialService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class MaterialController extends Controller
 
     $materials = $this->materialService->findAll($paginate, $perPage, $page);
 
-    return response()->json(MaterialResource::collection($materials));
+    return MaterialResource::collection($materials);
   }
 
   public function store(CreateMaterialRequest $request): JsonResponse

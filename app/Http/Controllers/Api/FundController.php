@@ -19,7 +19,7 @@ class FundController extends Controller
     private FundService $fundService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -27,7 +27,7 @@ class FundController extends Controller
 
     $funds = $this->fundService->findAll($paginate, $perPage, $page);
 
-    return response()->json(FundResource::collection($funds));
+    return FundResource::collection($funds);
   }
 
   public function store(CreateFundRequest $request): JsonResponse

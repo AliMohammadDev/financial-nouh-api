@@ -18,7 +18,7 @@ class DepartmentController extends Controller
     private DepartmentService $departmentService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class DepartmentController extends Controller
 
     $departments = $this->departmentService->findAll($paginate, $perPage, $page);
 
-    return response()->json(DepartmentResource::collection($departments));
+    return DepartmentResource::collection($departments);
   }
 
   public function store(CreateDepartmentRequest $request): JsonResponse

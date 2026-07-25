@@ -20,7 +20,7 @@ class CompanyFundController extends Controller
     private CompanyFundService $companyFundService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -28,7 +28,7 @@ class CompanyFundController extends Controller
 
     $funds = $this->companyFundService->findAll($paginate, $perPage, $page);
 
-    return response()->json(CompanyFundResource::collection($funds));
+    return CompanyFundResource::collection($funds);
   }
 
   public function store(CreateCompanyFundRequest $request): JsonResponse

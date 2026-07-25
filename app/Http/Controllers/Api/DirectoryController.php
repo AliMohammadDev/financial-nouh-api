@@ -19,7 +19,7 @@ class DirectoryController extends Controller
     private DirectoryService $directoryService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -27,7 +27,7 @@ class DirectoryController extends Controller
 
     $directories = $this->directoryService->findAll($paginate, $perPage, $page);
 
-    return response()->json(DirectoryResource::collection($directories));
+    return DirectoryResource::collection($directories);
   }
 
   public function store(CreateDirectoryRequest $request): JsonResponse

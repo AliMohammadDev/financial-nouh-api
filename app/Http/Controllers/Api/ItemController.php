@@ -18,7 +18,7 @@ class ItemController extends Controller
     private ItemService $itemService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class ItemController extends Controller
 
     $items = $this->itemService->findAll($paginate, $perPage, $page);
 
-    return response()->json(ItemResource::collection($items));
+    return ItemResource::collection($items);
   }
 
   public function store(CreateItemRequest $request): JsonResponse
