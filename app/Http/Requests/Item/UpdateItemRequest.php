@@ -23,9 +23,10 @@ class UpdateItemRequest extends FormRequest
   public function rules(): array
   {
     $itemId = $this->route('item');
+    $id = is_object($itemId) ? $itemId->id : $itemId;
 
     return [
-      'name'        => 'sometimes|required|string|max:255|unique:items,name,' . $itemId,
+      'name'        => 'sometimes|required|string|max:255|unique:items,name,' . $id,
       'description' => 'nullable|string',
     ];
   }

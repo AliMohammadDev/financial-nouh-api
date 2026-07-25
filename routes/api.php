@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\EmployeePaymentController;
 use App\Http\Controllers\Api\CompanyFundController; // <-- إضافة الـ Controller
+use App\Http\Controllers\Api\DirectoryController;
 use App\Http\Controllers\Api\User\CraftsmenController;
 use App\Http\Controllers\Api\User\EmployeeController;
 use App\Http\Controllers\Api\User\EngineerController;
@@ -71,3 +72,11 @@ Route::apiResource('expenses', ExpenseController::class);
 // System Configurations
 // ==========================================
 Route::apiResource('currencies', CurrencyController::class);
+
+
+// ==========================================
+// Directory & Archive Management
+// ==========================================
+Route::apiResource('directories', DirectoryController::class);
+Route::post('directories/{directory}/files', [DirectoryController::class, 'uploadFile']);
+Route::delete('directories/{directory}/files/{mediaId}', [DirectoryController::class, 'deleteFile']);

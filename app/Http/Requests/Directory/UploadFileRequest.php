@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Item;
+namespace App\Http\Requests\Directory;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateItemRequest extends FormRequest
+class UploadFileRequest extends FormRequest
 {
   /**
    * Determine if the user is authorized to make this request.
@@ -23,8 +23,8 @@ class CreateItemRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'name'        => 'required|string|max:255|unique:items,name',
-      'description' => 'nullable|string',
+      'files'   => ['required', 'array'],
+      'files.*' => ['file', 'max:10240'],
     ];
   }
 }
