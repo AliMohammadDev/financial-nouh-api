@@ -19,8 +19,7 @@ return new class extends Migration
         ->constrained()
         ->cascadeOnDelete();
       $table->foreignIdFor(Department::class)
-        ->constrained()
-        ->cascadeOnDelete();
+        ->constrained();
       $table->string('name');
       $table->decimal('expected_cost', 15, 2);
       $table->enum('status', ['pending', 'in_progress', 'completed', 'cancelled'])->default('pending');

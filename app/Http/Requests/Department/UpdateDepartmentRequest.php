@@ -23,10 +23,10 @@ class UpdateDepartmentRequest extends FormRequest
   public function rules(): array
   {
     $departmentId = $this->route('department');
-    $id = is_object($departmentId) ? $departmentId->Department_ID : $departmentId;
+    $id = is_object($departmentId) ? $departmentId->id : $departmentId;
 
     return [
-      'Name'         => ['sometimes', 'required', 'string', 'max:255', 'unique:departments,Name,' . $id . ',Department_ID'],
+      'Name'         => ['sometimes', 'required', 'string', 'max:255', 'unique:departments,Name,' . $id . ',id'],
       'Main_Manager' => ['nullable', 'string', 'max:255'],
     ];
   }

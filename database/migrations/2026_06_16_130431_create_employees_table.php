@@ -15,9 +15,7 @@ return new class extends Migration
     Schema::create('employees', function (Blueprint $table) {
       $table->id();
       $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-
       $table->string('job_title');
-
       $table->timestamps();
     });
   }

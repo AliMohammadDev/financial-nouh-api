@@ -6,6 +6,7 @@ use App\Models\Department;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -62,6 +63,12 @@ class DepartmentService
 
   public function delete(Department $department): bool
   {
+    if ($department->projects()->exists()) {
+      throw ValidationException::withMessages([
+        'department' => ['You have to delete projects first before deleting this department.'],
+      ]);
+    }
+
     return DB::transaction(function () use ($department) {
       return (bool) $department->delete();
     });
