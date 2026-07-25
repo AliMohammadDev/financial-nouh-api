@@ -18,7 +18,7 @@ class TrusteeController extends Controller
     private TrusteeService $trusteeService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class TrusteeController extends Controller
 
     $trustees = $this->trusteeService->findAll($paginate, $perPage, $page);
 
-    return response()->json(TrusteeResource::collection($trustees));
+    return  TrusteeResource::collection($trustees);
   }
 
   public function store(CreateTrusteeRequest $request): JsonResponse

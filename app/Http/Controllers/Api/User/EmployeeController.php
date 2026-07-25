@@ -18,7 +18,7 @@ class EmployeeController extends Controller
     private EmployeeService $employeeService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class EmployeeController extends Controller
 
     $employees = $this->employeeService->findAll($paginate, $perPage, $page);
 
-    return response()->json(EmployeeResource::collection($employees));
+    return EmployeeResource::collection($employees);
   }
 
   public function store(CreateEmployeeRequest $request): JsonResponse

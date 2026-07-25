@@ -18,7 +18,7 @@ class SupplierController extends Controller
     private SupplierService $supplierService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class SupplierController extends Controller
 
     $suppliers = $this->supplierService->findAll($paginate, $perPage, $page);
 
-    return response()->json(SupplierResource::collection($suppliers));
+    return SupplierResource::collection($suppliers);
   }
 
   public function store(CreateSupplierRequest $request): JsonResponse

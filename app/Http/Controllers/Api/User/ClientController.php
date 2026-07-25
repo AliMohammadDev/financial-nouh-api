@@ -18,7 +18,7 @@ class ClientController extends Controller
     private ClientService $clientService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class ClientController extends Controller
 
     $clients = $this->clientService->findAll($paginate, $perPage, $page);
 
-    return response()->json(ClientResource::collection($clients));
+    return ClientResource::collection($clients);
   }
 
   public function store(CreateClientRequest $request): JsonResponse

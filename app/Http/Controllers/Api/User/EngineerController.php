@@ -18,7 +18,7 @@ class EngineerController extends Controller
     private EngineerService $engineerService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class EngineerController extends Controller
 
     $engineers = $this->engineerService->findAll($paginate, $perPage, $page);
 
-    return response()->json(EngineerResource::collection($engineers));
+    return EngineerResource::collection($engineers);
   }
 
   public function store(CreateEngineerRequest $request): JsonResponse

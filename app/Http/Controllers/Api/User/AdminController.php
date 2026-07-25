@@ -16,7 +16,7 @@ class AdminController extends Controller
 {
   public function __construct(private AdminService $adminService) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -24,7 +24,7 @@ class AdminController extends Controller
 
     $admins = $this->adminService->findAll($paginate, $perPage, $page);
 
-    return response()->json(AdminResource::collection($admins));
+    return AdminResource::collection($admins);
   }
 
   public function store(CreateAdminRequest $request): JsonResponse

@@ -16,7 +16,7 @@ class InvestorController extends Controller
 {
   public function __construct(private InvestorService $investorService) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -24,7 +24,7 @@ class InvestorController extends Controller
 
     $investors = $this->investorService->findAll($paginate, $perPage, $page);
 
-    return response()->json(InvestorResource::collection($investors));
+    return InvestorResource::collection($investors);
   }
 
   public function store(CreateInvestorRequest $request): JsonResponse

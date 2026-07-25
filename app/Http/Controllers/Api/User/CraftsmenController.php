@@ -18,7 +18,7 @@ class CraftsmenController extends Controller
     private CraftsmenService $craftsmenService
   ) {}
 
-  public function index(Request $request): JsonResponse
+  public function index(Request $request)
   {
     $paginate = $request->boolean('paginate', false);
     $perPage  = $request->input('per_page', 10);
@@ -26,7 +26,7 @@ class CraftsmenController extends Controller
 
     $craftsmen = $this->craftsmenService->findAll($paginate, $perPage, $page);
 
-    return response()->json(CraftsmenResource::collection($craftsmen));
+    return CraftsmenResource::collection($craftsmen);
   }
 
   public function store(CreateCraftsmenRequest $request): JsonResponse
