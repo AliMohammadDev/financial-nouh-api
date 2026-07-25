@@ -16,8 +16,8 @@ class DepartmentResource extends JsonResource
   {
     return [
       'id' => $this->id,
-      'name'          => $this->Name,
-      'main_manager'  => $this->Main_Manager,
+      'name'          => $this->name,
+      'main_manager'  => $this->Main_manager,
       'created_at'    => $this->created_at?->format('Y-m-d'),
     ];
   }

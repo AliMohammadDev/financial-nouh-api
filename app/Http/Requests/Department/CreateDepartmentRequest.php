@@ -23,8 +23,8 @@ class CreateDepartmentRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'Name'         => ['required', 'string', 'max:255', 'unique:departments,Name'],
-      'Main_Manager' => ['nullable', 'string', 'max:255'],
+      'name'         => ['required', 'string', 'max:255', 'unique:departments,name'],
+      'main_manager' => ['nullable', 'string', 'max:255'],
     ];
   }
 }

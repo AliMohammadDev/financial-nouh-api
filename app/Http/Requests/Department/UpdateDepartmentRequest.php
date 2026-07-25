@@ -26,8 +26,8 @@ class UpdateDepartmentRequest extends FormRequest
     $id = is_object($departmentId) ? $departmentId->id : $departmentId;
 
     return [
-      'Name'         => ['sometimes', 'required', 'string', 'max:255', 'unique:departments,Name,' . $id . ',id'],
-      'Main_Manager' => ['nullable', 'string', 'max:255'],
+      'name'         => ['sometimes', 'required', 'string', 'max:255', 'unique:departments,name,' . $id . ',id'],
+      'main_manager' => ['nullable', 'string', 'max:255'],
     ];
   }
 }
