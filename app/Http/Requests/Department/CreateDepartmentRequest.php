@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Project;
+namespace App\Http\Requests\Department;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateProjectRequest extends FormRequest
+class CreateDepartmentRequest extends FormRequest
 {
   /**
    * Determine if the user is authorized to make this request.
@@ -23,11 +23,8 @@ class UpdateProjectRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'client_id'     => 'sometimes|required|exists:clients,id',
-      'department_id' => 'sometimes|required|exists:departments,id',
-      'name'          => 'sometimes|required|string|max:255',
-      'expected_cost' => 'sometimes|required|numeric|min:0',
-      'status'        => 'sometimes|required|string|in:pending,in_progress,completed,cancelled',
+      'Name'         => ['required', 'string', 'max:255', 'unique:departments,Name'],
+      'Main_Manager' => ['nullable', 'string', 'max:255'],
     ];
   }
 }

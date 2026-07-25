@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\EmployeePaymentController;
 use App\Http\Controllers\Api\CompanyFundController; // <-- إضافة الـ Controller
+use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\DirectoryController;
 use App\Http\Controllers\Api\User\CraftsmenController;
 use App\Http\Controllers\Api\User\EmployeeController;
@@ -52,6 +53,8 @@ Route::apiResource('materials', MaterialController::class);
 Route::apiResource('projects', ProjectController::class);
 Route::apiResource('project-funds', ProjectFundController::class);
 Route::post('project-funds/{projectFund}/currencies', [ProjectFundController::class, 'attachCurrency']);
+
+Route::apiResource('departments', DepartmentController::class);
 
 
 // ==========================================

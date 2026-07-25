@@ -31,7 +31,7 @@ class ProjectService
     ];
 
     $query = QueryBuilder::for(Project::class)
-      ->with(['client.user', 'projectFunds'])
+      ->with(['client.user', 'projectFunds', 'department'])
       ->allowedFilters(...$filters)
       ->defaultSort('-created_at');
 

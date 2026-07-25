@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Project\AttachProjectFundRequest;
 use App\Http\Requests\Project\CreateProjectRequest;
 use App\Http\Requests\Project\UpdateProjectRequest;
+use App\Http\Requests\ProjectFund\AttachProjectFundRequest;
 use App\Http\Resources\ProjectFundResource;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;

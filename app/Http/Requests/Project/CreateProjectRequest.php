@@ -24,6 +24,7 @@ class CreateProjectRequest extends FormRequest
   {
     return [
       'client_id'     => 'required|exists:clients,id',
+      'department_id' => 'required|exists:departments,id',
       'name'          => 'required|string|max:255',
       'expected_cost' => 'required|numeric|min:0',
       'status'        => 'nullable|string|in:pending,in_progress,completed,cancelled',

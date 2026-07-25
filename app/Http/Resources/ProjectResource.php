@@ -22,6 +22,7 @@ class ProjectResource extends JsonResource
       'status'        => $this->status,
       'client'        => new ClientResource($this->whenLoaded('client')),
       'funds'         => ProjectFundResource::collection($this->whenLoaded('projectFunds')),
+      'department'    => new DepartmentResource($this->whenLoaded('department')),
       'created_at'    => $this->created_at?->toIso8601String(),
     ];
   }

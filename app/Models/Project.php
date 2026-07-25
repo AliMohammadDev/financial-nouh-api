@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['client_id', 'name', 'expected_cost', 'status'])]
+#[Fillable(['client_id', 'name', 'department_id', 'expected_cost', 'status'])]
 class Project extends Model
 {
   use HasFactory;
@@ -16,6 +16,11 @@ class Project extends Model
   public function client(): BelongsTo
   {
     return $this->belongsTo(Client::class);
+  }
+
+  public function department(): BelongsTo
+  {
+    return $this->belongsTo(Department::class, 'department_id');
   }
 
   public function projectFunds(): HasMany
