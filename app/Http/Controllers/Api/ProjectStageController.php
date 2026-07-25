@@ -52,6 +52,9 @@ class ProjectStageController extends Controller
   public function destroy(ProjectStage $projectStage): JsonResponse
   {
     $this->projectStageService->delete($projectStage);
-    return response()->json(null, Response::HTTP_NO_CONTENT);
+
+    return response()->json([
+      'message' => 'Project stage deleted successfully.'
+    ], Response::HTTP_OK);
   }
 }

@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\FundController;
 use App\Http\Controllers\Api\ProjectStageController;
 use App\Http\Controllers\Api\ProjectTeamController;
+use App\Http\Controllers\Api\StageTimelineController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -57,6 +58,7 @@ Route::apiResource('project-funds', ProjectFundController::class);
 Route::post('project-funds/{projectFund}/currencies', [ProjectFundController::class, 'attachCurrency']);
 Route::apiResource('project-teams', ProjectTeamController::class);
 Route::apiResource('project-stages', ProjectStageController::class);
+Route::apiResource('stage-timelines', StageTimelineController::class);
 
 Route::apiResource('departments', DepartmentController::class);
 
