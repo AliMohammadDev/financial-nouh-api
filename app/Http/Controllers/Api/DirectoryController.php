@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Directory\CreateDirectoryRequest;
+use App\Http\Requests\Directory\MoveFileRequest;
 use App\Http\Requests\Directory\UpdateDirectoryRequest;
 use App\Http\Requests\Directory\UploadFileRequest;
 use App\Http\Resources\DirectoryResource;
@@ -71,6 +72,18 @@ class DirectoryController extends Controller
 
     return response()->json([
       'message' => 'File deleted from directory successfully'
+    ], Response::HTTP_OK);
+  }
+
+  public function moveFile(MoveFileRequest $request): JsonResponse
+  {
+    $this->directoryService->moveFile(
+      $request->input('media_id'),
+      $request->input('target_directory_id')
+    );
+
+    return response()->json([
+      'message' => 'File moved to another directory successfully'
     ], Response::HTTP_OK);
   }
 }

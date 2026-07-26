@@ -50,7 +50,7 @@ class TrusteeService
 
   public function findOne(Trustee $trustee): Trustee
   {
-    return $trustee->load('user');
+    return $trustee->load('user.funds.currencies');
   }
 
   public function create(array $data): Trustee

@@ -51,7 +51,7 @@ class ClientService
 
   public function findOne(Client $client): Client
   {
-    return $client->load(['user', 'projects']);
+    return $client->load(['user.funds.currencies', 'projects']);
   }
 
   public function create(array $data): Client

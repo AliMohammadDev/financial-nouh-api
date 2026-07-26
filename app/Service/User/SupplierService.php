@@ -50,7 +50,7 @@ class SupplierService
 
   public function findOne(Supplier $supplier): Supplier
   {
-    return $supplier->load('user');
+    return $supplier->load('user.funds.currencies');
   }
 
   public function create(array $data): Supplier

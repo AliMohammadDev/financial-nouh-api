@@ -50,7 +50,7 @@ class CraftsmenService
 
   public function findOne(Craftsmen $craftsmen): Craftsmen
   {
-    return $craftsmen->load('user');
+    return $craftsmen->load('user.funds.currencies');
   }
 
   public function create(array $data): Craftsmen

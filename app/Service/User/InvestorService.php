@@ -50,7 +50,7 @@ class InvestorService
 
   public function findOne(Investor $investor): Investor
   {
-    return $investor->load('user');
+    return $investor->load('user.funds.currencies');
   }
 
   public function create(array $data): Investor

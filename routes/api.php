@@ -91,3 +91,4 @@ Route::apiResource('currencies', CurrencyController::class);
 Route::apiResource('directories', DirectoryController::class);
 Route::post('directories/{directory}/files', [DirectoryController::class, 'uploadFile']);
 Route::delete('directories/{directory}/files/{mediaId}', [DirectoryController::class, 'deleteFile']);
+Route::post('directories/move-file', [DirectoryController::class, 'moveFile']);

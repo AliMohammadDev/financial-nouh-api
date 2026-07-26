@@ -50,7 +50,7 @@ class EngineerService
 
   public function findOne(Engineer $engineer): Engineer
   {
-    return $engineer->load('user');
+    return $engineer->load('user.funds.currencies');
   }
 
   public function create(array $data): Engineer

@@ -50,7 +50,7 @@ class AdminService
 
   public function findOne(Admin $admin): Admin
   {
-    return $admin->load('user');
+    return $admin->load('user.funds.currencies');
   }
 
   public function create(array $data): Admin

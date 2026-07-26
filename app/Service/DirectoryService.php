@@ -94,4 +94,23 @@ class DirectoryService
       return true;
     });
   }
+
+  public function moveFile(int $mediaId, int $targetDirectoryId): bool
+  {
+    return DB::transaction(function () use ($mediaId, $targetDirectoryId) {
+      // 1. العثور على سجل الـ Media في جدول الـ media العام
+      $mediaItem = \Spatie\MediaLibrary\MediaCollections\Models\Media::findOrFail($mediaId);
+
+      // 2. التحقق من أن الكائن المرتبط به هو Directory أساساً
+      if ($mediaItem->model_type !== Directory::class) {
+        throw new \Exception('The specified media is not a directory file.');
+      }
+
+      // 3. تحديث الـ model_id ليصبح هو معرف المجلد الجديد
+      $mediaItem->model_id = $targetDirectoryId;
+      $mediaItem->save();
+
+      return true;
+    });
+  }
 }

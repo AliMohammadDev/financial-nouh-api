@@ -50,7 +50,7 @@ class EmployeeService
 
   public function findOne(Employee $employee): Employee
   {
-    return $employee->load('user');
+    return $employee->load('user.funds.currencies');
   }
 
   public function create(array $data): Employee
