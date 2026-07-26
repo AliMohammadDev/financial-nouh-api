@@ -76,6 +76,7 @@ Route::post('company-funds/{companyFund}/currencies', [CompanyFundController::cl
 // ==========================================
 Route::apiResource('employee-payments', EmployeePaymentController::class);
 Route::apiResource('revenues', RevenueController::class);
+Route::apiResource('expenses', ExpenseController::class);
 
 
 // ==========================================
