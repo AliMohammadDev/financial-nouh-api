@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\FundController;
 use App\Http\Controllers\Api\ProjectStageController;
 use App\Http\Controllers\Api\ProjectTeamController;
+use App\Http\Controllers\Api\RevenueController;
 use App\Http\Controllers\Api\StageTimelineController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -74,7 +75,7 @@ Route::post('company-funds/{companyFund}/currencies', [CompanyFundController::cl
 // Financial & Payroll Management
 // ==========================================
 Route::apiResource('employee-payments', EmployeePaymentController::class);
-Route::apiResource('expenses', ExpenseController::class);
+Route::apiResource('revenues', RevenueController::class);
 
 
 // ==========================================
