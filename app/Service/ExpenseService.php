@@ -2,86 +2,54 @@
 
 namespace App\Service;
 
-use App\Enums\Currency;
 use App\Models\Expense;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ExpenseService
 {
-  public function findAll(): Collection
-  {
-    return Expense::with(['employee.user', 'createdBy', 'expenseable'])->get();
+  public function findAll(
+    bool $paginate = false,
+    int $perPage = 10,
+    int $page = 1,
+    array $columns = ["*"]
+  ): LengthAwarePaginator|Collection {
+
+    $query = Expense::with(['user', 'creator', 'expenseable'])
+      ->latest();
+
+    if ($paginate) {
+      return $query->paginate(perPage: $perPage, page: $page, columns: $columns);
+    }
+
+    return $query->get($columns);
   }
 
-  public function findOne(int $id): Expense
+  public function findOne(Expense $expense): Expense
   {
-    return Expense::with(['employee.user', 'createdBy', 'expenseable'])->findOrFail($id);
+    return $expense->load(['user', 'creator', 'expenseable']);
   }
 
   public function create(array $data): Expense
   {
     return DB::transaction(function () use ($data) {
-      $box = $data['expenseable_type']::findOrFail($data['expenseable_id']);
-
-      if ($data['currency'] === Currency::USD->value) {
-        $box->decrement('balance_usd', $data['amount']);
-      } else {
-        $box->decrement('balance_syp', $data['amount']);
-      }
-
       $expense = Expense::create($data);
-
-      return $expense->load(['employee.user', 'createdBy', 'expenseable']);
+      return $expense->load(['user', 'creator', 'expenseable']);
     });
   }
 
-  public function update(int $id, array $data): Expense
+  public function update(Expense $expense, array $data): Expense
   {
-    $expense = Expense::findOrFail($id);
-
     return DB::transaction(function () use ($expense, $data) {
-      $oldBox = $expense->expenseable_type::findOrFail($expense->expenseable_id);
-
-      if ($expense->currency === Currency::USD) {
-        $oldBox->increment('balance_usd', $expense->amount);
-      } else {
-        $oldBox->increment('balance_syp', $expense->amount);
-      }
-
-      $targetType  = $data['expenseable_type'] ?? $expense->expenseable_type;
-      $targetId    = $data['expenseable_id']   ?? $expense->expenseable_id;
-      $newAmount   = $data['amount']            ?? $expense->amount;
-
-      $newCurrency = isset($data['currency']) ? $data['currency'] : $expense->currency->value;
-
-      $newBox = $targetType::findOrFail($targetId);
-
-      if ($newCurrency === Currency::USD->value) {
-        $newBox->decrement('balance_usd', $newAmount);
-      } else {
-        $newBox->decrement('balance_syp', $newAmount);
-      }
-
       $expense->update($data);
-
-      return $expense->load(['employee.user', 'createdBy', 'expenseable']);
+      return $expense->load(['user', 'creator', 'expenseable']);
     });
   }
 
-  public function delete(int $id): bool
+  public function delete(Expense $expense): bool
   {
-    $expense = Expense::findOrFail($id);
-
     return DB::transaction(function () use ($expense) {
-      $box = $expense->expenseable_type::findOrFail($expense->expenseable_id);
-
-      if ($expense->currency === Currency::USD) {
-        $box->increment('balance_usd', $expense->amount);
-      } else {
-        $box->increment('balance_syp', $expense->amount);
-      }
-
       return (bool) $expense->delete();
     });
   }

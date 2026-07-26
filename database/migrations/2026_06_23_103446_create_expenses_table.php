@@ -16,12 +16,15 @@ return new class extends Migration
     Schema::create('expenses', function (Blueprint $table) {
       $table->id();
       $table->morphs('expenseable');
-      $table->text('description')->nullable();
+      $table->text('description');
       $table->decimal('amount', 15, 2);
-      $table->string('currency')->default('USD');
       $table->boolean('is_posted')->default(false);
-      $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
-      $table->foreignIdFor(Employee::class)->nullable()->constrained()->cascadeOnDelete();
+      $table->foreignIdFor(User::class)
+        ->constrained();
+
+      $table->foreignId('created_by')
+        ->constrained('users');
+
       $table->timestamps();
     });
   }

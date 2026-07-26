@@ -2,14 +2,21 @@
 
 namespace App\Models;
 
-use App\Enums\Currency;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-#[Fillable(['expenseable_type', 'expenseable_id', 'description', 'amount', 'currency', 'is_posted', 'employee_id', 'user_id'])]
+#[Fillable([
+  'expenseable_type',
+  'expenseable_id',
+  'description',
+  'amount',
+  'is_posted',
+  'user_id',
+  'created_by',
+])]
 class Expense extends Model
 {
   use HasFactory;
@@ -18,7 +25,7 @@ class Expense extends Model
   {
     return [
       'is_posted' => 'boolean',
-      'currency'  => Currency::class,
+      'amount'    => 'decimal:2',
     ];
   }
 
@@ -27,13 +34,13 @@ class Expense extends Model
     return $this->morphTo();
   }
 
-  public function employee(): BelongsTo
-  {
-    return $this->belongsTo(Employee::class, 'employee_id');
-  }
-
-  public function createdBy(): BelongsTo
+  public function user(): BelongsTo
   {
     return $this->belongsTo(User::class, 'user_id');
+  }
+
+  public function creator(): BelongsTo
+  {
+    return $this->belongsTo(User::class, 'created_by');
   }
 }

@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Expense\CreateExpenseRequest;
 use App\Http\Requests\Expense\UpdateExpenseRequest;
 use App\Http\Resources\ExpenseResource;
+use App\Models\Expense;
 use App\Service\ExpenseService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ExpenseController extends Controller
@@ -16,10 +18,15 @@ class ExpenseController extends Controller
     private ExpenseService $expenseService
   ) {}
 
-  public function index(): JsonResponse
+  public function index(Request $request)
   {
-    $expenses = $this->expenseService->findAll();
-    return response()->json(ExpenseResource::collection($expenses));
+    $paginate = $request->boolean('paginate', false);
+    $perPage  = $request->input('per_page', 10);
+    $page     = $request->input('page', 1);
+
+    $expenses = $this->expenseService->findAll($paginate, $perPage, $page);
+
+    return ExpenseResource::collection($expenses);
   }
 
   public function store(CreateExpenseRequest $request): JsonResponse
@@ -27,21 +34,22 @@ class ExpenseController extends Controller
     $expense = $this->expenseService->create($request->validated());
     return response()->json(new ExpenseResource($expense), Response::HTTP_CREATED);
   }
-  public function update(UpdateExpenseRequest $request, int $id): JsonResponse
+
+  public function show(Expense $expense): JsonResponse
   {
-    $payment = $this->expenseService->update($id, $request->validated());
-    return response()->json(new ExpenseResource($payment));
+    $expenseWithRelations = $this->expenseService->findOne($expense);
+    return response()->json(new ExpenseResource($expenseWithRelations));
   }
 
-  public function show(int $id): JsonResponse
+  public function update(UpdateExpenseRequest $request, Expense $expense): JsonResponse
   {
-    $expense = $this->expenseService->findOne($id);
-    return response()->json(new ExpenseResource($expense));
+    $updatedExpense = $this->expenseService->update($expense, $request->validated());
+    return response()->json(new ExpenseResource($updatedExpense));
   }
 
-  public function destroy(int $id): JsonResponse
+  public function destroy(Expense $expense): JsonResponse
   {
-    $this->expenseService->delete($id);
+    $this->expenseService->delete($expense);
     return response()->json([
       'message' => 'Expense deleted successfully'
     ], Response::HTTP_OK);
