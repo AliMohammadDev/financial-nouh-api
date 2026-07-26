@@ -21,16 +21,16 @@ class DirectoryResource extends JsonResource
       'parent_dir_id' => $this->parent_dir_id,
       'project'       => new ProjectResource($this->whenLoaded('project')),
       'children'      => DirectoryResource::collection($this->whenLoaded('children')),
+
+
       'files'         => $this->whenLoaded('media', function () {
         return $this->getMedia('directory_files')->map(function ($media) {
-          $customUrl = asset('storage/' . trim($this->dir_path, '/') . '/' . $media->file_name);
-
           return [
             'id'         => $media->id,
             'file_name'  => $media->file_name,
             'size'       => $media->human_readable_size,
             'extension'  => $media->extension,
-            'url'        => $customUrl,
+            'url'        => $media->getUrl(),
             'created_at' => $media->created_at?->format('Y-m-d H:i:s'),
           ];
         });
