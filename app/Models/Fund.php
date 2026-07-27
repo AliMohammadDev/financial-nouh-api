@@ -27,7 +27,7 @@ class Fund extends Model
   public function currencies(): BelongsToMany
   {
     return $this->belongsToMany(Currency::class, 'currency_funds')
-      ->withPivot(['balance'])
+      ->withPivot(['id', 'balance'])
       ->withTimestamps();
   }
 }

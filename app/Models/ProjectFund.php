@@ -28,7 +28,7 @@ class ProjectFund extends Model
   {
     return $this->belongsToMany(Currency::class, 'project_fund_currencies')
       ->using(ProjectFundCurrency::class)
-      ->withPivot(['balance'])
+      ->withPivot(['id', 'balance'])
       ->withTimestamps();
   }
 }

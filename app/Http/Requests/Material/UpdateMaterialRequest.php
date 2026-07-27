@@ -25,7 +25,6 @@ class UpdateMaterialRequest extends FormRequest
     return [
       'item_id' => 'sometimes|required|exists:items,id',
       'name'               => 'sometimes|required|string|max:255',
-      'unit'               => 'sometimes|required|string|max:50',
       'description'        => 'nullable|string',
     ];
   }

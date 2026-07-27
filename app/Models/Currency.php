@@ -15,7 +15,7 @@ class Currency extends Model
   {
     return $this->belongsToMany(Fund::class, 'currency_funds')
       ->using(CurrencyFund::class)
-      ->withPivot(['balance'])
+      ->withPivot(['id', 'balance'])
       ->withTimestamps();
   }
 
@@ -23,7 +23,7 @@ class Currency extends Model
   {
     return $this->belongsToMany(ProjectFund::class, 'project_fund_currencies')
       ->using(ProjectFundCurrency::class)
-      ->withPivot(['balance'])
+      ->withPivot(['id', 'balance'])
       ->withTimestamps();
   }
 
@@ -31,7 +31,7 @@ class Currency extends Model
   {
     return $this->belongsToMany(CompanyFund::class, 'company_fund_currencies')
       ->using(CompanyFundCurrency::class)
-      ->withPivot(['balance'])
+      ->withPivot(['id', 'balance'])
       ->withTimestamps();
   }
 }

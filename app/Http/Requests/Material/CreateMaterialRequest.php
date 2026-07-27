@@ -25,7 +25,6 @@ class CreateMaterialRequest extends FormRequest
     return [
       'item_id' => 'required|exists:items,id',
       'name'               => 'required|string|max:255',
-      'unit'               => 'required|string|max:50',
       'description'        => 'nullable|string',
     ];
   }

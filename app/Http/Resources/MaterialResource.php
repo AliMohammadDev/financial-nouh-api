@@ -18,7 +18,6 @@ class MaterialResource extends JsonResource
       'id'                 => $this->id,
       'item_id' => $this->item_id,
       'name'               => $this->name,
-      'unit'               => $this->unit,
       'description'        => $this->description,
       'structural_item'    => new ItemResource($this->whenLoaded('structuralItem')),
       'created_at'         => $this->created_at?->toIso8601String(),
