@@ -16,7 +16,17 @@ class ExpenseService
     array $columns = ["*"]
   ): LengthAwarePaginator|Collection {
 
-    $query = Expense::with(['user', 'creator', 'expenseable'])
+    $query = Expense::with([
+      'user.client',
+      'user.employee',
+      'user.admin',
+      'user.engineer',
+      'user.craftsmen',
+      'user.supplier',
+      'user.trustee',
+      'creator',
+      'expenseable'
+    ])
       ->latest();
 
     if ($paginate) {
@@ -28,9 +38,18 @@ class ExpenseService
 
   public function findOne(Expense $expense): Expense
   {
-    return $expense->load(['user', 'creator', 'expenseable']);
+    return $expense->load([
+      'user.client',
+      'user.employee',
+      'user.admin',
+      'user.engineer',
+      'user.craftsmen',
+      'user.supplier',
+      'user.trustee',
+      'creator',
+      'expenseable'
+    ]);
   }
-
   public function create(array $data): Expense
   {
     return DB::transaction(function () use ($data) {

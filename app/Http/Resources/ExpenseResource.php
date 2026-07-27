@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Http\Resources\User\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -16,22 +17,18 @@ class ExpenseResource extends JsonResource
 
       if ($type === 'App\Models\CurrencyFund') {
         $expenseableInfo = [
-          'type'    => 'user',
-          'user_id' => $this->expenseable->fund?->user_id ?? null,
-          'fund_id' => $this->expenseable->fund_id ?? null,
-          'id'      => $this->expenseable->id,
+          'type'    => 'currency_fund',
+          'details' => $this->expenseable,
         ];
       } elseif ($type === 'App\Models\CompanyFundCurrency') {
         $expenseableInfo = [
-          'type'            => 'company',
-          'company_fund_id' => $this->expenseable->company_fund_id ?? null,
-          'id'              => $this->expenseable->id,
+          'type'    => 'company_fund',
+          'details' => $this->expenseable,
         ];
       } elseif ($type === 'App\Models\ProjectFundCurrency') {
         $expenseableInfo = [
-          'type'            => 'project',
-          'project_fund_id' => $this->expenseable->project_fund_id ?? null,
-          'id'              => $this->expenseable->id,
+          'type'    => 'project_fund',
+          'details' => $this->expenseable,
         ];
       }
     }
@@ -44,15 +41,8 @@ class ExpenseResource extends JsonResource
       'description'       => $this->description,
       'amount'            => (float) $this->amount,
       'is_posted'         => (bool) $this->is_posted,
-
-      'user'              => $this->whenLoaded('user', function () {
-        return $this->user?->name;
-      }),
-
-      'created_by'        => $this->whenLoaded('creator', function () {
-        return $this->creator?->name;
-      }),
-
+      'user'              => new UserResource($this->whenLoaded('user')),
+      'created_by'        => new UserResource($this->whenLoaded('creator')),
       'created_at'        => $this->created_at?->format('Y-m-d'),
     ];
   }
