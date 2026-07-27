@@ -16,10 +16,9 @@ class MaterialResource extends JsonResource
   {
     return [
       'id'                 => $this->id,
-      'item_id' => $this->item_id,
       'name'               => $this->name,
       'description'        => $this->description,
-      'structural_item'    => new ItemResource($this->whenLoaded('structuralItem')),
+      'item'        => new ItemResource($this->whenLoaded('item')),
       'created_at'         => $this->created_at?->toIso8601String(),
     ];
   }

@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\FundController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\ProjectStageController;
 use App\Http\Controllers\Api\ProjectTeamController;
 use App\Http\Controllers\Api\RevenueController;
@@ -62,6 +63,7 @@ Route::apiResource('project-stages', ProjectStageController::class);
 Route::apiResource('stage-timelines', StageTimelineController::class);
 
 Route::apiResource('departments', DepartmentController::class);
+Route::apiResource('invoices', InvoiceController::class);
 
 
 // ==========================================
