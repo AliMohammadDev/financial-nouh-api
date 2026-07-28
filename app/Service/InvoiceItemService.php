@@ -1,0 +1,76 @@
+<?php
+
+namespace App\Service;
+
+use App\Models\InvoiceItem;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
+
+class InvoiceItemService
+{
+  public function findAll(
+    bool $paginate = false,
+    int $perPage = 10,
+    int $page = 1,
+    array $columns = ["*"]
+  ): LengthAwarePaginator|Collection {
+
+    $filters = [
+      AllowedFilter::callback('search', function ($query, $value) {
+        $query->where('item_description', 'like', "%{$value}%")
+          ->orWhere('unit', 'like', "%{$value}%")
+          ->orWhereHas('material', function ($q) use ($value) {
+            $q->where('name', 'like', "%{$value}%");
+          });
+      }),
+      AllowedFilter::exact('invoice_id'),
+      AllowedFilter::exact('material_id'),
+    ];
+
+    $query = QueryBuilder::for(InvoiceItem::class)
+      ->with(['material', 'invoice'])
+      ->allowedFilters(...$filters)
+      ->defaultSort('-created_at');
+
+    if ($paginate) {
+      return $query->paginate(
+        perPage: $perPage,
+        page: $page,
+        columns: $columns,
+      );
+    }
+
+    return $query->get($columns);
+  }
+
+  public function findOne(InvoiceItem $invoiceItem): InvoiceItem
+  {
+    return $invoiceItem->load(['material', 'invoice']);
+  }
+
+  public function create(array $data): InvoiceItem
+  {
+    return DB::transaction(function () use ($data) {
+      $invoiceItem = InvoiceItem::create($data);
+      return $invoiceItem->load(['material', 'invoice']);
+    });
+  }
+
+  public function update(InvoiceItem $invoiceItem, array $data): InvoiceItem
+  {
+    return DB::transaction(function () use ($invoiceItem, $data) {
+      $invoiceItem->update($data);
+      return $invoiceItem->load(['material', 'invoice']);
+    });
+  }
+
+  public function delete(InvoiceItem $invoiceItem): bool
+  {
+    return DB::transaction(function () use ($invoiceItem) {
+      return (bool) $invoiceItem->delete();
+    });
+  }
+}
