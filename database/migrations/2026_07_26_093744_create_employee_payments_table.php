@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\CompanyFundCurrency;
 use App\Models\Employee;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,7 +15,13 @@ return new class extends Migration
   {
     Schema::create('employee_payments', function (Blueprint $table) {
       $table->id();
-      $table->foreignIdFor(Employee::class)->constrained()->cascadeOnDelete();
+      $table->foreignIdFor(Employee::class)
+        ->constrained();
+
+      $table->foreignIdFor(CompanyFundCurrency::class, 'company_fund_currency_id')
+        ->constrained('company_fund_currencies')
+        ->cascadeOnDelete();
+
       $table->decimal('bonuses', 10, 2)->default(0);
       $table->decimal('deductions', 10, 2)->default(0);
       $table->date('payment_date');

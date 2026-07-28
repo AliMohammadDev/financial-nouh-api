@@ -24,6 +24,7 @@ class UpdateEmployeePaymentRequest extends FormRequest
   {
     return [
       'employee_id'  => 'sometimes|required|exists:employees,id',
+      'company_fund_currency_id'  => 'sometimes|required|exists:company_fund_currencies,id',
       'bonuses'      => 'sometimes|nullable|numeric|min:0',
       'deductions'   => 'sometimes|nullable|numeric|min:0',
       'payment_date' => 'sometimes|required|date',

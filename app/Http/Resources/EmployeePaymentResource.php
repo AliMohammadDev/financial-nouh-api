@@ -18,6 +18,12 @@ class EmployeePaymentResource extends JsonResource
       'id'           => $this->id,
       'employee_id'  => $this->employee_id,
       'employee'     => $this->relationLoaded('employee') ? $this->employee : null,
+
+      'company_fund_currency_id' => $this->company_fund_currency_id,
+      'company_fund_currency'    => $this->relationLoaded('companyFundCurrency') ? $this->companyFundCurrency : null,
+
+
+
       'bonuses'      => (float) $this->bonuses,
       'deductions'   => (float) $this->deductions,
       'payment_date' => $this->payment_date?->toDateString(),

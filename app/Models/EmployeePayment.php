@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['employee_id', 'bonuses', 'deductions', 'payment_date', 'amount'])]
+#[Fillable(['employee_id', 'company_fund_currency_id', 'bonuses', 'deductions', 'payment_date', 'amount'])]
 class EmployeePayment extends Model
 {
   use HasFactory;
@@ -22,5 +22,10 @@ class EmployeePayment extends Model
   public function employee(): BelongsTo
   {
     return $this->belongsTo(Employee::class);
+  }
+
+  public function companyFundCurrency(): BelongsTo
+  {
+    return $this->belongsTo(CompanyFundCurrency::class);
   }
 }

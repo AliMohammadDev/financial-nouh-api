@@ -28,7 +28,7 @@ class EmployeePaymentService
     ];
 
     $query = QueryBuilder::for(EmployeePayment::class)
-      ->with('employee.user')
+      ->with(['employee.user', 'companyFundCurrency.companyFund', 'companyFundCurrency.currency'])
       ->allowedFilters(...$filters)
       ->defaultSort('-created_at');
 
