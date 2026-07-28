@@ -16,8 +16,7 @@ class InvoiceItemResource extends JsonResource
   {
     return [
       'id'               => $this->id,
-      'invoice_id'       => $this->invoice_id,
-      'material_id'      => $this->material_id,
+      'invoice'          => new InvoiceResource($this->whenLoaded('invoice')),
       'material'         => new MaterialResource($this->whenLoaded('material')),
       'item_description' => $this->item_description,
       'unit'             => $this->unit,
