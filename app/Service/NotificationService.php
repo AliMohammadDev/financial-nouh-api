@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 class NotificationService
 {
+
   public function getUserNotifications(
     User $user,
     bool $paginate = false,
@@ -39,5 +40,10 @@ class NotificationService
     }
 
     return false;
+  }
+
+  public function markAllAsRead(User $user): int
+  {
+    return $user->unreadNotifications->markAsRead();
   }
 }

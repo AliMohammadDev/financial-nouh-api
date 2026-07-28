@@ -45,4 +45,14 @@ class NotificationController extends Controller
       'message' => 'notification not found',
     ], 404);
   }
+
+  public function markAllAsRead(Request $request)
+  {
+    $user = $request->user();
+    $this->notificationService->markAllAsRead($user);
+
+    return response()->json([
+      'message' => 'all notifications marked as read successfully',
+    ]);
+  }
 }

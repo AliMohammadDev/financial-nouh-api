@@ -100,4 +100,5 @@ Route::post('directories/move-file', [DirectoryController::class, 'moveFile']);
 
 
 Route::get('/notifications', [NotificationController::class, 'index']);
+Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
 Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
