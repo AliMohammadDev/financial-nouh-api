@@ -2,6 +2,9 @@
 
 namespace App\Service;
 
+use App\Models\CompanyFundCurrency;
+use App\Models\CurrencyFund;
+use App\Models\ProjectFundCurrency;
 use App\Models\Revenue;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
@@ -28,13 +31,43 @@ class RevenueService
 
   public function findOne(Revenue $revenue): Revenue
   {
-    return $revenue->load(['user', 'receiver', 'revenueable']);
+
+    $revenue->load([
+      'user.client',
+      'user.employee',
+      'user.admin',
+      'user.engineer',
+      'user.craftsmen',
+      'user.supplier',
+      'user.trustee',
+      'receiver',
+    ]);
+
+    $revenue->loadMorph('revenueable', [
+      CurrencyFund::class => [
+        'currency',
+        'fund.user.client',
+        'fund.user.employee',
+        'fund.user.admin',
+        'fund.user.engineer',
+        'fund.user.craftsmen',
+        'fund.user.supplier',
+        'fund.user.trustee',
+      ],
+      CompanyFundCurrency::class => [],
+      ProjectFundCurrency::class => [
+        'currency',
+        'projectFund.project',
+      ],
+    ]);
+
+    return $revenue;
   }
 
   public function create(array $data): Revenue
   {
     return DB::transaction(function () use ($data) {
-      $revenue = Revenue::create($data); // الـ Observer سيقوم بزيادة الرصيد تلقائياً
+      $revenue = Revenue::create($data);
       return $revenue->load(['user', 'receiver', 'revenueable']);
     });
   }
@@ -42,7 +75,7 @@ class RevenueService
   public function update(Revenue $revenue, array $data): Revenue
   {
     return DB::transaction(function () use ($revenue, $data) {
-      $revenue->update($data); // الـ Observer سيقوم بتعديل الأرصدة تلقائياً
+      $revenue->update($data);
       return $revenue->load(['user', 'receiver', 'revenueable']);
     });
   }
@@ -50,7 +83,7 @@ class RevenueService
   public function delete(Revenue $revenue): bool
   {
     return DB::transaction(function () use ($revenue) {
-      return (bool) $revenue->delete(); // الـ Observer سيقوم بخصم المبلغ عند الحذف
+      return (bool) $revenue->delete();
     });
   }
 }

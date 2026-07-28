@@ -45,4 +45,6 @@ class Revenue extends Model
   {
     return $this->belongsTo(User::class, 'received_by');
   }
+
+
 }
