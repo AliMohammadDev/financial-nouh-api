@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\FundController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\InvoiceItemController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProjectStageController;
 use App\Http\Controllers\Api\ProjectTeamController;
 use App\Http\Controllers\Api\RevenueController;
@@ -96,3 +97,7 @@ Route::apiResource('directories', DirectoryController::class);
 Route::post('directories/{directory}/files', [DirectoryController::class, 'uploadFile']);
 Route::delete('directories/{directory}/files/{mediaId}', [DirectoryController::class, 'deleteFile']);
 Route::post('directories/move-file', [DirectoryController::class, 'moveFile']);
+
+
+Route::get('/notifications', [NotificationController::class, 'index']);
+Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);

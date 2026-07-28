@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Models\Expense;
+use App\Models\User;
+use App\Notifications\FundBalanceAlertNotification;
 
 class ExpenseObserver
 {
@@ -15,6 +17,7 @@ class ExpenseObserver
 
     if ($fund && isset($fund->balance)) {
       $fund->decrement('balance', $expense->amount);
+      $this->checkAndNotify($fund);
     }
   }
 
@@ -37,6 +40,7 @@ class ExpenseObserver
       $newFund = $expense->expenseable;
       if ($newFund && isset($newFund->balance)) {
         $newFund->decrement('balance', $expense->amount);
+        $this->checkAndNotify($newFund);
       }
     }
   }
@@ -67,5 +71,17 @@ class ExpenseObserver
   public function forceDeleted(Expense $expense): void
   {
     //
+  }
+
+  protected function checkAndNotify($fund): void
+  {
+    if ($fund->balance <= 100) {
+
+      $admins = User::whereHas('admin')->get();
+
+      foreach ($admins as $admin) {
+        $admin->notify(new FundBalanceAlertNotification($fund));
+      }
+    }
   }
 }
