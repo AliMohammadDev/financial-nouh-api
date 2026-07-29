@@ -109,6 +109,8 @@ class RevenueService
         'fund.user.craftsmen',
         'fund.user.supplier',
         'fund.user.trustee',
+        'fund.user.investor',
+        'fund.user.dailyWorker',
       ],
       CompanyFundCurrency::class => [],
       ProjectFundCurrency::class => [
@@ -131,6 +133,8 @@ class RevenueService
       'user.craftsmen',
       'user.supplier',
       'user.trustee',
+      'user.investor',
+      'user.dailyWorker',
       'receiver',
     ]);
 
@@ -144,6 +148,8 @@ class RevenueService
         'fund.user.craftsmen',
         'fund.user.supplier',
         'fund.user.trustee',
+        'fund.user.investor',
+        'fund.user.dailyWorker',
       ],
       CompanyFundCurrency::class => [],
       ProjectFundCurrency::class => [

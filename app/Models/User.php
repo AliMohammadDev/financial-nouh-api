@@ -51,6 +51,10 @@ class User extends Authenticatable
   {
     return $this->hasOne(Employee::class);
   }
+  public function investor()
+  {
+    return $this->hasOne(Investor::class);
+  }
 
   public function engineer()
   {
@@ -70,5 +74,10 @@ class User extends Authenticatable
   public function trustee()
   {
     return $this->hasOne(Trustee::class);
+  }
+
+  public function dailyWorker()
+  {
+    return $this->hasOne(DailyWorker::class);
   }
 }

@@ -46,4 +46,12 @@ class NotificationService
   {
     return $user->unreadNotifications->markAsRead();
   }
+
+  public function getNotificationsCount(User $user): array
+  {
+    return [
+      'total' => $user->notifications()->count(),
+      'unread' => $user->unreadNotifications()->count(),
+    ];
+  }
 }

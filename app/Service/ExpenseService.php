@@ -125,8 +125,8 @@ class ExpenseService
         'user.craftsmen',
         'user.supplier',
         'user.trustee',
-        'creator',
         'expenseable',
+        'creator',
       ])
       ->allowedFilters(...$filters)
       ->defaultSort('-created_at');
@@ -145,6 +145,8 @@ class ExpenseService
           'fund.user.craftsmen',
           'fund.user.supplier',
           'fund.user.trustee',
+          'fund.user.investor',
+          'fund.user.dailyWorker',
         ],
         CompanyFundCurrency::class => [],
         ProjectFundCurrency::class => [
@@ -168,6 +170,8 @@ class ExpenseService
         'fund.user.craftsmen',
         'fund.user.supplier',
         'fund.user.trustee',
+        'fund.user.investor',
+        'fund.user.dailyWorker',
       ],
       CompanyFundCurrency::class => [],
       ProjectFundCurrency::class => [
@@ -189,6 +193,8 @@ class ExpenseService
       'user.craftsmen',
       'user.supplier',
       'user.trustee',
+      'user.investor',
+      'user.dailyWorker',
       'creator',
     ]);
 
@@ -202,6 +208,8 @@ class ExpenseService
         'fund.user.craftsmen',
         'fund.user.supplier',
         'fund.user.trustee',
+        'fund.user.investor',
+        'fund.user.dailyWorker',
       ],
       CompanyFundCurrency::class => [],
       ProjectFundCurrency::class => [

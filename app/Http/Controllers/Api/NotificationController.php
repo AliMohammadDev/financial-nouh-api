@@ -26,8 +26,12 @@ class NotificationController extends Controller
       page: $page
     );
 
+
+    $counts = $this->notificationService->getNotificationsCount($user);
+
     return response()->json([
-      'data' => $notifications,
+      'data'   => $notifications,
+      'counts' => $counts,
     ]);
   }
   public function markAsRead(Request $request, $id)

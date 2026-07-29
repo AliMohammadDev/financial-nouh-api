@@ -35,23 +35,27 @@ class UserResource extends JsonResource
     if ($this->relationLoaded('admin') && $this->admin) return 'admin';
     if ($this->relationLoaded('client') && $this->client) return 'client';
     if ($this->relationLoaded('employee') && $this->employee) return 'employee';
+    if ($this->relationLoaded('engineer') && $this->engineer) return 'engineer';
     if ($this->relationLoaded('craftsmen') && $this->craftsmen) return 'craftsmen';
-    if ($this->relationLoaded('engineer') && $this->craftsmen) return 'engineer';
     if ($this->relationLoaded('supplier') && $this->supplier) return 'supplier';
     if ($this->relationLoaded('trustee') && $this->trustee) return 'trustee';
+    if ($this->relationLoaded('investor') && $this->investor) return 'investor';
+    if ($this->relationLoaded('dailyWorker') && $this->dailyWorker) return 'daily_worker';
 
     return 'user';
   }
 
   private function getRoleDetails()
   {
+    if ($this->relationLoaded('admin') && $this->admin) return $this->admin;
     if ($this->relationLoaded('client') && $this->client) return $this->client;
     if ($this->relationLoaded('employee') && $this->employee) return $this->employee;
+    if ($this->relationLoaded('engineer') && $this->engineer) return $this->engineer;
     if ($this->relationLoaded('craftsmen') && $this->craftsmen) return $this->craftsmen;
-    if ($this->relationLoaded('admin') && $this->admin) return $this->admin;
-    if ($this->relationLoaded('engineer') && $this->craftsmen) return 'engineer';
     if ($this->relationLoaded('supplier') && $this->supplier) return $this->supplier;
     if ($this->relationLoaded('trustee') && $this->trustee) return $this->trustee;
+    if ($this->relationLoaded('investor') && $this->investor) return $this->investor;
+    if ($this->relationLoaded('dailyWorker') && $this->dailyWorker) return $this->dailyWorker;
 
     return null;
   }
