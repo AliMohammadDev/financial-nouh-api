@@ -11,6 +11,11 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class MaterialService
 {
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -54,6 +59,15 @@ class MaterialService
   {
     return DB::transaction(function () use ($data) {
       $material = Material::create($data);
+
+      $materialName = $material->name ?? 'مادة';
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء مادة جديدة: {$materialName}",
+        affectedTable: 'materials'
+      );
+
       return $material->load('item');
     });
   }
@@ -62,6 +76,14 @@ class MaterialService
   {
     DB::transaction(function () use ($material, $data) {
       $material->update($data);
+
+      $materialName = $material->name ?? 'مادة';
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات المادة: {$materialName}",
+        affectedTable: 'materials'
+      );
     });
 
     return $material->load('item');
@@ -70,7 +92,19 @@ class MaterialService
   public function delete(Material $material): bool
   {
     return DB::transaction(function () use ($material) {
-      return (bool) $material->delete();
+      $materialName = $material->name ?? 'مادة';
+
+      $deleted = (bool) $material->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف المادة: {$materialName}",
+          affectedTable: 'materials'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

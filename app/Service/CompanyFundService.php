@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\DB;
 
 class CompanyFundService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -38,7 +44,16 @@ class CompanyFundService
   public function create(array $data): CompanyFund
   {
     return DB::transaction(function () use ($data) {
-      return CompanyFund::create($data);
+      $fund = CompanyFund::create($data);
+
+      // تسجيل عملية الإضافة في الـ Audit Log
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء صندوق شركة جديد: {$fund->name}",
+        affectedTable: 'company_funds'
+      );
+
+      return $fund;
     });
   }
 
@@ -48,6 +63,13 @@ class CompanyFundService
 
     DB::transaction(function () use ($fund, $data) {
       $fund->update($data);
+
+      // تسجيل عملية التعديل في الـ Audit Log
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات صندوق الشركة: {$fund->name}",
+        affectedTable: 'company_funds'
+      );
     });
 
     return $fund;
@@ -56,8 +78,22 @@ class CompanyFundService
   public function delete(int $id): bool
   {
     $fund = CompanyFund::findOrFail($id);
+
     return DB::transaction(function () use ($fund) {
-      return (bool) $fund->delete();
+      $fundName = $fund->name ?? 'صندوق الشركة';
+
+      $deleted = (bool) $fund->delete();
+
+      if ($deleted) {
+        // تسجيل عملية الحذف في الـ Audit Log
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف صندوق الشركة: {$fundName}",
+          affectedTable: 'company_funds'
+        );
+      }
+
+      return $deleted;
     });
   }
 
@@ -67,6 +103,12 @@ class CompanyFundService
       $companyFund->currencies()->syncWithoutDetaching([
         $data['currency_id'] => ['balance' => $data['balance']]
       ]);
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بربط عملة جديدة (برصيد: {$data['balance']}) بصندوق الشركة: {$companyFund->name}",
+        affectedTable: 'company_fund_currencies'
+      );
 
       return $companyFund->load(['currencies']);
     });

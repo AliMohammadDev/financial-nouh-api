@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Models\Invoice;
+use App\Service\AuditLogService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,10 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class InvoiceService
 {
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -79,13 +84,31 @@ class InvoiceService
       $data['invoice_number'] = "{$year}-{$month}-{$formattedSequence}";
 
       $invoice = Invoice::create($data);
+
+      $invoiceNumber = $invoice->invoice_number ?? 'فاتورة';
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء فاتورة جديدة برقم: {$invoiceNumber}",
+        affectedTable: 'invoices'
+      );
+
       return $invoice->load(['item', 'supplier', 'expense']);
     });
   }
+
   public function update(Invoice $invoice, array $data): Invoice
   {
     DB::transaction(function () use ($invoice, $data) {
       $invoice->update($data);
+
+      $invoiceNumber = $invoice->invoice_number ?? 'فاتورة';
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات الفاتورة رقم: {$invoiceNumber}",
+        affectedTable: 'invoices'
+      );
     });
 
     return $invoice->load(['item', 'supplier', 'expense']);
@@ -94,7 +117,19 @@ class InvoiceService
   public function delete(Invoice $invoice): bool
   {
     return DB::transaction(function () use ($invoice) {
-      return (bool) $invoice->delete();
+      $invoiceNumber = $invoice->invoice_number ?? 'فاتورة';
+
+      $deleted = (bool) $invoice->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف الفاتورة رقم: {$invoiceNumber}",
+          affectedTable: 'invoices'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

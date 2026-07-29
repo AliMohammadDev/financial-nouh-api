@@ -69,6 +69,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::delete('directories/{directory}/files/{mediaId}', [DirectoryController::class, 'deleteFile']);
   Route::post('directories/move-file', [DirectoryController::class, 'moveFile']);
 
+
+  // ==========================================
+  // System Configurations
+  // ==========================================
+  Route::apiResource('currencies', CurrencyController::class);
+
+
+
   // ==========================================
   // Project & Fund Management
   // ==========================================
@@ -81,52 +89,36 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::apiResource('project-teams', ProjectTeamController::class);
   Route::apiResource('project-stages', ProjectStageController::class);
   Route::apiResource('stage-timelines', StageTimelineController::class);
+
+  // Fund Management Routes
+  Route::apiResource('funds', FundController::class);
+  Route::post('funds/{fund}/currencies', [FundController::class, 'attachCurrency']);
+
+  // ==========================================
+  // Company Funds Management
+  // ==========================================
+  Route::apiResource('company-funds', CompanyFundController::class);
+  Route::post('company-funds/{companyFund}/currencies', [CompanyFundController::class, 'attachCurrency']);
+
+  // ==========================================
+  // Inventory & Structural Management
+  // ==========================================
+  Route::apiResource('items', ItemController::class);
+  Route::apiResource('materials', MaterialController::class);
+
+
+  Route::apiResource('invoices', InvoiceController::class);
+  Route::apiResource('invoice-items', InvoiceItemController::class);
+
+  Route::apiResource('employee-payments', EmployeePaymentController::class);
+
+
+  Route::get('/audit-logs', [AuditLogController::class, 'index']);
+
+  // ==========================================
+  // Financial & Payroll Management
+  // ==========================================
+
+  Route::apiResource('revenues', RevenueController::class);
+  Route::apiResource('expenses', ExpenseController::class);
 });
-
-
-
-
-
-
-// Fund Management Routes
-Route::apiResource('funds', FundController::class);
-Route::post('funds/{fund}/currencies', [FundController::class, 'attachCurrency']);
-
-
-// ==========================================
-// Inventory & Structural Management
-// ==========================================
-Route::apiResource('items', ItemController::class);
-Route::apiResource('materials', MaterialController::class);
-
-
-
-
-Route::apiResource('invoices', InvoiceController::class);
-Route::apiResource('invoice-items', InvoiceItemController::class);
-
-
-// ==========================================
-// Company Funds Management
-// ==========================================
-Route::apiResource('company-funds', CompanyFundController::class);
-Route::post('company-funds/{companyFund}/currencies', [CompanyFundController::class, 'attachCurrency']);
-
-
-// ==========================================
-// Financial & Payroll Management
-// ==========================================
-Route::apiResource('employee-payments', EmployeePaymentController::class);
-Route::apiResource('revenues', RevenueController::class);
-Route::apiResource('expenses', ExpenseController::class);
-
-
-// ==========================================
-// System Configurations
-// ==========================================
-Route::apiResource('currencies', CurrencyController::class);
-
-
-
-
-Route::get('/audit-logs', [AuditLogController::class, 'index']);

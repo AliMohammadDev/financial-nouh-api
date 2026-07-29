@@ -11,6 +11,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ItemService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -49,7 +55,17 @@ class ItemService
   public function create(array $data): Item
   {
     return DB::transaction(function () use ($data) {
-      return Item::create($data);
+      $item = Item::create($data);
+
+      $itemName = $item->name ?? 'صنف';
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء صنف جديد: {$itemName}",
+        affectedTable: 'items'
+      );
+
+      return $item;
     });
   }
 
@@ -57,6 +73,14 @@ class ItemService
   {
     DB::transaction(function () use ($item, $data) {
       $item->update($data);
+
+      $itemName = $item->name ?? 'صنف';
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات الصنف: {$itemName}",
+        affectedTable: 'items'
+      );
     });
 
     return $item->load('materials');
@@ -65,7 +89,19 @@ class ItemService
   public function delete(Item $item): bool
   {
     return DB::transaction(function () use ($item) {
-      return (bool) $item->delete();
+      $itemName = $item->name ?? 'صنف';
+
+      $deleted = (bool) $item->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف الصنف: {$itemName}",
+          affectedTable: 'items'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

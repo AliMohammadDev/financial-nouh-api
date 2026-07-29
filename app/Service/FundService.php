@@ -11,6 +11,10 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class FundService
 {
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -52,7 +56,15 @@ class FundService
   public function create(array $data): Fund
   {
     return DB::transaction(function () use ($data) {
-      return Fund::create($data);
+      $fund = Fund::create($data);
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء صندوق جديد: {$fund->name}",
+        affectedTable: 'funds'
+      );
+
+      return $fund;
     });
   }
 
@@ -60,6 +72,12 @@ class FundService
   {
     DB::transaction(function () use ($fund, $data) {
       $fund->update($data);
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات الصندوق: {$fund->name}",
+        affectedTable: 'funds'
+      );
     });
 
     return $fund->load('user');
@@ -68,7 +86,19 @@ class FundService
   public function delete(Fund $fund): bool
   {
     return DB::transaction(function () use ($fund) {
-      return (bool) $fund->delete();
+      $fundName = $fund->name ?? 'صندوق';
+
+      $deleted = (bool) $fund->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف الصندوق: {$fundName}",
+          affectedTable: 'funds'
+        );
+      }
+
+      return $deleted;
     });
   }
 
@@ -78,6 +108,13 @@ class FundService
       $fund->currencies()->syncWithoutDetaching([
         $data['currency_id'] => ['balance' => $data['balance']]
       ]);
+
+      // تسجيل عملية ربط العملة للصندوق
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بربط عملة جديدة (برصيد: {$data['balance']}) بالصندوق: {$fund->name}",
+        affectedTable: 'fund_currencies'
+      );
 
       return $fund->load(['user', 'currencies']);
     });

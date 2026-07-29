@@ -11,6 +11,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class EmployeePaymentService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -52,7 +58,18 @@ class EmployeePaymentService
   {
     return DB::transaction(function () use ($data) {
       $payment = EmployeePayment::create($data);
-      return $payment->load('employee.user');
+      $payment->load('employee.user');
+
+      $employeeName = $payment->employee?->user?->name ?? 'موظف';
+      $amount = $payment->amount ?? 'مبلغ';
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء دفعة مالية جديدة للموظف ({$employeeName}) بقيمة: {$amount}",
+        affectedTable: 'employee_payments'
+      );
+
+      return $payment;
     });
   }
 
@@ -60,6 +77,15 @@ class EmployeePaymentService
   {
     DB::transaction(function () use ($employeePayment, $data) {
       $employeePayment->update($data);
+      $employeePayment->load('employee.user');
+
+      $employeeName = $employeePayment->employee?->user?->name ?? 'موظف';
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات الدفعة المالية للموظف: {$employeeName}",
+        affectedTable: 'employee_payments'
+      );
     });
 
     return $employeePayment->load('employee.user');
@@ -68,7 +94,20 @@ class EmployeePaymentService
   public function delete(EmployeePayment $employeePayment): bool
   {
     return DB::transaction(function () use ($employeePayment) {
-      return (bool) $employeePayment->delete();
+      $employeePayment->load('employee.user');
+      $employeeName = $employeePayment->employee?->user?->name ?? 'موظف';
+
+      $deleted = (bool) $employeePayment->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف الدفعة المالية الخاصة بالموضف: {$employeeName}",
+          affectedTable: 'employee_payments'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

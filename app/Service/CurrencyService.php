@@ -11,6 +11,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class CurrencyService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -48,7 +54,17 @@ class CurrencyService
   public function create(array $data): Currency
   {
     return DB::transaction(function () use ($data) {
-      return Currency::create($data);
+      $currency = Currency::create($data);
+
+      $currencyName = $currency->currency ?? 'عملة';
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء عملة جديدة: {$currencyName}",
+        affectedTable: 'currencies'
+      );
+
+      return $currency;
     });
   }
 
@@ -56,6 +72,14 @@ class CurrencyService
   {
     DB::transaction(function () use ($currency, $data) {
       $currency->update($data);
+
+      $currencyName = $currency->currency ?? 'عملة';
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات العملة: {$currencyName}",
+        affectedTable: 'currencies'
+      );
     });
 
     return $currency;
@@ -64,7 +88,19 @@ class CurrencyService
   public function delete(Currency $currency): bool
   {
     return DB::transaction(function () use ($currency) {
-      return (bool) $currency->delete();
+      $currencyName = $currency->currency ?? 'عملة';
+
+      $deleted = (bool) $currency->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف العملة: {$currencyName}",
+          affectedTable: 'currencies'
+        );
+      }
+
+      return $deleted;
     });
   }
 }
