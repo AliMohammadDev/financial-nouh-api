@@ -45,7 +45,7 @@ class EmployeePaymentService
 
   public function findOne(EmployeePayment $employeePayment): EmployeePayment
   {
-    return $employeePayment->load('employee.user');
+    return $employeePayment->load(['employee.user', 'companyFundCurrency.companyFund', 'companyFundCurrency.currency']);
   }
 
   public function create(array $data): EmployeePayment
