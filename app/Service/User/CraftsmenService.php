@@ -4,6 +4,7 @@ namespace App\Service\User;
 
 use App\Models\Craftsmen;
 use App\Models\User;
+use App\Service\AuditLogService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class CraftsmenService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -64,6 +71,12 @@ class CraftsmenService
         'user_id' => $user->id,
       ]);
 
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بتسجيل حرفي جديد: {$user->name} (البريد: {$user->email})",
+        affectedTable: 'craftsmen'
+      );
+
       return $craftsmen->load('user');
     });
   }
@@ -78,6 +91,13 @@ class CraftsmenService
       }
 
       $craftsmen->user()->update($data);
+      $craftsmen->load('user');
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات الحرفي: {$craftsmen->user->name}",
+        affectedTable: 'craftsmen'
+      );
     });
 
     return $craftsmen->load('user');
@@ -86,7 +106,19 @@ class CraftsmenService
   public function delete(Craftsmen $craftsmen): bool
   {
     return DB::transaction(function () use ($craftsmen) {
-      return (bool) $craftsmen->user()->delete();
+      $craftsmenName = $craftsmen->user?->name ?? 'غير معروف';
+
+      $deleted = (bool) $craftsmen->user()->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف الحرفي: {$craftsmenName}",
+          affectedTable: 'craftsmen'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

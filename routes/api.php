@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\EmployeePaymentController;
@@ -45,23 +46,26 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::get('/notifications', [NotificationController::class, 'index']);
   Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
   Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+
+
+
+  // ==========================================
+  // User Management Routes
+  // ==========================================
+  Route::apiResource('clients', ClientController::class);
+  Route::apiResource('craftsmen', CraftsmenController::class);
+  Route::apiResource('employees', EmployeeController::class);
+  Route::apiResource('engineers', EngineerController::class);
+  Route::apiResource('admins', AdminController::class);
+  Route::apiResource('investors', InvestorController::class);
+  Route::apiResource('suppliers', SupplierController::class);
+  Route::apiResource('trustees', TrusteeController::class);
 });
 
 
 
 
 
-// ==========================================
-// User Management Routes
-// ==========================================
-Route::apiResource('clients', ClientController::class);
-Route::apiResource('craftsmen', CraftsmenController::class);
-Route::apiResource('employees', EmployeeController::class);
-Route::apiResource('engineers', EngineerController::class);
-Route::apiResource('admins', AdminController::class);
-Route::apiResource('investors', InvestorController::class);
-Route::apiResource('suppliers', SupplierController::class);
-Route::apiResource('trustees', TrusteeController::class);
 
 // Fund Management Routes
 Route::apiResource('funds', FundController::class);
@@ -118,3 +122,5 @@ Route::apiResource('directories', DirectoryController::class);
 Route::post('directories/{directory}/files', [DirectoryController::class, 'uploadFile']);
 Route::delete('directories/{directory}/files/{mediaId}', [DirectoryController::class, 'deleteFile']);
 Route::post('directories/move-file', [DirectoryController::class, 'moveFile']);
+
+Route::get('/audit-logs', [AuditLogController::class, 'index']);

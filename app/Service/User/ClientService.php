@@ -4,6 +4,7 @@ namespace App\Service\User;
 
 use App\Models\Client;
 use App\Models\User;
+use App\Service\AuditLogService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,10 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ClientService
 {
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -65,6 +70,12 @@ class ClientService
         'user_id' => $user->id,
       ]);
 
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بتسجيل عميل جديد: {$user->name} (البريد: {$user->email})",
+        affectedTable: 'clients'
+      );
+
       return $client->load(['user', 'projects']);
     });
   }
@@ -79,6 +90,13 @@ class ClientService
       }
 
       $client->user()->update($data);
+      $client->load('user');
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات العميل: {$client->user->name}",
+        affectedTable: 'clients'
+      );
     });
 
     return $client->load(['user', 'projects']);
@@ -87,7 +105,19 @@ class ClientService
   public function delete(Client $client): bool
   {
     return DB::transaction(function () use ($client) {
-      return (bool) $client->user()->delete();
+      $clientName = $client->user?->name ?? 'غير معروف';
+
+      $deleted = (bool) $client->user()->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف العميل: {$clientName}",
+          affectedTable: 'clients'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

@@ -4,6 +4,7 @@ namespace App\Service\User;
 
 use App\Models\Investor;
 use App\Models\User;
+use App\Service\AuditLogService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class InvestorService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -59,10 +66,17 @@ class InvestorService
       $data['password'] = Hash::make($data['password']);
       $user = User::create($data);
 
-      return Investor::create([
-        'user_id' => $user->id,
-        'investment_ratio' => $data['investment_ratio']
-      ])->load('user');
+      $investor = Investor::create([
+        'user_id'          => $user->id,
+        'investment_ratio' => $data['investment_ratio'] ?? null
+      ]);
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بتسجيل مستثمر جديد: {$user->name} (نسبة الاستثمار: {$investor->investment_ratio}%)",
+        affectedTable: 'investors'
+      );
+
+      return $investor->load('user');
     });
   }
 
@@ -80,6 +94,14 @@ class InvestorService
       if (isset($data['investment_ratio'])) {
         $investor->update(['investment_ratio' => $data['investment_ratio']]);
       }
+
+      $investor->load('user');
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات المستثمر: {$investor->user->name}",
+        affectedTable: 'investors'
+      );
     });
 
     return $investor->load('user');
@@ -88,7 +110,19 @@ class InvestorService
   public function delete(Investor $investor): bool
   {
     return DB::transaction(function () use ($investor) {
-      return (bool) $investor->user()->delete();
+      $investorName = $investor->user?->name ?? 'غير معروف';
+
+      $deleted = (bool) $investor->user()->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف المستثمر: {$investorName}",
+          affectedTable: 'investors'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

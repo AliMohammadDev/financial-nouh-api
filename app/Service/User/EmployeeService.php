@@ -4,6 +4,7 @@ namespace App\Service\User;
 
 use App\Models\Employee;
 use App\Models\User;
+use App\Service\AuditLogService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class EmployeeService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -65,6 +72,12 @@ class EmployeeService
         'job_title' => $data['job_title']
       ]);
 
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بتسجيل موظف جديد: {$user->name} (المسمى الوظيفي: {$employee->job_title})",
+        affectedTable: 'employees'
+      );
+
       return $employee->load('user');
     });
   }
@@ -83,6 +96,14 @@ class EmployeeService
       if (isset($data['job_title'])) {
         $employee->update(collect($data)->only(['job_title'])->toArray());
       }
+
+      $employee->load('user');
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات الموظف: {$employee->user->name}",
+        affectedTable: 'employees'
+      );
     });
 
     return $employee->load('user');
@@ -91,7 +112,19 @@ class EmployeeService
   public function delete(Employee $employee): bool
   {
     return DB::transaction(function () use ($employee) {
-      return (bool) $employee->user()->delete();
+      $employeeName = $employee->user?->name ?? 'غير معروف';
+
+      $deleted = (bool) $employee->user()->delete();
+
+      if ($deleted) {
+          $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف الموظف: {$employeeName}",
+          affectedTable: 'employees'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

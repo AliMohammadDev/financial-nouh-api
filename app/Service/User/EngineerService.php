@@ -4,6 +4,7 @@ namespace App\Service\User;
 
 use App\Models\Engineer;
 use App\Models\User;
+use App\Service\AuditLogService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,11 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class EngineerService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -66,6 +72,12 @@ class EngineerService
         'base_salary' => $data['base_salary'],
       ]);
 
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بتسجيل مهندس جديد: {$user->name} (المسمى الوظيفي: {$engineer->job_title})",
+        affectedTable: 'engineers'
+      );
+
       return $engineer->load('user');
     });
   }
@@ -82,6 +94,15 @@ class EngineerService
       $engineer->user->update(collect($data)->except(['job_title', 'base_salary'])->toArray());
 
       $engineer->update(collect($data)->only(['job_title', 'base_salary'])->toArray());
+
+      $engineer->load('user');
+
+      // تسجيل عملية التعديل في الـ Audit Log
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات المهندس: {$engineer->user->name}",
+        affectedTable: 'engineers'
+      );
     });
 
     return $engineer->load('user');
@@ -90,7 +111,20 @@ class EngineerService
   public function delete(Engineer $engineer): bool
   {
     return DB::transaction(function () use ($engineer) {
-      return (bool) $engineer->user()->delete();
+      $engineerName = $engineer->user?->name ?? 'غير معروف';
+
+      $deleted = (bool) $engineer->user()->delete();
+
+      if ($deleted) {
+        // تسجيل عملية الحذف في الـ Audit Log
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف المهندس: {$engineerName}",
+          affectedTable: 'engineers'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

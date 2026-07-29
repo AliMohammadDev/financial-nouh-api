@@ -4,6 +4,7 @@ namespace App\Service\User;
 
 use App\Models\Trustee;
 use App\Models\User;
+use App\Service\AuditLogService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class TrusteeService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -62,8 +69,14 @@ class TrusteeService
 
       $trustee = Trustee::create([
         'user_id'          => $user->id,
-        'kinship_relation' => $data['kinship_relation'],
+        'kinship_relation' => $data['kinship_relation'] ?? null,
       ]);
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بتسجيل وصي جديد: {$user->name} (صلة القرابة: {$trustee->kinship_relation})",
+        affectedTable: 'trustees'
+      );
 
       return $trustee->load('user');
     });
@@ -83,6 +96,14 @@ class TrusteeService
       if (isset($data['kinship_relation'])) {
         $trustee->update(collect($data)->only(['kinship_relation'])->toArray());
       }
+
+      $trustee->load('user');
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات الوصي: {$trustee->user->name}",
+        affectedTable: 'trustees'
+      );
     });
 
     return $trustee->load('user');
@@ -91,7 +112,19 @@ class TrusteeService
   public function delete(Trustee $trustee): bool
   {
     return DB::transaction(function () use ($trustee) {
-      return (bool) $trustee->user()->delete();
+      $trusteeName = $trustee->user?->name ?? 'غير معروف';
+
+      $deleted = (bool) $trustee->user()->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف الوصي: {$trusteeName}",
+          affectedTable: 'trustees'
+        );
+      }
+
+      return $deleted;
     });
   }
 }
