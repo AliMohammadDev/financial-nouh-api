@@ -17,7 +17,7 @@ class CurrencyResource extends JsonResource
 
     if ($this->resource->pivot) {
       $balance = $this->pivot->balance;
-      $expenseableId = $this->pivot->id; // الـ ID الخاص بجدول الـ Pivot
+      $expenseableId = $this->pivot->id;
 
       if (isset($this->pivot->fund_id) && $this->pivot->getTable() === 'currency_funds') {
         $expenseableType = 'App\\Models\\CurrencyFund';
@@ -41,13 +41,13 @@ class CurrencyResource extends JsonResource
     }
 
     return [
-      'id'                => $this->id, // حافظنا على id العملة الأصلي كما هو
-      'expenseable_type'  => $expenseableType, // اسم المودل جاهز للإرسال مباشرة
-      'expenseable_id'    => $expenseableId,   // الـ ID الخاص بالـ Pivot جاهز للإرسال مباشرة
+      'id'                => $this->id,
+      // 'expenseable_type'  => $expenseableType,
+      // 'expenseable_id'    => $expenseableId,
       'currency'          => $this->currency,
       'symbol'            => $this->symbol,
       'balance'           => $balance,
-      'user'              => $user,
+      // 'user'              => $user,
       'created_at'        => $this->created_at?->format('Y-m-d'),
     ];
   }

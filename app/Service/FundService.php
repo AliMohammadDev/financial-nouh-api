@@ -46,7 +46,7 @@ class FundService
 
   public function findOne(Fund $fund): Fund
   {
-    return $fund->load('user');
+    return $fund->load(['currencies', 'user']);
   }
 
   public function create(array $data): Fund

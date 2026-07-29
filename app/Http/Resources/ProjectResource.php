@@ -23,7 +23,7 @@ class ProjectResource extends JsonResource
       'client'        => new ClientResource($this->whenLoaded('client')),
       'funds'         => ProjectFundResource::collection($this->whenLoaded('projectFunds')),
       'department'    => new DepartmentResource($this->whenLoaded('department')),
-      'created_at'    => $this->created_at?->toIso8601String(),
+      'created_at'  => $this->created_at?->format('Y-m-d'),
     ];
   }
 }
