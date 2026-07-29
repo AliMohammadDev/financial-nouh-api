@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Auth\AuthController;
 use App\Http\Controllers\Api\CurrencyController;
 use App\Http\Controllers\Api\EmployeePaymentController;
 use App\Http\Controllers\Api\CompanyFundController; // <-- إضافة الـ Controller
@@ -28,6 +29,21 @@ use App\Http\Controllers\Api\RevenueController;
 use App\Http\Controllers\Api\StageTimelineController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
+
+
+
+Route::post('login', [AuthController::class, 'login']);
+
+
+
+Route::middleware(['auth:sanctum'])->group(function () {
+  // User
+  Route::get('me', [AuthController::class, 'me']);
+  Route::post('logout', [AuthController::class, 'logout']);
+});
+
+
+
 
 
 // ==========================================

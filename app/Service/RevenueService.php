@@ -9,9 +9,29 @@ use App\Models\Revenue;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
+
 
 class RevenueService
 {
+  // public function findAll(
+  //   bool $paginate = false,
+  //   int $perPage = 10,
+  //   int $page = 1,
+  //   array $columns = ["*"]
+  // ): LengthAwarePaginator|Collection {
+
+  //   $query = Revenue::with(['user', 'receiver', 'revenueable'])
+  //     ->latest();
+
+  //   if ($paginate) {
+  //     return $query->paginate(perPage: $perPage, page: $page, columns: $columns);
+  //   }
+
+  //   return $query->get($columns);
+  // }
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -19,14 +39,85 @@ class RevenueService
     array $columns = ["*"]
   ): LengthAwarePaginator|Collection {
 
-    $query = Revenue::with(['user', 'receiver', 'revenueable'])
-      ->latest();
+    // تعريف الفلاتر باستخدام Spatie Query Builder
+    $filters = [
+      AllowedFilter::callback('search', function ($query, $value) {
+        $query->whereHas('user', function ($q) use ($value) {
+          $q->where('name', 'like', "%{$value}%")
+            ->orWhere('email', 'like', "%{$value}%");
+        });
+      }),
+
+      // 1. فلترة حسب صندوق العملات العادي (CurrencyFund)
+      AllowedFilter::callback('currency_fund_id', function ($query, $value) {
+        $query->where('revenueable_type', CurrencyFund::class)
+          ->where('revenueable_id', $value);
+      }),
+
+      // 2. فلترة حسب صندوق الشركة (CompanyFundCurrency)
+      AllowedFilter::callback('company_fund_currency_id', function ($query, $value) {
+        $query->where('revenueable_type', CompanyFundCurrency::class)
+          ->where('revenueable_id', $value);
+      }),
+
+      // 3. فلترة حسب صندوق المشروع (ProjectFundCurrency)
+      AllowedFilter::callback('project_fund_currency_id', function ($query, $value) {
+        $query->where('revenueable_type', ProjectFundCurrency::class)
+          ->where('revenueable_id', $value);
+      }),
+    ];
+
+    $query = QueryBuilder::for(Revenue::class)
+      ->with(['user', 'receiver', 'revenueable'])
+      ->allowedFilters(...$filters)
+      ->defaultSort('-created_at');
 
     if ($paginate) {
-      return $query->paginate(perPage: $perPage, page: $page, columns: $columns);
+      $paginator = $query->paginate(perPage: $perPage, page: $page, columns: $columns);
+
+      // تحميل العلاقات المورفية للصفحات
+      $paginator->getCollection()->loadMorph('revenueable', [
+        CurrencyFund::class => [
+          'currency',
+          'fund.user.client',
+          'fund.user.employee',
+          'fund.user.admin',
+          'fund.user.engineer',
+          'fund.user.craftsmen',
+          'fund.user.supplier',
+          'fund.user.trustee',
+        ],
+        CompanyFundCurrency::class => [],
+        ProjectFundCurrency::class => [
+          'currency',
+          'projectFund.project',
+        ],
+      ]);
+
+      return $paginator;
     }
 
-    return $query->get($columns);
+    $revenues = $query->get($columns);
+
+    $revenues->loadMorph('revenueable', [
+      CurrencyFund::class => [
+        'currency',
+        'fund.user.client',
+        'fund.user.employee',
+        'fund.user.admin',
+        'fund.user.engineer',
+        'fund.user.craftsmen',
+        'fund.user.supplier',
+        'fund.user.trustee',
+      ],
+      CompanyFundCurrency::class => [],
+      ProjectFundCurrency::class => [
+        'currency',
+        'projectFund.project',
+      ],
+    ]);
+
+    return $revenues;
   }
 
   public function findOne(Revenue $revenue): Revenue

@@ -84,7 +84,7 @@ class UserRoleSeeder extends Seeder
         $user = User::create([
           'name'              => $name,
           'email'             => $englishEmail,
-          'password'          => Hash::make('password123'),
+          'password'          => Hash::make('password'),
           'phone_number'      => '+9639' . rand(11111111, 99999999),
           'address'           => 'سوريا - دمشق',
           'email_verified_at' => now(),
