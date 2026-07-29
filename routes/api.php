@@ -40,6 +40,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
   // User
   Route::get('me', [AuthController::class, 'me']);
   Route::post('logout', [AuthController::class, 'logout']);
+
+  // Notifications
+  Route::get('/notifications', [NotificationController::class, 'index']);
+  Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+  Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 });
 
 
@@ -113,8 +118,3 @@ Route::apiResource('directories', DirectoryController::class);
 Route::post('directories/{directory}/files', [DirectoryController::class, 'uploadFile']);
 Route::delete('directories/{directory}/files/{mediaId}', [DirectoryController::class, 'deleteFile']);
 Route::post('directories/move-file', [DirectoryController::class, 'moveFile']);
-
-
-Route::get('/notifications', [NotificationController::class, 'index']);
-Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead']);
-Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
