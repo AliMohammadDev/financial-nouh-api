@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\DB;
 
 class ProjectFundService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -38,7 +44,15 @@ class ProjectFundService
   public function create(array $data): ProjectFund
   {
     return DB::transaction(function () use ($data) {
-      return ProjectFund::create($data);
+      $fund = ProjectFund::create($data);
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء صندوق مشروع جديد: {$fund->name}",
+        affectedTable: 'project_funds'
+      );
+
+      return $fund;
     });
   }
 
@@ -48,6 +62,12 @@ class ProjectFundService
 
     DB::transaction(function () use ($fund, $data) {
       $fund->update($data);
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات صندوق المشروع: {$fund->name}",
+        affectedTable: 'project_funds'
+      );
     });
 
     return $fund;
@@ -56,17 +76,35 @@ class ProjectFundService
   public function delete(int $id): bool
   {
     $fund = ProjectFund::findOrFail($id);
+
     return DB::transaction(function () use ($fund) {
-      return (bool) $fund->delete();
+      $fundName = $fund->name ?? 'صندوق';
+
+      $deleted = (bool) $fund->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف صندوق المشروع: {$fundName}",
+          affectedTable: 'project_funds'
+        );
+      }
+
+      return $deleted;
     });
   }
-
   public function attachCurrency(ProjectFund $projectFund, array $data): ProjectFund
   {
     return DB::transaction(function () use ($projectFund, $data) {
       $projectFund->currencies()->syncWithoutDetaching([
         $data['currency_id'] => ['balance' => $data['balance']]
       ]);
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بربط عملة جديدة (برصيد: {$data['balance']}) بالصندوق: {$projectFund->name}",
+        affectedTable: 'project_fund_currencies' 
+      );
+
 
       return $projectFund->load(['project', 'currencies']);
     });

@@ -5,13 +5,18 @@ namespace App\Service;
 use App\Models\Directory;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class DirectoryService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -49,7 +54,15 @@ class DirectoryService
   public function create(array $data): Directory
   {
     return DB::transaction(function () use ($data) {
-      return Directory::create($data);
+      $directory = Directory::create($data);
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء مجلد جديد: {$directory->dir_name}",
+        affectedTable: 'directories'
+      );
+
+      return $directory;
     });
   }
 
@@ -57,6 +70,13 @@ class DirectoryService
   {
     return DB::transaction(function () use ($directory, $data) {
       $directory->update($data);
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات المجلد: {$directory->dir_name}",
+        affectedTable: 'directories'
+      );
+
       return $directory;
     });
   }
@@ -64,13 +84,25 @@ class DirectoryService
   public function delete(Directory $directory): bool
   {
     return DB::transaction(function () use ($directory) {
+      $dirName = $directory->dir_name ?? 'غير معروف';
+
       $directory->clearMediaCollection('directory_files');
 
       foreach ($directory->children as $child) {
         $this->delete($child);
       }
 
-      return (bool) $directory->delete();
+      $deleted = (bool) $directory->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف المجلد: {$dirName}",
+          affectedTable: 'directories'
+        );
+      }
+
+      return $deleted;
     });
   }
 
@@ -81,7 +113,11 @@ class DirectoryService
         $directory->addMedia($file)
           ->toMediaCollection('directory_files', 'public');
       }
-
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام برفع ملفات جديدة إلى المجلد: {$directory->dir_name}",
+        affectedTable: 'directories'
+      );
       return $directory->load(['media', 'project', 'children']);
     });
   }
@@ -90,7 +126,16 @@ class DirectoryService
   {
     return DB::transaction(function () use ($directory, $mediaId) {
       $media = $directory->media()->findOrFail($mediaId);
+      $mediaName = $media->file_name ?? 'ملف';
       $media->delete();
+
+      $this->auditLogService->log(
+        actionType: 'حذف',
+        description: "قام بحذف الملف ({$mediaName}) من المجلد: {$directory->dir_name}",
+        affectedTable: 'directories'
+      );
+
+
       return true;
     });
   }
@@ -98,17 +143,20 @@ class DirectoryService
   public function moveFile(int $mediaId, int $targetDirectoryId): bool
   {
     return DB::transaction(function () use ($mediaId, $targetDirectoryId) {
-      // 1. العثور على سجل الـ Media في جدول الـ media العام
       $mediaItem = \Spatie\MediaLibrary\MediaCollections\Models\Media::findOrFail($mediaId);
 
-      // 2. التحقق من أن الكائن المرتبط به هو Directory أساساً
       if ($mediaItem->model_type !== Directory::class) {
         throw new \Exception('The specified media is not a directory file.');
       }
 
-      // 3. تحديث الـ model_id ليصبح هو معرف المجلد الجديد
       $mediaItem->model_id = $targetDirectoryId;
       $mediaItem->save();
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بنقل الملف (ID: {$mediaId}) إلى المجلد رقم: {$targetDirectoryId}",
+        affectedTable: 'directories'
+      );
 
       return true;
     });

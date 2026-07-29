@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Models\Project;
-use App\Models\ProjectFund;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +12,11 @@ use Illuminate\Validation\ValidationException;
 
 class ProjectService
 {
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -56,6 +60,12 @@ class ProjectService
   {
     return DB::transaction(function () use ($data) {
       $project = Project::create($data);
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء مشروع جديد: {$project->name}",
+        affectedTable: 'projects'
+      );
+
       return $project->load(['client.user', 'projectFunds']);
     });
   }
@@ -64,6 +74,11 @@ class ProjectService
   {
     DB::transaction(function () use ($project, $data) {
       $project->update($data);
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات المشروع: {$project->name}",
+        affectedTable: 'projects'
+      );
     });
 
     return $project->load(['client.user', 'projectFunds']);
@@ -78,26 +93,19 @@ class ProjectService
     }
 
     return DB::transaction(function () use ($project) {
-      return (bool) $project->delete();
-    });
-  }
-  // project funds
-  public function attachFund(Project $project, array $data): ProjectFund
-  {
-    return DB::transaction(function () use ($project, $data) {
-      return ProjectFund::firstOrCreate([
-        'project_id' => $project->id,
-        'name'       => $data['name'] ?? 'Main Fund',
-        'type'       => $data['type'] ?? 'general',
-        'currency'   => $data['currency'] ?? 'usd',
-      ]);
-    });
-  }
+      $projectName = $project->name ?? 'غير معروف';
 
-  public function detachFund(ProjectFund $projectFund): bool
-  {
-    return DB::transaction(function () use ($projectFund) {
-      return (bool) $projectFund->delete();
+      $deleted = (bool) $project->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف المشروع: {$projectName}",
+          affectedTable: 'projects'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

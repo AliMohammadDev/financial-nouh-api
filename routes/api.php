@@ -60,6 +60,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::apiResource('investors', InvestorController::class);
   Route::apiResource('suppliers', SupplierController::class);
   Route::apiResource('trustees', TrusteeController::class);
+
+  // ==========================================
+  // Directory & Archive Management
+  // ==========================================
+  Route::apiResource('directories', DirectoryController::class);
+  Route::post('directories/{directory}/files', [DirectoryController::class, 'uploadFile']);
+  Route::delete('directories/{directory}/files/{mediaId}', [DirectoryController::class, 'deleteFile']);
+  Route::post('directories/move-file', [DirectoryController::class, 'moveFile']);
+
+  // ==========================================
+  // Project & Fund Management
+  // ==========================================
+  Route::apiResource('departments', DepartmentController::class);
+
+
+  Route::apiResource('projects', ProjectController::class);
+  Route::apiResource('project-funds', ProjectFundController::class);
+  Route::post('project-funds/{projectFund}/currencies', [ProjectFundController::class, 'attachCurrency']);
+  Route::apiResource('project-teams', ProjectTeamController::class);
+  Route::apiResource('project-stages', ProjectStageController::class);
+  Route::apiResource('stage-timelines', StageTimelineController::class);
 });
 
 
@@ -79,17 +100,8 @@ Route::apiResource('items', ItemController::class);
 Route::apiResource('materials', MaterialController::class);
 
 
-// ==========================================
-// Project & Fund Management
-// ==========================================
-Route::apiResource('projects', ProjectController::class);
-Route::apiResource('project-funds', ProjectFundController::class);
-Route::post('project-funds/{projectFund}/currencies', [ProjectFundController::class, 'attachCurrency']);
-Route::apiResource('project-teams', ProjectTeamController::class);
-Route::apiResource('project-stages', ProjectStageController::class);
-Route::apiResource('stage-timelines', StageTimelineController::class);
 
-Route::apiResource('departments', DepartmentController::class);
+
 Route::apiResource('invoices', InvoiceController::class);
 Route::apiResource('invoice-items', InvoiceItemController::class);
 
@@ -115,12 +127,6 @@ Route::apiResource('expenses', ExpenseController::class);
 Route::apiResource('currencies', CurrencyController::class);
 
 
-// ==========================================
-// Directory & Archive Management
-// ==========================================
-Route::apiResource('directories', DirectoryController::class);
-Route::post('directories/{directory}/files', [DirectoryController::class, 'uploadFile']);
-Route::delete('directories/{directory}/files/{mediaId}', [DirectoryController::class, 'deleteFile']);
-Route::post('directories/move-file', [DirectoryController::class, 'moveFile']);
+
 
 Route::get('/audit-logs', [AuditLogController::class, 'index']);

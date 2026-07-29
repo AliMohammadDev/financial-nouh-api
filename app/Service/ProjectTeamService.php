@@ -11,6 +11,13 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ProjectTeamService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -58,7 +65,19 @@ class ProjectTeamService
   public function create(array $data): ProjectTeam
   {
     return DB::transaction(function () use ($data) {
-      return ProjectTeam::create($data);
+      $projectTeam = ProjectTeam::create($data);
+      $projectTeam->load(['user', 'project']);
+
+      $userName = $projectTeam->user?->name ?? 'مستخدم';
+      $projectName = $projectTeam->project?->name ?? 'مشروع';
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإضافة العضو ({$userName}) إلى فريق المشروع: {$projectName}",
+        affectedTable: 'project_teams'
+      );
+
+      return $projectTeam;
     });
   }
 
@@ -66,14 +85,39 @@ class ProjectTeamService
   {
     return DB::transaction(function () use ($projectsTeam, $data) {
       $projectsTeam->update($data);
-      return $projectsTeam->load(['user', 'project']);
+      $projectsTeam->load(['user', 'project']);
+
+      $userName = $projectsTeam->user?->name ?? 'مستخدم';
+      $projectName = $projectsTeam->project?->name ?? 'مشروع';
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات عضو فريق المشروع ({$userName}) في المشروع: {$projectName}",
+        affectedTable: 'project_teams'
+      );
+
+      return $projectsTeam;
     });
   }
 
   public function delete(ProjectTeam $projectsTeam): bool
   {
     return DB::transaction(function () use ($projectsTeam) {
-      return (bool) $projectsTeam->delete();
+      $projectsTeam->load(['user', 'project']);
+      $userName = $projectsTeam->user?->name ?? 'مستخدم';
+      $projectName = $projectsTeam->project?->name ?? 'مشروع';
+
+      $deleted = (bool) $projectsTeam->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بإزالة العضو ({$userName}) من فريق المشروع: {$projectName}",
+          affectedTable: 'project_teams'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

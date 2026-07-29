@@ -11,6 +11,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ProjectStageService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -52,6 +58,13 @@ class ProjectStageService
   {
     return DB::transaction(function () use ($data) {
       $stage = ProjectStage::create($data);
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء مرحلة مشروع جديدة: {$stage->name}",
+        affectedTable: 'project_stages'
+      );
+
       return $stage->load(['project']);
     });
   }
@@ -59,7 +72,13 @@ class ProjectStageService
   public function update(ProjectStage $projectStage, array $data): ProjectStage
   {
     DB::transaction(function () use ($projectStage, $data) {
-      $projectStage->update($data);
+      $projectStage->update($projectStage->load(['project']) ? $data : $data);
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات مرحلة المشروع: {$projectStage->name}",
+        affectedTable: 'project_stages'
+      );
     });
 
     return $projectStage->load(['project']);
@@ -68,7 +87,19 @@ class ProjectStageService
   public function delete(ProjectStage $projectStage): bool
   {
     return DB::transaction(function () use ($projectStage) {
-      return (bool) $projectStage->delete();
+      $stageName = $projectStage->name ?? 'غير معروف';
+
+      $deleted = (bool) $projectStage->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف مرحلة المشروع: {$stageName}",
+          affectedTable: 'project_stages'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

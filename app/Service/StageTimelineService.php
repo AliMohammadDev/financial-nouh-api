@@ -11,6 +11,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class StageTimelineService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -52,7 +58,17 @@ class StageTimelineService
   {
     return DB::transaction(function () use ($data) {
       $timeline = StageTimeline::create($data);
-      return $timeline->load(['projectStage']);
+      $timeline->load(['projectStage']);
+
+      $stageName = $timeline->stage_name ?? 'الخط الزمني';
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء خط زمني جديد للمرحلة: {$stageName}",
+        affectedTable: 'stage_timelines'
+      );
+
+      return $timeline;
     });
   }
 
@@ -60,6 +76,15 @@ class StageTimelineService
   {
     DB::transaction(function () use ($stageTimeline, $data) {
       $stageTimeline->update($data);
+      $stageTimeline->load(['projectStage']);
+
+      $stageName = $stageTimeline->stage_name ?? 'الخط الزمني';
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات الخط الزمني للمرحلة: {$stageName}",
+        affectedTable: 'stage_timelines'
+      );
     });
 
     return $stageTimeline->load(['projectStage']);
@@ -68,7 +93,19 @@ class StageTimelineService
   public function delete(StageTimeline $stageTimeline): bool
   {
     return DB::transaction(function () use ($stageTimeline) {
-      return (bool) $stageTimeline->delete();
+      $stageName = $stageTimeline->stage_name ?? 'الخط الزمني';
+
+      $deleted = (bool) $stageTimeline->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف الخط الزمني للمرحلة: {$stageName}",
+          affectedTable: 'stage_timelines'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

@@ -5,11 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Project\CreateProjectRequest;
 use App\Http\Requests\Project\UpdateProjectRequest;
-use App\Http\Requests\ProjectFund\AttachProjectFundRequest;
-use App\Http\Resources\ProjectFundResource;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
-use App\Models\ProjectFund;
 use App\Service\ProjectService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,20 +53,6 @@ class ProjectController extends Controller
     $this->projectService->delete($project);
     return response()->json([
       'message' => 'Project deleted successfully'
-    ], Response::HTTP_OK);
-  }
-
-  public function attachFund(AttachProjectFundRequest $request, Project $project): JsonResponse
-  {
-    $projectFund = $this->projectService->attachFund($project, $request->validated());
-    return response()->json(new ProjectFundResource($projectFund), Response::HTTP_OK);
-  }
-
-  public function detachFund(ProjectFund $projectFund): JsonResponse
-  {
-    $this->projectService->detachFund($projectFund);
-    return response()->json([
-      'message' => 'Fund detached from project successfully'
     ], Response::HTTP_OK);
   }
 }

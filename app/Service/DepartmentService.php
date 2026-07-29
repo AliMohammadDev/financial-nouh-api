@@ -12,6 +12,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class DepartmentService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -49,7 +55,15 @@ class DepartmentService
   public function create(array $data): Department
   {
     return DB::transaction(function () use ($data) {
-      return Department::create($data);
+      $department = Department::create($data);
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء قسم جديد: {$department->Name}",
+        affectedTable: 'departments'
+      );
+
+      return $department;
     });
   }
 
@@ -57,6 +71,13 @@ class DepartmentService
   {
     return DB::transaction(function () use ($department, $data) {
       $department->update($data);
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات القسم: {$department->Name}",
+        affectedTable: 'departments'
+      );
+
       return $department;
     });
   }
@@ -70,7 +91,19 @@ class DepartmentService
     }
 
     return DB::transaction(function () use ($department) {
-      return (bool) $department->delete();
+      $departmentName = $department->Name ?? 'غير معروف';
+
+      $deleted = (bool) $department->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف القسم: {$departmentName}",
+          affectedTable: 'departments'
+        );
+      }
+
+      return $deleted;
     });
   }
 }
