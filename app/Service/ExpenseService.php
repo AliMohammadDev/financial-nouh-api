@@ -20,71 +20,7 @@ class ExpenseService
   ) {}
 
 
-  //   public function findAll(
-  //   bool $paginate = false,
-  //   int $perPage = 10,
-  //   int $page = 1,
-  //   array $columns = ["*"]
-  // ): LengthAwarePaginator|Collection {
 
-  //   $query = Expense::with([
-  //     'user.client',
-  //     'user.employee',
-  //     'user.admin',
-  //     'user.engineer',
-  //     'user.craftsmen',
-  //     'user.supplier',
-  //     'user.trustee',
-  //     'creator',
-  //     'expenseable'
-  //   ])->latest();
-
-  //   if ($paginate) {
-  //     $paginator = $query->paginate(perPage: $perPage, page: $page, columns: $columns);
-
-  //     $paginator->getCollection()->loadMorph('expenseable', [
-  //       CurrencyFund::class => [
-  //         'currency',
-  //         'fund.user.client',
-  //         'fund.user.employee',
-  //         'fund.user.admin',
-  //         'fund.user.engineer',
-  //         'fund.user.craftsmen',
-  //         'fund.user.supplier',
-  //         'fund.user.trustee',
-  //       ],
-  //       CompanyFundCurrency::class => [],
-  //       ProjectFundCurrency::class => [
-  //         'currency',
-  //         'projectFund.project',
-  //       ],
-  //     ]);
-
-  //     return $paginator;
-  //   }
-
-  //   $expenses = $query->get($columns);
-
-  //   $expenses->loadMorph('expenseable', [
-  //     CurrencyFund::class => [
-  //       'currency',
-  //       'fund.user.client',
-  //       'fund.user.employee',
-  //       'fund.user.admin',
-  //       'fund.user.engineer',
-  //       'fund.user.craftsmen',
-  //       'fund.user.supplier',
-  //       'fund.user.trustee',
-  //     ],
-  //     CompanyFundCurrency::class => [],
-  //     ProjectFundCurrency::class => [
-  //       'currency',
-  //       'projectFund.project',
-  //     ],
-  //   ]);
-
-  //   return $expenses;
-  // }
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -92,7 +28,6 @@ class ExpenseService
     array $columns = ["*"]
   ): LengthAwarePaginator|Collection {
 
-    // تعريف الفلاتر باستخدام Spatie Query Builder
     $filters = [
       AllowedFilter::callback('search', function ($query, $value) {
         $query->whereHas('user', function ($q) use ($value) {
@@ -101,19 +36,35 @@ class ExpenseService
         });
       }),
 
-      // 1. فلترة حسب صندوق العملات العادي (CurrencyFund)
+      AllowedFilter::callback('fund_id', function ($query, $value) {
+        $query->where('expenseable_type', CurrencyFund::class)
+          ->whereHasMorph('expenseable', [CurrencyFund::class], function ($q) use ($value) {
+            $q->where('fund_id', $value);
+          });
+      }),
+
+      AllowedFilter::callback('company_fund_id', function ($query, $value) {
+        $query->where('expenseable_type', CompanyFundCurrency::class)
+          ->whereHasMorph('expenseable', [CompanyFundCurrency::class], function ($q) use ($value) {
+            $q->where('company_fund_id', $value);
+          });
+      }),
+
+      AllowedFilter::callback('project_fund_id', function ($query, $value) {
+        $query->where('expenseable_type', ProjectFundCurrency::class)
+          ->whereHasMorph('expenseable', [ProjectFundCurrency::class], function ($q) use ($value) {
+            $q->where('project_fund_id', $value);
+          });
+      }),
+
       AllowedFilter::callback('currency_fund_id', function ($query, $value) {
         $query->where('expenseable_type', CurrencyFund::class)
           ->where('expenseable_id', $value);
       }),
-
-      // 2. فلترة حسب صندوق الشركة (CompanyFundCurrency)
       AllowedFilter::callback('company_fund_currency_id', function ($query, $value) {
         $query->where('expenseable_type', CompanyFundCurrency::class)
           ->where('expenseable_id', $value);
       }),
-
-      // 3. فلترة حسب صندوق المشروع (ProjectFundCurrency)
       AllowedFilter::callback('project_fund_currency_id', function ($query, $value) {
         $query->where('expenseable_type', ProjectFundCurrency::class)
           ->where('expenseable_id', $value);
@@ -138,7 +89,6 @@ class ExpenseService
     if ($paginate) {
       $paginator = $query->paginate(perPage: $perPage, page: $page, columns: $columns);
 
-      // تحميل العلاقات المورفية للصفحات لجعل البيانات جاهزة ونظيفة
       $paginator->getCollection()->loadMorph('expenseable', [
         CurrencyFund::class => [
           'currency',
@@ -227,8 +177,6 @@ class ExpenseService
   public function create(array $data): Expense
   {
     return DB::transaction(function () use ($data) {
-      // $expense = Expense::create($data);
-      // return $expense->load(['user', 'creator', 'expenseable']);
 
       $expense = Expense::create($data);
       $expense->load(['user', 'creator', 'expenseable']);
