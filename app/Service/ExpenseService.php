@@ -15,6 +15,10 @@ use Spatie\QueryBuilder\QueryBuilder;
 class ExpenseService
 {
 
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
 
   //   public function findAll(
   //   bool $paginate = false,
@@ -223,8 +227,21 @@ class ExpenseService
   public function create(array $data): Expense
   {
     return DB::transaction(function () use ($data) {
+      // $expense = Expense::create($data);
+      // return $expense->load(['user', 'creator', 'expenseable']);
+
       $expense = Expense::create($data);
-      return $expense->load(['user', 'creator', 'expenseable']);
+      $expense->load(['user', 'creator', 'expenseable']);
+
+      $amount = $expense->amount ?? 'مبلغ';
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء سجل مصروف جديد بقيمة: {$amount}",
+        affectedTable: 'expenses'
+      );
+
+      return $expense;
     });
   }
 
@@ -232,14 +249,36 @@ class ExpenseService
   {
     return DB::transaction(function () use ($expense, $data) {
       $expense->update($data);
-      return $expense->load(['user', 'creator', 'expenseable']);
+      $expense->load(['user', 'creator', 'expenseable']);
+
+      $amount = $expense->amount ?? 'مبلغ';
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات سجل المصروف (القيمة: {$amount})",
+        affectedTable: 'expenses'
+      );
+
+      return $expense;
     });
   }
 
   public function delete(Expense $expense): bool
   {
     return DB::transaction(function () use ($expense) {
-      return (bool) $expense->delete();
+      $amount = $expense->amount ?? 'مبلغ';
+
+      $deleted = (bool) $expense->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف سجل المصروف (القيمة السابقة: {$amount})",
+          affectedTable: 'expenses'
+        );
+      }
+
+      return $deleted;
     });
   }
 }

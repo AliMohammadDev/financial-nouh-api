@@ -15,6 +15,11 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class RevenueService
 {
+
+  public function __construct(
+    private AuditLogService $auditLogService
+  ) {}
+
   // public function findAll(
   //   bool $paginate = false,
   //   int $perPage = 10,
@@ -165,7 +170,17 @@ class RevenueService
   {
     return DB::transaction(function () use ($data) {
       $revenue = Revenue::create($data);
-      return $revenue->load(['user', 'receiver', 'revenueable']);
+      $revenue->load(['user', 'receiver', 'revenueable']);
+
+      $amount = $revenue->amount ?? 'مبلغ';
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بإنشاء سجل إيراد جديد بقيمة: {$amount}",
+        affectedTable: 'revenues'
+      );
+
+      return $revenue;
     });
   }
 
@@ -173,14 +188,36 @@ class RevenueService
   {
     return DB::transaction(function () use ($revenue, $data) {
       $revenue->update($data);
-      return $revenue->load(['user', 'receiver', 'revenueable']);
+      $revenue->load(['user', 'receiver', 'revenueable']);
+
+      $amount = $revenue->amount ?? 'مبلغ';
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل بيانات سجل الإيراد (القيمة: {$amount})",
+        affectedTable: 'revenues'
+      );
+
+      return $revenue;
     });
   }
 
   public function delete(Revenue $revenue): bool
   {
     return DB::transaction(function () use ($revenue) {
-      return (bool) $revenue->delete();
+      $amount = $revenue->amount ?? 'مبلغ';
+
+      $deleted = (bool) $revenue->delete();
+
+      if ($deleted) {
+        $this->auditLogService->log(
+          actionType: 'حذف',
+          description: "قام بحذف سجل الإيراد (القيمة السابقة: {$amount})",
+          affectedTable: 'revenues'
+        );
+      }
+
+      return $deleted;
     });
   }
 }
