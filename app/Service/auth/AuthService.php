@@ -19,7 +19,7 @@ class AuthService
       abort(403, 'User is not active');
     }
 
-    $user->tokens()->delete();
+    // $user->tokens()->delete(); 
     $token = $user->createToken('auth_token')->plainTextToken;
     return $token;
   }
