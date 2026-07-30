@@ -53,7 +53,7 @@ class ProjectService
 
   public function findOne(Project $project): Project
   {
-    return $project->load(['client.user', 'projectFunds.currencies']);
+    return $project->load(['client.user', 'projectFunds.currencies', 'department']);
   }
 
   public function create(array $data): Project
