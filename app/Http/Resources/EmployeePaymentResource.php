@@ -15,7 +15,7 @@ class EmployeePaymentResource extends JsonResource
   public function toArray(Request $request): array
   {
     return [
-      'employee_id'  => $this->employee_id,
+      'id'             => $this->id,
       'employee'     => $this->relationLoaded('employee') ? $this->employee : null,
       'company_fund_currency'    => $this->relationLoaded('companyFundCurrency') ? $this->companyFundCurrency : null,
       'bonuses'      => (float) $this->bonuses,
@@ -23,7 +23,6 @@ class EmployeePaymentResource extends JsonResource
       'payment_date' => $this->payment_date?->toDateString(),
       'amount'       => (float) $this->amount,
       'created_at' => $this->created_at?->format('Y-m-d'),
-
     ];
   }
 }
