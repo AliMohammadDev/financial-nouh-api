@@ -55,6 +55,23 @@ class ExpenseResource extends JsonResource
       'description'       => $this->description,
       'amount'            => (float) $this->amount,
       'is_posted'         => (bool) $this->is_posted,
+
+      'invoices'          => $this->whenLoaded('invoices', function () {
+        return $this->invoices->map(function ($invoice) {
+          return [
+            'id'                   => $invoice->id,
+            'invoice_number'       => $invoice->invoice_number,
+            'date'                 => $invoice->date?->format('Y-m-d'),
+            'discount'             => (float) $invoice->discount,
+            'final_total'          => (float) $invoice->final_total,
+            'is_posted'            => (bool) $invoice->is_posted,
+            'is_visible_to_client' => (bool) $invoice->is_visible_to_client,
+            'item'                 => $invoice->relationLoaded('item') ? $invoice->item?->name : null,
+            'supplier'             => $invoice->relationLoaded('supplier') ? $invoice->supplier?->name : null,
+          ];
+        });
+      }),
+
       'user'              => new UserResource($this->whenLoaded('user')),
       'created_by'        => new UserResource($this->whenLoaded('creator')),
       'created_at'        => $this->created_at?->format('Y-m-d'),

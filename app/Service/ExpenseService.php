@@ -150,6 +150,8 @@ class ExpenseService
       'user.investor',
       'user.dailyWorker',
       'creator',
+      'invoices.item',    
+      'invoices.supplier',
     ]);
 
     $expense->loadMorph('expenseable', [
