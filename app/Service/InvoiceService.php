@@ -2,7 +2,10 @@
 
 namespace App\Service;
 
+use App\Models\CompanyFundCurrency;
+use App\Models\CurrencyFund;
 use App\Models\Invoice;
+use App\Models\ProjectFundCurrency;
 use App\Service\AuditLogService;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -37,10 +40,43 @@ class InvoiceService
       AllowedFilter::exact('item_id'),
       AllowedFilter::exact('supplier_id'),
       AllowedFilter::exact('is_posted'),
+
+      // 1. فلترة حسب project_fund_id
+      AllowedFilter::callback('project_fund_id', function ($query, $value) {
+        $query->whereHasMorph(
+          'expenseable',
+          [ProjectFundCurrency::class],
+          function ($q) use ($value) {
+            $q->where('project_fund_id', $value);
+          }
+        );
+      }),
+
+      // 2. فلترة حسب fund_id
+      AllowedFilter::callback('fund_id', function ($query, $value) {
+        $query->whereHasMorph(
+          'expenseable',
+          [CurrencyFund::class],
+          function ($q) use ($value) {
+            $q->where('fund_id', $value);
+          }
+        );
+      }),
+
+      // 3. فلترة حسب company_fund_id
+      AllowedFilter::callback('company_fund_id', function ($query, $value) {
+        $query->whereHasMorph(
+          'expenseable',
+          [CompanyFundCurrency::class],
+          function ($q) use ($value) {
+            $q->where('company_fund_id', $value);
+          }
+        );
+      }),
     ];
 
     $query = QueryBuilder::for(Invoice::class)
-      ->with(['item', 'supplier', 'expense'])
+      ->with(['item', 'supplier', 'expense.expenseable'])
       ->allowedFilters(...$filters)
       ->defaultSort('-created_at');
 
