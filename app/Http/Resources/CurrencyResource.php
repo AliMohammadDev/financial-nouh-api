@@ -42,12 +42,12 @@ class CurrencyResource extends JsonResource
 
     return [
       'id'                => $this->id,
-      // 'expenseable_type'  => $expenseableType,
-      // 'expenseable_id'    => $expenseableId,
+      'expenseable_type'  => $expenseableType,
+      'expenseable_id'    => $expenseableId,
       'currency'          => $this->currency,
       'symbol'            => $this->symbol,
       'balance'           => $balance,
-      // 'user'              => $user,
+      'user'              => $user,
       'created_at'        => $this->created_at?->format('Y-m-d'),
     ];
   }
