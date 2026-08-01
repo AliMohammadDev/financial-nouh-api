@@ -27,6 +27,18 @@ class AuthController extends Controller
     $user = User::where('email', $request->email)->first();
     // $user->loadMissing(['roles']);
 
+    $user->load([
+      'client',
+      'employee',
+      'admin',
+      'engineer',
+      'craftsmen',
+      'supplier',
+      'trustee',
+      'investor',
+      'dailyWorker',
+    ]);
+
     return response()->json([
       'token'   => $token,
       'user'    => new UserResource($user)
@@ -35,9 +47,21 @@ class AuthController extends Controller
 
   public function me()
   {
+
     $user = Auth::user();
 
     // $user->loadMissing(['roles']);
+    $user->load([
+      'client',
+      'employee',
+      'admin',
+      'engineer',
+      'craftsmen',
+      'supplier',
+      'trustee',
+      'investor',
+      'dailyWorker',
+    ]);
     return new UserResource($user);
   }
 

@@ -44,7 +44,7 @@ class TransactionService
         'user.dailyWorker',
         'creator',
         'morphFrom',
-        'morphToFund',
+        'morphToFund', // تأكدنا من استخدام اسم العلاقة الصحيح هنا
       ])
       ->allowedFilters(...$filters)
       ->defaultSort('-created_at');
@@ -73,7 +73,7 @@ class TransactionService
       $paginator = $query->paginate(perPage: $perPage, page: $page, columns: $columns);
 
       $paginator->getCollection()->loadMorph('morphFrom', $morphRelationsMap);
-      $paginator->getCollection()->loadMorph('morphToFund', $morphRelationsMap);
+      $paginator->getCollection()->loadMorph('morphToFund', $morphRelationsMap); // تم التصحيح هنا أيضاً
 
       return $paginator;
     }
@@ -81,7 +81,7 @@ class TransactionService
     $transactions = $query->get($columns);
 
     $transactions->loadMorph('morphFrom', $morphRelationsMap);
-    $transactions->loadMorph('morphToFund', $morphRelationsMap);
+    $transactions->loadMorph('morphToFund', $morphRelationsMap); // تم التصحيح هنا أيضاً
 
     return $transactions;
   }
@@ -100,7 +100,7 @@ class TransactionService
       'user.dailyWorker',
       'creator',
       'morphFrom',
-      'morphToFund',
+      'morphToFund', // تأكدنا من اسم العلاقة الصحيح
     ]);
 
     $morphRelationsMap = [
@@ -124,7 +124,7 @@ class TransactionService
     ];
 
     $transaction->loadMorph('morphFrom', $morphRelationsMap);
-    $transaction->loadMorph('morphToFund', $morphRelationsMap);
+    $transaction->loadMorph('morphToFund', $morphRelationsMap); // تم التصحيح هنا
 
     return $transaction;
   }

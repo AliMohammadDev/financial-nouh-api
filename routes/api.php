@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\ProjectStageController;
 use App\Http\Controllers\Api\ProjectTeamController;
 use App\Http\Controllers\Api\RevenueController;
 use App\Http\Controllers\Api\StageTimelineController;
+use App\Http\Controllers\Api\TransactionController;
 use App\Http\Controllers\Api\User\AdminController;
 use App\Http\Controllers\Api\User\ClientController;
 use App\Http\Controllers\Api\User\CraftsmenController;
@@ -96,6 +97,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
   // ==========================================
   Route::apiResource('funds', FundController::class);
   Route::post('funds/{fund}/currencies', [FundController::class, 'attachCurrency']);
+
+  Route::apiResource('transactions', TransactionController::class);
 
   Route::apiResource('company-funds', CompanyFundController::class);
   Route::post('company-funds/{companyFund}/currencies', [CompanyFundController::class, 'attachCurrency']);
