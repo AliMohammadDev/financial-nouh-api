@@ -19,9 +19,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class StageTimeline extends Model
 {
   use HasFactory;
-
-  protected $table = 'stage_timelines';
-
   protected function casts(): array
   {
     return [

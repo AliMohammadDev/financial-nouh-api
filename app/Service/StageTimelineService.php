@@ -31,10 +31,15 @@ class StageTimelineService
       }),
       AllowedFilter::exact('project_stage_id'),
       AllowedFilter::exact('status'),
+      AllowedFilter::callback('project_id', function ($query, $value) {
+        $query->whereHas('projectStage.project', function ($q) use ($value) {
+          $q->where('project_id', $value);
+        });
+      }),
     ];
 
     $query = QueryBuilder::for(StageTimeline::class)
-      ->with(['projectStage'])
+      ->with(['projectStage.project'])
       ->allowedFilters(...$filters)
       ->defaultSort('-created_at');
 
@@ -48,17 +53,16 @@ class StageTimelineService
 
     return $query->get($columns);
   }
-
   public function findOne(StageTimeline $stageTimeline): StageTimeline
   {
-    return $stageTimeline->load(['projectStage']);
+    return $stageTimeline->load(['projectStage.project']);
   }
 
   public function create(array $data): StageTimeline
   {
     return DB::transaction(function () use ($data) {
       $timeline = StageTimeline::create($data);
-      $timeline->load(['projectStage']);
+      $timeline->load(['projectStage.project']);
 
       $stageName = $timeline->stage_name ?? 'الخط الزمني';
 
@@ -76,7 +80,7 @@ class StageTimelineService
   {
     DB::transaction(function () use ($stageTimeline, $data) {
       $stageTimeline->update($data);
-      $stageTimeline->load(['projectStage']);
+      $stageTimeline->load(['projectStage.project']);
 
       $stageName = $stageTimeline->stage_name ?? 'الخط الزمني';
 
@@ -87,7 +91,7 @@ class StageTimelineService
       );
     });
 
-    return $stageTimeline->load(['projectStage']);
+    return $stageTimeline->load(['projectStage.project']);
   }
 
   public function delete(StageTimeline $stageTimeline): bool

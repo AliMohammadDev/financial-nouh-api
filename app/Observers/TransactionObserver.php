@@ -114,7 +114,9 @@ class TransactionObserver
     //
   }
 
-
+  /**
+   * فحص رصيد صندوق المصدر وإرسال تنبيه إن انخفض عن الحد الأدنى
+   */
   protected function checkAndNotify($fund): void
   {
     if ($fund->balance <= 100) {
