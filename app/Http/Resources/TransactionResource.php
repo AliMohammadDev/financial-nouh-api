@@ -11,14 +11,9 @@ class TransactionResource extends JsonResource
 {
   public function toArray(Request $request): array
   {
-    // === هنا قمنا بإضافة تتبع (Logs) لفحص قيمة العلاقة ونوعها قبل التنسيق ===
-    Log::info('Transaction Debug:', [
-      'id'                => $this->id,
-      'morph_to_type'     => $this->morph_to_type,
-      'morph_to_id'       => $this->morph_to_id,
-      'relation_loaded'   => $this->relationLoaded('morphToFund'),
-      'morph_to_fund_val' => $this->morphToFund ? $this->morphToFund->toArray() : 'NULL_OR_NOT_LOADED',
-    ]);
+
+    $morphToInfo = $this->formatMorphRelation($this->morphToFund ?? $this->morphTo, $this->morph_to_type);
+
 
     return [
       'id'              => $this->id,
@@ -27,7 +22,7 @@ class TransactionResource extends JsonResource
       'morph_from_info' => $this->formatMorphRelation($this->morphFrom, $this->morph_from_type),
       'morph_to_type'   => $this->morph_to_type,
       'morph_to_id'     => $this->morph_to_id,
-      'morph_to_info'   => $this->formatMorphRelation($this->morphToFund ?? $this->morphTo, $this->morph_to_type),
+      'morph_to_info'   => $morphToInfo,
       'name'            => $this->name,
       'amount'          => (float) $this->amount,
       'user'            => new UserResource($this->whenLoaded('user')),

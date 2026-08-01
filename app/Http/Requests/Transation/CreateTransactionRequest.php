@@ -30,6 +30,7 @@ class CreateTransactionRequest extends FormRequest
       'name'            => ['nullable', 'string'],
       'amount'          => ['required', 'numeric', 'min:0.01'],
       'user_id'         => ['nullable', 'exists:users,id'],
+      'created_by'      => ['sometimes', 'exists:users,id'],
     ];
   }
 }

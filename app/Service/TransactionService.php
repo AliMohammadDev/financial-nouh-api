@@ -44,7 +44,7 @@ class TransactionService
         'user.dailyWorker',
         'creator',
         'morphFrom',
-        'morphToFund', // تأكدنا من استخدام اسم العلاقة الصحيح هنا
+        'morphToFund', 
       ])
       ->allowedFilters(...$filters)
       ->defaultSort('-created_at');
@@ -73,7 +73,7 @@ class TransactionService
       $paginator = $query->paginate(perPage: $perPage, page: $page, columns: $columns);
 
       $paginator->getCollection()->loadMorph('morphFrom', $morphRelationsMap);
-      $paginator->getCollection()->loadMorph('morphToFund', $morphRelationsMap); // تم التصحيح هنا أيضاً
+      $paginator->getCollection()->loadMorph('morphToFund', $morphRelationsMap);
 
       return $paginator;
     }
@@ -81,13 +81,19 @@ class TransactionService
     $transactions = $query->get($columns);
 
     $transactions->loadMorph('morphFrom', $morphRelationsMap);
-    $transactions->loadMorph('morphToFund', $morphRelationsMap); // تم التصحيح هنا أيضاً
+    $transactions->loadMorph('morphToFund', $morphRelationsMap);
 
     return $transactions;
   }
 
   public function findOne(Transaction $transaction): Transaction
   {
+    \Illuminate\Support\Facades\Log::info('Service FindOne Start:', [
+      'transaction_id' => $transaction->id,
+      'morph_to_type' => $transaction->morph_to_type,
+      'morph_to_id' => $transaction->morph_to_id,
+    ]);
+
     $transaction->load([
       'user.client',
       'user.employee',
@@ -100,8 +106,9 @@ class TransactionService
       'user.dailyWorker',
       'creator',
       'morphFrom',
-      'morphToFund', // تأكدنا من اسم العلاقة الصحيح
+      'morphToFund',
     ]);
+
 
     $morphRelationsMap = [
       CurrencyFund::class => [
@@ -124,7 +131,8 @@ class TransactionService
     ];
 
     $transaction->loadMorph('morphFrom', $morphRelationsMap);
-    $transaction->loadMorph('morphToFund', $morphRelationsMap); // تم التصحيح هنا
+    $transaction->loadMorph('morphToFund', $morphRelationsMap);
+
 
     return $transaction;
   }

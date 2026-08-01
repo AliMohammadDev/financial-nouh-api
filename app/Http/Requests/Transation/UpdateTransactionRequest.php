@@ -29,7 +29,8 @@ class UpdateTransactionRequest extends FormRequest
       'morph_to_id'     => ['sometimes', 'integer'],
       'name'            => ['nullable', 'string'],
       'amount'          => ['sometimes', 'numeric', 'min:0.01'],
-      'user_id'         => ['nullable', 'exists:users,id'],
+      'user_id'         => ['sometimes', 'exists:users,id'],
+      'created_by'      => ['sometimes', 'exists:users,id'],
     ];
   }
 }
