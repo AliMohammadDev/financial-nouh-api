@@ -41,42 +41,49 @@ class InvoiceService
       AllowedFilter::exact('supplier_id'),
       AllowedFilter::exact('is_posted'),
 
-      // 1. فلترة حسب project_fund_id
-      AllowedFilter::callback('project_fund_id', function ($query, $value) {
-        $query->whereHasMorph(
-          'expenseable',
-          [ProjectFundCurrency::class],
-          function ($q) use ($value) {
-            $q->where('project_fund_id', $value);
-          }
-        );
-      }),
-
-      // 2. فلترة حسب fund_id
+      // الفلترة حسب الصندوق العادي (Fund ID)
       AllowedFilter::callback('fund_id', function ($query, $value) {
-        $query->whereHasMorph(
-          'expenseable',
-          [CurrencyFund::class],
-          function ($q) use ($value) {
-            $q->where('fund_id', $value);
-          }
-        );
+        $query->whereHas('expense', function ($q) use ($value) {
+          $q->where('expenseable_type', CurrencyFund::class)
+            ->whereHasMorph('expenseable', [CurrencyFund::class], function ($subQ) use ($value) {
+              $subQ->where('fund_id', $value);
+            });
+        });
       }),
 
-      // 3. فلترة حسب company_fund_id
+      // الفلترة حسب صندوق الشركة (Company Fund ID)
       AllowedFilter::callback('company_fund_id', function ($query, $value) {
-        $query->whereHasMorph(
-          'expenseable',
-          [CompanyFundCurrency::class],
-          function ($q) use ($value) {
-            $q->where('company_fund_id', $value);
-          }
-        );
+        $query->whereHas('expense', function ($q) use ($value) {
+          $q->where('expenseable_type', CompanyFundCurrency::class)
+            ->whereHasMorph('expenseable', [CompanyFundCurrency::class], function ($subQ) use ($value) {
+              $subQ->where('company_fund_id', $value);
+            });
+        });
+      }),
+
+      // الفلترة حسب صندوق المشروع (Project Fund ID)
+      AllowedFilter::callback('project_fund_id', function ($query, $value) {
+        $query->whereHas('expense', function ($q) use ($value) {
+          $q->where('expenseable_type', ProjectFundCurrency::class)
+            ->whereHasMorph('expenseable', [ProjectFundCurrency::class], function ($subQ) use ($value) {
+              $subQ->where('project_fund_id', $value);
+            });
+        });
       }),
     ];
 
     $query = QueryBuilder::for(Invoice::class)
-      ->with(['item', 'supplier', 'expense.expenseable'])
+      ->with([
+        'item',
+        'supplier',
+        'expense.expenseable' => function ($morphTo) {
+          $morphTo->morphWith([
+            CurrencyFund::class        => ['currency', 'fund'],
+            ProjectFundCurrency::class => ['currency', 'projectFund'],
+            CompanyFundCurrency::class => ['currency', 'companyFund'],
+          ]);
+        }
+      ])
       ->allowedFilters(...$filters)
       ->defaultSort('-created_at');
 
@@ -90,7 +97,6 @@ class InvoiceService
 
     return $query->get($columns);
   }
-
   public function findOne(Invoice $invoice): Invoice
   {
     return $invoice->load(['item', 'supplier', 'expense']);
