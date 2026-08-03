@@ -18,6 +18,66 @@ class TransactionService
     private AuditLogService $auditLogService
   ) {}
 
+  // public function findAll(
+  //   bool $paginate = false,
+  //   int $perPage = 10,
+  //   int $page = 1,
+  //   array $columns = ["*"]
+  // ): LengthAwarePaginator|Collection {
+
+  //   $filters = [
+  //     AllowedFilter::callback('search', function ($query, $value) {
+  //       $query->where('name', 'like', "%{$value}%");
+  //     }),
+  //   ];
+
+  //   $query = QueryBuilder::for(Transaction::class)
+  //     ->with([
+  //       'creator',
+  //       'morphFrom',
+  //       'morphToFund',
+  //     ])
+  //     ->allowedFilters(...$filters)
+  //     ->defaultSort('-created_at');
+
+  //   $morphRelationsMap = [
+  //     CurrencyFund::class => [
+  //       'currency',
+  //       'fund.user.client',
+  //       'fund.user.employee',
+  //       'fund.user.admin',
+  //       'fund.user.engineer',
+  //       'fund.user.craftsmen',
+  //       'fund.user.supplier',
+  //       'fund.user.trustee',
+  //       'fund.user.investor',
+  //       'fund.user.dailyWorker',
+  //     ],
+  //     CompanyFundCurrency::class => [],
+  //     ProjectFundCurrency::class => [
+  //       'currency',
+  //       'projectFund.project',
+  //     ],
+  //   ];
+
+  //   if ($paginate) {
+  //     $paginator = $query->paginate(perPage: $perPage, page: $page, columns: $columns);
+
+  //     $paginator->getCollection()->loadMorph('morphFrom', $morphRelationsMap);
+  //     $paginator->getCollection()->loadMorph('morphToFund', $morphRelationsMap);
+
+  //     return $paginator;
+  //   }
+
+  //   $transactions = $query->get($columns);
+
+  //   $transactions->loadMorph('morphFrom', $morphRelationsMap);
+  //   $transactions->loadMorph('morphToFund', $morphRelationsMap);
+
+  //   return $transactions;
+  // }
+
+
   public function findAll(
     bool $paginate = false,
     int $perPage = 10,
@@ -28,6 +88,92 @@ class TransactionService
     $filters = [
       AllowedFilter::callback('search', function ($query, $value) {
         $query->where('name', 'like', "%{$value}%");
+      }),
+
+
+      AllowedFilter::callback('fund_id', function ($query, $value) {
+        $query->where(function ($q) use ($value) {
+          $q->where(function ($sub) use ($value) {
+            $sub->where('morph_from_type', CurrencyFund::class)
+              ->whereHasMorph('morphFrom', [CurrencyFund::class], function ($sq) use ($value) {
+                $sq->where('fund_id', $value);
+              });
+          })->orWhere(function ($sub) use ($value) {
+            $sub->where('morph_to_type', CurrencyFund::class)
+              ->whereHasMorph('morphToFund', [CurrencyFund::class], function ($sq) use ($value) {
+                $sq->where('fund_id', $value);
+              });
+          });
+        });
+      }),
+
+      AllowedFilter::callback('company_fund_id', function ($query, $value) {
+        $query->where(function ($q) use ($value) {
+          $q->where(function ($sub) use ($value) {
+            $sub->where('morph_from_type', CompanyFundCurrency::class)
+              ->whereHasMorph('morphFrom', [CompanyFundCurrency::class], function ($sq) use ($value) {
+                $sq->where('company_fund_id', $value);
+              });
+          })->orWhere(function ($sub) use ($value) {
+            $sub->where('morph_to_type', CompanyFundCurrency::class)
+              ->whereHasMorph('morphToFund', [CompanyFundCurrency::class], function ($sq) use ($value) {
+                $sq->where('company_fund_id', $value);
+              });
+          });
+        });
+      }),
+
+      AllowedFilter::callback('project_fund_id', function ($query, $value) {
+        $query->where(function ($q) use ($value) {
+          $q->where(function ($sub) use ($value) {
+            $sub->where('morph_from_type', ProjectFundCurrency::class)
+              ->whereHasMorph('morphFrom', [ProjectFundCurrency::class], function ($sq) use ($value) {
+                $sq->where('project_fund_id', $value);
+              });
+          })->orWhere(function ($sub) use ($value) {
+            $sub->where('morph_to_type', ProjectFundCurrency::class)
+              ->whereHasMorph('morphToFund', [ProjectFundCurrency::class], function ($sq) use ($value) {
+                $sq->where('project_fund_id', $value);
+              });
+          });
+        });
+      }),
+
+
+      AllowedFilter::callback('currency_fund_id', function ($query, $value) {
+        $query->where(function ($q) use ($value) {
+          $q->where(function ($sub) use ($value) {
+            $sub->where('morph_from_type', CurrencyFund::class)
+              ->where('morph_from_id', $value);
+          })->orWhere(function ($sub) use ($value) {
+            $sub->where('morph_to_type', CurrencyFund::class)
+              ->where('morph_to_id', $value);
+          });
+        });
+      }),
+
+      AllowedFilter::callback('company_fund_currency_id', function ($query, $value) {
+        $query->where(function ($q) use ($value) {
+          $q->where(function ($sub) use ($value) {
+            $sub->where('morph_from_type', CompanyFundCurrency::class)
+              ->where('morph_from_id', $value);
+          })->orWhere(function ($sub) use ($value) {
+            $sub->where('morph_to_type', CompanyFundCurrency::class)
+              ->where('morph_to_id', $value);
+          });
+        });
+      }),
+
+      AllowedFilter::callback('project_fund_currency_id', function ($query, $value) {
+        $query->where(function ($q) use ($value) {
+          $q->where(function ($sub) use ($value) {
+            $sub->where('morph_from_type', ProjectFundCurrency::class)
+              ->where('morph_from_id', $value);
+          })->orWhere(function ($sub) use ($value) {
+            $sub->where('morph_to_type', ProjectFundCurrency::class)
+              ->where('morph_to_id', $value);
+          });
+        });
       }),
     ];
 
@@ -76,7 +222,6 @@ class TransactionService
 
     return $transactions;
   }
-
   public function findOne(Transaction $transaction): Transaction
   {
     $transaction->load([
