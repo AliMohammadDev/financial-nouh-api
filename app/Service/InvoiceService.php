@@ -39,9 +39,10 @@ class InvoiceService
       }),
       AllowedFilter::exact('item_id'),
       AllowedFilter::exact('supplier_id'),
+      AllowedFilter::exact('expense_id'),
       AllowedFilter::exact('is_posted'),
 
-      // الفلترة حسب الصندوق العادي (Fund ID)
+
       AllowedFilter::callback('fund_id', function ($query, $value) {
         $query->whereHas('expense', function ($q) use ($value) {
           $q->where('expenseable_type', CurrencyFund::class)
@@ -51,7 +52,6 @@ class InvoiceService
         });
       }),
 
-      // الفلترة حسب صندوق الشركة (Company Fund ID)
       AllowedFilter::callback('company_fund_id', function ($query, $value) {
         $query->whereHas('expense', function ($q) use ($value) {
           $q->where('expenseable_type', CompanyFundCurrency::class)
@@ -61,7 +61,6 @@ class InvoiceService
         });
       }),
 
-      // الفلترة حسب صندوق المشروع (Project Fund ID)
       AllowedFilter::callback('project_fund_id', function ($query, $value) {
         $query->whereHas('expense', function ($q) use ($value) {
           $q->where('expenseable_type', ProjectFundCurrency::class)
