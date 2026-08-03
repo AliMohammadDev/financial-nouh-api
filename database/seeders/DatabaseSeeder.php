@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
       // UserSeeder::class,
       UserRoleSeeder::class,
       DepartmentProjectSeeder::class,
-
+      CompanyFundSeeder::class,
       ItemMaterialSeeder::class,
       CurrencySeeder::class,
     ]);

@@ -8,6 +8,7 @@ use App\Models\Craftsmen;
 use App\Models\DailyWorker;
 use App\Models\Employee;
 use App\Models\Engineer;
+use App\Models\Fund;
 use App\Models\Investor;
 use App\Models\Supplier;
 use App\Models\Trustee;
@@ -92,6 +93,11 @@ class UserRoleSeeder extends Seeder
 
         $data = array_merge(['user_id' => $user->id], $roleData['extra']);
         $roleData['model']::create($data);
+
+        Fund::create([
+          'user_id' => $user->id,
+          'name'    => 'صندوق ' . $name,
+        ]);
       }
     }
   }

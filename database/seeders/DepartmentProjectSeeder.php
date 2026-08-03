@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Client;
 use App\Models\Department;
 use App\Models\Project;
+use App\Models\ProjectFund;
 use Illuminate\Database\Seeder;
 
 class DepartmentProjectSeeder extends Seeder
@@ -71,12 +72,17 @@ class DepartmentProjectSeeder extends Seeder
     ];
 
     foreach ($projectsData as $index => $proj) {
-      Project::create([
+      $project = Project::create([
         'name'          => $proj['name'],
         'department_id' => $createdDepartments[$index % count($createdDepartments)]->id,
         'client_id'     => $clientIds[array_rand($clientIds)],
         'expected_cost' => $proj['expected_cost'],
         'status'        => $proj['status'],
+      ]);
+
+      ProjectFund::create([
+        'project_id' => $project->id,
+        'name'       => 'صندوق مشروع ' . $project->name,
       ]);
     }
   }
