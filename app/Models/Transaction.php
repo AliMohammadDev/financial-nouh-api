@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
   'morph_to_id',
   'name',
   'amount',
-  'user_id',
   'created_by',
 ])]
 class Transaction extends Model
@@ -38,10 +37,7 @@ class Transaction extends Model
   {
     return $this->morphTo('morphToFund', 'morph_to_type', 'morph_to_id');
   }
-  public function user(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'user_id');
-  }
+
 
   public function creator(): BelongsTo
   {

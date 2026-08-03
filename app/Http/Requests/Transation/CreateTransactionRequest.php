@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Transation;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateTransactionRequest extends FormRequest
@@ -29,7 +28,6 @@ class CreateTransactionRequest extends FormRequest
       'morph_to_id'     => ['required', 'integer'],
       'name'            => ['nullable', 'string'],
       'amount'          => ['required', 'numeric', 'min:0.01'],
-      'user_id'         => ['nullable', 'exists:users,id'],
       'created_by'      => ['sometimes', 'exists:users,id'],
     ];
   }

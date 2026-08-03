@@ -33,18 +33,9 @@ class TransactionService
 
     $query = QueryBuilder::for(Transaction::class)
       ->with([
-        'user.client',
-        'user.employee',
-        'user.admin',
-        'user.engineer',
-        'user.craftsmen',
-        'user.supplier',
-        'user.trustee',
-        'user.investor',
-        'user.dailyWorker',
         'creator',
         'morphFrom',
-        'morphToFund', 
+        'morphToFund',
       ])
       ->allowedFilters(...$filters)
       ->defaultSort('-created_at');
@@ -88,27 +79,11 @@ class TransactionService
 
   public function findOne(Transaction $transaction): Transaction
   {
-    \Illuminate\Support\Facades\Log::info('Service FindOne Start:', [
-      'transaction_id' => $transaction->id,
-      'morph_to_type' => $transaction->morph_to_type,
-      'morph_to_id' => $transaction->morph_to_id,
-    ]);
-
     $transaction->load([
-      'user.client',
-      'user.employee',
-      'user.admin',
-      'user.engineer',
-      'user.craftsmen',
-      'user.supplier',
-      'user.trustee',
-      'user.investor',
-      'user.dailyWorker',
       'creator',
       'morphFrom',
       'morphToFund',
     ]);
-
 
     $morphRelationsMap = [
       CurrencyFund::class => [
@@ -133,7 +108,6 @@ class TransactionService
     $transaction->loadMorph('morphFrom', $morphRelationsMap);
     $transaction->loadMorph('morphToFund', $morphRelationsMap);
 
-
     return $transaction;
   }
 
@@ -143,7 +117,7 @@ class TransactionService
       $data['created_by'] = auth()->id();
 
       $transaction = Transaction::create($data);
-      $transaction->load(['user', 'creator', 'morphFrom', 'morphToFund']);
+      $transaction->load(['creator', 'morphFrom', 'morphToFund']);
 
       $this->auditLogService->log(
         actionType: 'إضافة',
@@ -159,7 +133,7 @@ class TransactionService
   {
     return DB::transaction(function () use ($transaction, $data) {
       $transaction->update($data);
-      $transaction->load(['user', 'creator', 'morphFrom', 'morphToFund']);
+      $transaction->load(['creator', 'morphFrom', 'morphToFund']);
 
       $this->auditLogService->log(
         actionType: 'تعديل',

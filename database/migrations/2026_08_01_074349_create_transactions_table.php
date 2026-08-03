@@ -22,8 +22,7 @@ return new class extends Migration
       $table->text('name');
       $table->decimal('amount', 15, 2);
 
-      $table->foreignIdFor(User::class)
-        ->constrained('users');
+
 
       $table->foreignId('created_by')
         ->constrained('users');

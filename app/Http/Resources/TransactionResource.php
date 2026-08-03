@@ -5,7 +5,6 @@ namespace App\Http\Resources;
 use App\Http\Resources\User\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Log;
 
 class TransactionResource extends JsonResource
 {
@@ -25,7 +24,6 @@ class TransactionResource extends JsonResource
       'morph_to_info'   => $morphToInfo,
       'name'            => $this->name,
       'amount'          => (float) $this->amount,
-      'user'            => new UserResource($this->whenLoaded('user')),
       'created_by'      => new UserResource($this->whenLoaded('creator')),
       'created_at'      => $this->created_at?->format('Y-m-d'),
     ];
