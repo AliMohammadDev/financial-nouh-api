@@ -26,9 +26,7 @@ class InvoiceResource extends JsonResource
       'is_posted'            => (bool) $this->is_posted,
       'is_visible_to_client' => (bool) $this->is_visible_to_client,
 
-      'item'                 => $this->whenLoaded('item', function () {
-        return $this->item?->name;
-      }),
+      'item'                 => new ItemResource($this->whenLoaded('item')),
       'supplier'             => $this->whenLoaded('supplier', function () {
         return $this->supplier?->name;
       }),

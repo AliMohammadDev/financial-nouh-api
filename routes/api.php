@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\ProjectFundController;
 use App\Http\Controllers\Api\ProjectStageController;
 use App\Http\Controllers\Api\ProjectTeamController;
 use App\Http\Controllers\Api\ReInvoiceController;
+use App\Http\Controllers\Api\ReInvoiceItemController;
 use App\Http\Controllers\Api\RevenueController;
 use App\Http\Controllers\Api\StageTimelineController;
 use App\Http\Controllers\Api\TransactionController;
@@ -111,6 +112,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::apiResource('materials', MaterialController::class);
   Route::apiResource('invoices', InvoiceController::class);
   Route::apiResource('invoice-items', InvoiceItemController::class);
+  Route::apiResource('re-invoice-items', ReInvoiceItemController::class);
 
   // ==========================================
   // Re-Invoices & Financial Additions
