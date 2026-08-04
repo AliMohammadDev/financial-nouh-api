@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Client;
+use App\Models\Currency;
 use App\Models\Department;
 use App\Models\Project;
 use App\Models\ProjectFund;
@@ -37,6 +38,11 @@ class DepartmentProjectSeeder extends Seeder
       $clientIds = [Client::create(['user_id' => 1])->id];
     }
 
+    $usdCurrency = Currency::firstOrCreate(
+      ['currency' => 'USD'],
+      ['symbol' => '$']
+    );
+
     $projectsData = [
       [
         'name' => 'إنشاء برج الجنان السكني (هيكل خرساني)',
@@ -53,7 +59,6 @@ class DepartmentProjectSeeder extends Seeder
         'expected_cost' => 85000.00,
         'status' => 'pending',
       ],
-
       [
         'name' => 'تصميم الواجهات الخارجية لمجمع الروضة',
         'expected_cost' => 45000.00,
@@ -80,9 +85,13 @@ class DepartmentProjectSeeder extends Seeder
         'status'        => $proj['status'],
       ]);
 
-      ProjectFund::create([
+      $projectFund = ProjectFund::create([
         'project_id' => $project->id,
         'name'       => 'صندوق مشروع ' . $project->name,
+      ]);
+
+      $projectFund->currencies()->attach($usdCurrency->id, [
+        'balance' => 5000.00,
       ]);
     }
   }

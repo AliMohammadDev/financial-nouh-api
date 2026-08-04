@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Admin;
 use App\Models\Client;
 use App\Models\Craftsmen;
+use App\Models\Currency;
 use App\Models\DailyWorker;
 use App\Models\Employee;
 use App\Models\Engineer;
@@ -62,6 +63,12 @@ class UserRoleSeeder extends Seeder
     shuffle($arabicNames);
     $nameIndex = 0;
 
+    // جلب عملة الدولار (USD) للتأكد من وجودها
+    $usdCurrency = Currency::firstOrCreate(
+      ['currency' => 'USD'],
+      ['symbol' => '$']
+    );
+
     $roles = [
       ['model' => Admin::class, 'name_en' => 'admin', 'count' => 4, 'extra' => []],
       ['model' => Client::class, 'name_en' => 'client', 'count' => 4, 'extra' => []],
@@ -94,10 +101,18 @@ class UserRoleSeeder extends Seeder
         $data = array_merge(['user_id' => $user->id], $roleData['extra']);
         $roleData['model']::create($data);
 
-        Fund::create([
+        // إنشاء الصندوق للمستخدم
+        $fund = Fund::create([
           'user_id' => $user->id,
           'name'    => 'صندوق ' . $name,
         ]);
+
+        // ربط الصندوق بعملة الدولار مع إعطائه رصيد مبدئي 1000$
+        if ($usdCurrency) {
+          $fund->currencies()->attach($usdCurrency->id, [
+            'balance' => 1000.00,
+          ]);
+        }
       }
     }
   }

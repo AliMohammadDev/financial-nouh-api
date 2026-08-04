@@ -1,8 +1,7 @@
 <?php
 
-use App\Models\Expense;
+use App\Models\CurrencyFund;
 use App\Models\Item;
-use App\Models\Supplier;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,20 +13,19 @@ return new class extends Migration
    */
   public function up(): void
   {
-    Schema::create('invoices', function (Blueprint $table) {
+    Schema::create('re_invoices', function (Blueprint $table) {
       $table->id();
 
       $table->foreignIdFor(Item::class)
         ->constrained();
 
-      $table->foreignIdFor(Expense::class)
-        ->constrained();
-
-      $table->foreignIdFor(Supplier::class)
+      $table->foreignId('supplier_id')
         ->nullable()
-        ->constrained();
+        ->constrained('users');
 
-      $table->string('invoice_number')->unique();
+      $table->morphs('reinvoiceable');
+
+      $table->string('reinvoice_number')->unique();
       $table->timestamp('date')->nullable();
       $table->decimal('discount', 15, 2)->default(0);
       $table->decimal('final_total', 15, 2)->default(0);
@@ -43,6 +41,6 @@ return new class extends Migration
    */
   public function down(): void
   {
-    Schema::dropIfExists('invoices');
+    Schema::dropIfExists('re_invoices');
   }
 };

@@ -22,10 +22,10 @@ return new class extends Migration
         ->constrained('company_fund_currencies')
         ->cascadeOnDelete();
 
-      $table->decimal('bonuses', 10, 2)->default(0);
-      $table->decimal('deductions', 10, 2)->default(0);
+      $table->decimal('bonuses', 15, 2)->default(0);
+      $table->decimal('deductions', 15, 2)->default(0);
       $table->date('payment_date');
-      $table->decimal('amount', 10, 2);
+      $table->decimal('amount', 15, 2);
       $table->timestamps();
     });
   }

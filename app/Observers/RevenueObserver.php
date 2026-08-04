@@ -14,7 +14,7 @@ class RevenueObserver
     $fund = $revenue->revenueable;
 
     if ($fund && isset($fund->balance)) {
-      $fund->increment('balance', $revenue->amount); // زيادة الرصيد عند الإيراد
+      $fund->increment('balance', $revenue->amount);
     }
   }
 
@@ -25,7 +25,6 @@ class RevenueObserver
   {
     if ($revenue->wasChanged('amount') || $revenue->wasChanged('revenueable_id') || $revenue->wasChanged('revenueable_type')) {
 
-      // 1. خصم المبلغ القديم من الصندوق القديم
       $originalType = $revenue->getOriginal('revenueable_type');
       $originalId   = $revenue->getOriginal('revenueable_id');
       $oldAmount    = $revenue->getOriginal('amount');
@@ -35,7 +34,6 @@ class RevenueObserver
         $oldFund->decrement('balance', $oldAmount);
       }
 
-      // 2. إضافة المبلغ الجديد إلى الصندوق الجديد
       $newFund = $revenue->revenueable;
       if ($newFund && isset($newFund->balance)) {
         $newFund->increment('balance', $revenue->amount);
@@ -51,7 +49,7 @@ class RevenueObserver
     $fund = $revenue->revenueable;
 
     if ($fund && isset($fund->balance)) {
-      $fund->decrement('balance', $revenue->amount); // خصم الرصيد عند حذف الإيراد
+      $fund->decrement('balance', $revenue->amount);
     }
   }
 

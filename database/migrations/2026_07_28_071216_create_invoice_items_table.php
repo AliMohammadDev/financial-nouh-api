@@ -26,9 +26,9 @@ return new class extends Migration
       $table->text('item_description');
 
       $table->string('unit');
-      $table->decimal('quantity', 10, 2);
-      $table->decimal('unit_price', 10, 2);
-      $table->decimal('total_price', 10, 2);
+      $table->decimal('quantity', 15, 2);
+      $table->decimal('unit_price', 15, 2);
+      $table->decimal('total_price', 15, 2);
 
       $table->timestamps();
     });
