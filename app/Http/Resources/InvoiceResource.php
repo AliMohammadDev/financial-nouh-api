@@ -31,6 +31,8 @@ class InvoiceResource extends JsonResource
         return $this->supplier?->name;
       }),
 
+      'invoice_items'        => InvoiceItemResource::collection($this->whenLoaded('invoiceItems')),
+
       'expense'              => $this->whenLoaded('expense', function () {
         return [
           'id'               => $this->expense->id,

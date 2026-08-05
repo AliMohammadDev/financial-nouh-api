@@ -98,7 +98,7 @@ class InvoiceService
   }
   public function findOne(Invoice $invoice): Invoice
   {
-    return $invoice->load(['item', 'supplier', 'expense']);
+    return $invoice->load(['item', 'supplier', 'expense', 'invoiceItems.material']);
   }
 
   public function create(array $data): Invoice
