@@ -51,7 +51,7 @@ class RevenueController extends Controller
   {
     $this->revenueService->delete($revenue);
     return response()->json([
-      'message' => 'Revenue deleted successfully'
+      'message' => 'تم حذف الإيراد بنجاح'
     ], Response::HTTP_OK);
   }
 }

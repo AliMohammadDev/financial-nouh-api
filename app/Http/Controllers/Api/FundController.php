@@ -52,7 +52,7 @@ class FundController extends Controller
   {
     $this->fundService->delete($fund);
     return response()->json([
-      'message' => 'Fund deleted successfully'
+      'message' => 'تم حذف الصندوق بنجاح'
     ], Response::HTTP_OK);
   }
 
@@ -61,7 +61,7 @@ class FundController extends Controller
     $updatedFund = $this->fundService->attachCurrency($fund, $request->validated());
 
     return response()->json([
-      'message' => 'Currency attached to fund successfully',
+      'message' => 'تم ربط العملة بالصندوق بنجاح',
       'data'    => new FundResource($updatedFund)
     ], Response::HTTP_OK);
   }

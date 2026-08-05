@@ -42,7 +42,7 @@ class NotificationService
     return false;
   }
 
-  public function markAllAsRead(User $user): int
+  public function markAllAsRead(User $user): ?int
   {
     return $user->unreadNotifications->markAsRead();
   }

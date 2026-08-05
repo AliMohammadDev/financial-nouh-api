@@ -51,7 +51,7 @@ class EmployeePaymentController extends Controller
   {
     $this->paymentService->delete($employeePayment);
     return response()->json([
-      'message' => 'Employee payment deleted successfully'
+      'message' => 'تم حذف دفعة الموظف بنجاح'
     ], Response::HTTP_OK);
   }
 }

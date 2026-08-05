@@ -54,7 +54,7 @@ class StageTimelineController extends Controller
     $this->stageTimelineService->delete($stageTimeline);
 
     return response()->json([
-      'message' => 'Stage timeline deleted successfully.'
-    ], Response::HTTP_OK); 
+      'message' => 'تم حذف الجدول الزمني للمرحلة بنجاح'
+    ], Response::HTTP_OK);
   }
 }

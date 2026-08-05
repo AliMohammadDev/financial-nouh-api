@@ -19,7 +19,9 @@ class AuditLogController extends Controller
     $perPage  = $request->input('per_page', 10);
     $page     = $request->input('page', 1);
 
-    $logs = $this->auditLogService->findAll($paginate, $perPage, $page);
+    $filters  = $request->input('filter', []);
+
+    $logs = $this->auditLogService->findAll($paginate, $perPage, $page, $filters);
 
     return AuditLogResource::collection($logs);
   }

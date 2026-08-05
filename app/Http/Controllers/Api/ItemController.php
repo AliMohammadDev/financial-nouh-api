@@ -51,7 +51,7 @@ class ItemController extends Controller
   {
     $this->itemService->delete($item);
     return response()->json([
-      'message' => 'Structural item and its materials deleted successfully'
+      'message' => 'تم حذف البند ومواده بنجاح'
     ], Response::HTTP_OK);
   }
 }

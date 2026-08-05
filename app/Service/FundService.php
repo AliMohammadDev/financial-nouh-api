@@ -109,7 +109,6 @@ class FundService
         $data['currency_id'] => ['balance' => $data['balance']]
       ]);
 
-      // تسجيل عملية ربط العملة للصندوق
       $this->auditLogService->log(
         actionType: 'إضافة',
         description: "قام بربط عملة جديدة (برصيد: {$data['balance']}) بالصندوق: {$fund->name}",

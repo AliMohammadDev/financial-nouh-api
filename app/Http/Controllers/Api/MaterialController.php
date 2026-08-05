@@ -51,7 +51,7 @@ class MaterialController extends Controller
   {
     $this->materialService->delete($material);
     return response()->json([
-      'message' => 'Material deleted successfully'
+      'message' => 'تم حذف المادة بنجاح'
     ], Response::HTTP_OK);
   }
 }

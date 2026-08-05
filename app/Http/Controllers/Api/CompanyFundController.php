@@ -53,7 +53,7 @@ class CompanyFundController extends Controller
   {
     $this->companyFundService->delete($id);
     return response()->json([
-      'message' => 'Company fund deleted successfully'
+      'message' => 'تم حذف تمويل الشركة بنجاح'
     ], Response::HTTP_OK);
   }
 
@@ -62,7 +62,7 @@ class CompanyFundController extends Controller
     $updatedFund = $this->companyFundService->attachCurrency($companyFund, $request->validated());
 
     return response()->json([
-      'message' => 'Currency attached to company fund successfully',
+      'message' => 'تم ربط العملة بالصندوق الشركة بنجاح',
       'data'    => new CompanyFundResource($updatedFund)
     ], Response::HTTP_OK);
   }

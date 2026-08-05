@@ -54,7 +54,7 @@ class ProjectStageController extends Controller
     $this->projectStageService->delete($projectStage);
 
     return response()->json([
-      'message' => 'Project stage deleted successfully.'
+      'message' => 'تم حذف مرحلة المشروع بنجاح.'
     ], Response::HTTP_OK);
   }
 }

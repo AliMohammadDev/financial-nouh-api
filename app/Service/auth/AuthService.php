@@ -16,10 +16,10 @@ class AuthService
     }
 
     if (!$user->is_active) {
-      abort(403, 'User is not active');
+      abort(403, 'المستخدم غير مفعل');
     }
 
-    // $user->tokens()->delete(); 
+    // $user->tokens()->delete();
     $token = $user->createToken('auth_token')->plainTextToken;
     return $token;
   }

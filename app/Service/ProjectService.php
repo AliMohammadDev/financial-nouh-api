@@ -88,7 +88,7 @@ class ProjectService
   {
     if ($project->projectTeams()->exists()) {
       throw ValidationException::withMessages([
-        'project' => ['You have to delete project teams first before deleting this project.'],
+        'project' => ['يجب حذف فرق العمل المرتبطة بالمشروع أولاً قبل حذف هذا المشروع.'],
       ]);
     }
 

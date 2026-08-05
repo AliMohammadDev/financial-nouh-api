@@ -21,7 +21,7 @@ class AuthController extends Controller
 
     if (!$token) {
       return response()->json([
-        'message' => 'Invalid email or password',
+        'message' => 'البريد الإلكتروني أو كلمة المرور غير صحيحة',
       ], 401);
     }
     $user = User::where('email', $request->email)->first();
@@ -75,7 +75,7 @@ class AuthController extends Controller
     }
 
     return response()->json([
-      'message' => 'Logged out successfully',
+      'message' => 'تم تسجيل الخروج بنجاح',
     ], 200);
   }
 }

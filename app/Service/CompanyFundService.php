@@ -46,7 +46,6 @@ class CompanyFundService
     return DB::transaction(function () use ($data) {
       $fund = CompanyFund::create($data);
 
-      // تسجيل عملية الإضافة في الـ Audit Log
       $this->auditLogService->log(
         actionType: 'إضافة',
         description: "قام بإنشاء صندوق شركة جديد: {$fund->name}",
@@ -64,7 +63,6 @@ class CompanyFundService
     DB::transaction(function () use ($fund, $data) {
       $fund->update($data);
 
-      // تسجيل عملية التعديل في الـ Audit Log
       $this->auditLogService->log(
         actionType: 'تعديل',
         description: "قام بتعديل بيانات صندوق الشركة: {$fund->name}",
@@ -85,7 +83,6 @@ class CompanyFundService
       $deleted = (bool) $fund->delete();
 
       if ($deleted) {
-        // تسجيل عملية الحذف في الـ Audit Log
         $this->auditLogService->log(
           actionType: 'حذف',
           description: "قام بحذف صندوق الشركة: {$fundName}",

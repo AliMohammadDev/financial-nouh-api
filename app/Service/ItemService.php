@@ -8,6 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
+use Illuminate\Validation\ValidationException;
 
 class ItemService
 {
@@ -88,6 +89,20 @@ class ItemService
 
   public function delete(Item $item): bool
   {
+
+    if ($item->materials()->exists()) {
+      throw ValidationException::withMessages([
+        'item' => ['لا يمكن حذف هذا البند لأنه يحتوي على مواد مرتبطة به.'],
+      ]);
+    }
+
+    if ($item->invoices()->exists()) {
+
+      throw ValidationException::withMessages([
+        'item' => ['لا يمكن حذف هذا البند لأنه يحتوي على بفواتير موجودة .'],
+      ]);
+    }
+
     return DB::transaction(function () use ($item) {
       $itemName = $item->name ?? 'صنف';
 

@@ -15,4 +15,8 @@ class Item extends Model
   {
     return $this->hasMany(Material::class, 'item_id');
   }
+  public function invoices(): HasMany
+  {
+    return $this->hasMany(Invoice::class, 'item_id');
+  }
 }

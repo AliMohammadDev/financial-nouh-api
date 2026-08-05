@@ -51,7 +51,7 @@ class DepartmentController extends Controller
   {
     $this->departmentService->delete($department);
     return response()->json([
-      'message' => 'Department deleted successfully'
+      'message' => 'تم حذف القسم بنجاح'
     ], Response::HTTP_OK);
   }
 }

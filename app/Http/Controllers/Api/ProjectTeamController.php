@@ -49,7 +49,7 @@ class ProjectTeamController extends Controller
   {
     $this->projectTeamService->delete($projectTeam);
     return response()->json([
-      'message' => 'Project team member deleted successfully'
+      'message' => 'تم حذف عضو فريق المشروع بنجاح'
     ], Response::HTTP_OK);
   }
 }

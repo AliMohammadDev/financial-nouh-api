@@ -51,7 +51,7 @@ class CurrencyController extends Controller
   {
     $this->currencyService->delete($currency);
     return response()->json([
-      'message' => 'Currency deleted successfully'
+      'message' => 'تم حذف العملة بنجاح'
     ], Response::HTTP_OK);
   }
 }

@@ -23,6 +23,7 @@ return new class extends Migration
         ->constrained();
 
       $table->foreignId('received_by')
+        ->nullable()
         ->constrained('users');
 
       $table->timestamps();

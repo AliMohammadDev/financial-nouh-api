@@ -53,7 +53,7 @@ class TransactionController extends Controller
     $this->transactionService->delete($transaction);
 
     return response()->json([
-      'message' => 'Transaction deleted successfully',
+      'message' => 'تم حذف المعاملة بنجاح',
     ], 200);
   }
 }

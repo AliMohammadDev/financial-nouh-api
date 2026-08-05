@@ -20,6 +20,7 @@ return new class extends Migration
       $table->decimal('amount', 15, 2);
       $table->boolean('is_posted')->default(false);
       $table->foreignIdFor(User::class)
+      ->nullable()
         ->constrained();
 
       $table->foreignId('created_by')

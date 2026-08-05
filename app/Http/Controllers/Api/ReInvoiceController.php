@@ -51,7 +51,7 @@ class ReInvoiceController extends Controller
   {
     $this->reInvoiceService->delete($reInvoice);
     return response()->json([
-      'message' => 'ReInvoice deleted successfully'
+      'message' => 'تم حذف فاتورة  مرتجع الفاتورة بنجاح'
     ], Response::HTTP_OK);
   }
 }

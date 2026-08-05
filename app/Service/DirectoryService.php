@@ -148,10 +148,10 @@ class DirectoryService
   public function moveFile(int $mediaId, int $targetDirectoryId): bool
   {
     return DB::transaction(function () use ($mediaId, $targetDirectoryId) {
-      $mediaItem = \Spatie\MediaLibrary\MediaCollections\Models\Media::findOrFail($mediaId);
+      $mediaItem = Media::findOrFail($mediaId);
 
       if ($mediaItem->model_type !== Directory::class) {
-        throw new \Exception('The specified media is not a directory file.');
+        throw new \Exception('الملف المحدد ليس ملفاً تابعاً للمجلدات.');
       }
 
       $mediaItem->model_id = $targetDirectoryId;
@@ -173,7 +173,7 @@ class DirectoryService
       $mediaItem = Media::findOrFail($mediaId);
 
       if ($mediaItem->model_type !== Directory::class) {
-        throw new \Exception('The specified media is not a directory file.');
+        throw new \Exception('الملف المحدد ليس ملفاً تابعاً للمجلدات.');
       }
 
       $targetDirectory = Directory::findOrFail($targetDirectoryId);

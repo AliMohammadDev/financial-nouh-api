@@ -8,6 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class MaterialService
 {
@@ -91,6 +92,14 @@ class MaterialService
 
   public function delete(Material $material): bool
   {
+
+    if ($material->invoiceItems()->exists()) {
+      throw new HttpResponseException(
+        response()->json([
+          'message' => 'لا يمكن حذف هذه المادة لأنها مستخدمة في بنود فواتير سابقة.',
+        ])
+      );
+    }
     return DB::transaction(function () use ($material) {
       $materialName = $material->name ?? 'مادة';
 

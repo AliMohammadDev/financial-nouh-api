@@ -47,11 +47,12 @@ class ReInvoiceItemController extends Controller
     return response()->json(new ReInvoiceItemResource($updatedItem));
   }
 
+
   public function destroy(ReInvoiceItem $reInvoiceItem): JsonResponse
   {
     $this->reInvoiceItemService->delete($reInvoiceItem);
     return response()->json([
-      'message' => 'Re-invoice item deleted successfully'
+      'message' => 'تم حذف بند مرتجع الفاتورة  بنجاح'
     ], Response::HTTP_OK);
   }
 }

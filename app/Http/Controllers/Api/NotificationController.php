@@ -41,12 +41,12 @@ class NotificationController extends Controller
 
     if ($updated) {
       return response()->json([
-        'message' => 'notification marked as read successfully',
+        'message' => 'تم تحديد الإشعار كمقروء بنجاح',
       ]);
     }
 
     return response()->json([
-      'message' => 'notification not found',
+      'message' => 'الإشعار غير موجود',
     ], 404);
   }
 
@@ -56,7 +56,7 @@ class NotificationController extends Controller
     $this->notificationService->markAllAsRead($user);
 
     return response()->json([
-      'message' => 'all notifications marked as read successfully',
+      'message' => 'تم تحديد جميع الإشعارات كمقروءة بنجاح',
     ]);
   }
 }

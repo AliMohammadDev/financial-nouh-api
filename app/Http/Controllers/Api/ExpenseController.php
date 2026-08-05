@@ -51,7 +51,7 @@ class ExpenseController extends Controller
   {
     $this->expenseService->delete($expense);
     return response()->json([
-      'message' => 'Expense deleted successfully'
+      'message' => 'تم حذف المصروف بنجاح'
     ], Response::HTTP_OK);
   }
 }

@@ -54,7 +54,7 @@ class DirectoryController extends Controller
   {
     $this->directoryService->delete($directory);
     return response()->json([
-      'message' => 'Directory deleted successfully'
+      'message' => 'تم حذف المجلد بنجاح'
     ], Response::HTTP_OK);
   }
 
@@ -63,7 +63,7 @@ class DirectoryController extends Controller
     $updatedDirectory = $this->directoryService->uploadFile($directory, $request->file('files'));
 
     return response()->json([
-      'message' => 'Files uploaded to directory successfully',
+      'message' => 'تم رفع الملفات إلى المجلد بنجاح',
       'data'    =>    new DirectoryResource($updatedDirectory)
     ], Response::HTTP_OK);
   }
@@ -72,7 +72,7 @@ class DirectoryController extends Controller
     $this->directoryService->deleteFile($directory, $mediaId);
 
     return response()->json([
-      'message' => 'File deleted from directory successfully'
+      'message' => 'تم حذف الملف من المجلد بنجاح'
     ], Response::HTTP_OK);
   }
 
@@ -84,7 +84,7 @@ class DirectoryController extends Controller
     );
 
     return response()->json([
-      'message' => 'File moved to another directory successfully'
+      'message' => 'تم نقل الملف إلى مجلد آخر بنجاح'
     ], Response::HTTP_OK);
   }
 
@@ -96,7 +96,7 @@ class DirectoryController extends Controller
     );
 
     return response()->json([
-      'message' => 'File copied to another directory successfully'
+      'message' => 'تم نسخ الملف إلى مجلد آخر بنجاح'
     ], Response::HTTP_OK);
   }
 }
