@@ -22,8 +22,6 @@ return new class extends Migration
       $table->text('name');
       $table->decimal('amount', 15, 2);
 
-
-
       $table->foreignId('created_by')
         ->constrained('users');
       $table->timestamps();

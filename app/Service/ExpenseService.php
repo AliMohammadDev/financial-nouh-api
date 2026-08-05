@@ -149,8 +149,20 @@ class ExpenseService
       'user.trustee',
       'user.investor',
       'user.dailyWorker',
-      'creator',
-      'invoices.item',    
+
+
+      'creator.client',
+      'creator.employee',
+      'creator.admin',
+      'creator.engineer',
+      'creator.craftsmen',
+      'creator.supplier',
+      'creator.trustee',
+      'creator.investor',
+      'creator.dailyWorker',
+
+
+      'invoices.item',
       'invoices.supplier',
     ]);
 

@@ -138,6 +138,17 @@ class RevenueService
       'user.trustee',
       'user.investor',
       'user.dailyWorker',
+
+      'receiver.client',
+      'receiver.employee',
+      'receiver.admin',
+      'receiver.engineer',
+      'receiver.craftsmen',
+      'receiver.supplier',
+      'receiver.trustee',
+      'receiver.investor',
+      'receiver.dailyWorker',
+
       'receiver',
     ]);
 
