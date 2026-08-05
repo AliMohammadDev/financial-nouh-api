@@ -6,6 +6,7 @@ use App\Models\Directory;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -32,7 +33,7 @@ class DirectoryService
     ];
 
     $query = QueryBuilder::for(Directory::class)
-      ->with(['project', 'children', 'media'])
+      ->with(['project', 'children.media', 'media'])
       ->allowedFilters(...$filters);
 
     $query->whereNull('parent_dir_id');
@@ -48,9 +49,13 @@ class DirectoryService
 
   public function findOne(Directory $directory): Directory
   {
-    return $directory->load(['project', 'children', 'media']);
+    return $directory->load([
+      'project',
+      'parent.parent.parent',
+      'children.media',
+      'media'
+    ]);
   }
-
   public function create(array $data): Directory
   {
     return DB::transaction(function () use ($data) {
@@ -155,6 +160,29 @@ class DirectoryService
       $this->auditLogService->log(
         actionType: 'تعديل',
         description: "قام بنقل الملف (ID: {$mediaId}) إلى المجلد رقم: {$targetDirectoryId}",
+        affectedTable: 'directories'
+      );
+
+      return true;
+    });
+  }
+
+  public function copyFile(int $mediaId, int $targetDirectoryId): bool
+  {
+    return DB::transaction(function () use ($mediaId, $targetDirectoryId) {
+      $mediaItem = Media::findOrFail($mediaId);
+
+      if ($mediaItem->model_type !== Directory::class) {
+        throw new \Exception('The specified media is not a directory file.');
+      }
+
+      $targetDirectory = Directory::findOrFail($targetDirectoryId);
+
+      $mediaItem->copy($targetDirectory, 'directory_files', 'public');
+
+      $this->auditLogService->log(
+        actionType: 'إضافة',
+        description: "قام بنسخ الملف ({$mediaItem->file_name}) إلى المجلد رقم: {$targetDirectoryId}",
         affectedTable: 'directories'
       );
 

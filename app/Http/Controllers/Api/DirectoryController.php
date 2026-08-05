@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Directory\CopyFileRequest;
 use App\Http\Requests\Directory\CreateDirectoryRequest;
 use App\Http\Requests\Directory\MoveFileRequest;
 use App\Http\Requests\Directory\UpdateDirectoryRequest;
@@ -84,6 +85,18 @@ class DirectoryController extends Controller
 
     return response()->json([
       'message' => 'File moved to another directory successfully'
+    ], Response::HTTP_OK);
+  }
+
+  public function copyFile(CopyFileRequest $request): JsonResponse
+  {
+    $this->directoryService->copyFile(
+      $request->input('media_id'),
+      $request->input('target_directory_id')
+    );
+
+    return response()->json([
+      'message' => 'File copied to another directory successfully'
     ], Response::HTTP_OK);
   }
 }

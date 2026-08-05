@@ -77,6 +77,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::post('directories/{directory}/files', [DirectoryController::class, 'uploadFile']);
   Route::delete('directories/{directory}/files/{mediaId}', [DirectoryController::class, 'deleteFile']);
   Route::post('directories/move-file', [DirectoryController::class, 'moveFile']);
+  Route::post('directories/copy-file', [DirectoryController::class, 'copyFile']);
 
   // ==========================================
   // System Configurations

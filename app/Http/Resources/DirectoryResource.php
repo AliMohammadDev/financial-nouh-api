@@ -22,7 +22,7 @@ class DirectoryResource extends JsonResource
       'project'       => new ProjectResource($this->whenLoaded('project')),
       'children'      => DirectoryResource::collection($this->whenLoaded('children')),
 
-
+      'parent'        => new DirectoryResource($this->whenLoaded('parent')),
       'files'         => $this->whenLoaded('media', function () {
         return $this->getMedia('directory_files')->map(function ($media) {
           return [
