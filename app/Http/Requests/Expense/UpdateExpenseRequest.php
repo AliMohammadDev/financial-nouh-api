@@ -32,29 +32,29 @@ class UpdateExpenseRequest extends FormRequest
         'sometimes',
         'numeric',
         'min:0.01',
-        function ($attribute, $value, $fail) {
-          $expense = $this->route('expense');
+        // function ($attribute, $value, $fail) {
+        //   $expense = $this->route('expense');
 
-          if (!$expense) {
-            return;
-          }
+        //   if (!$expense) {
+        //     return;
+        //   }
 
-          $modelType = $this->input('expenseable_type', $expense->expenseable_type);
-          $modelId   = $this->input('expenseable_id', $expense->expenseable_id);
+        //   $modelType = $this->input('expenseable_type', $expense->expenseable_type);
+        //   $modelId   = $this->input('expenseable_id', $expense->expenseable_id);
 
-          $fund = $modelType::find($modelId);
+        //   $fund = $modelType::find($modelId);
 
-          if ($fund && isset($fund->balance)) {
-            $availableBalance = $fund->balance;
-            if ($expense->expenseable_type === $modelType && $expense->expenseable_id === $modelId) {
-              $availableBalance += $expense->amount;
-            }
+        //   if ($fund && isset($fund->balance)) {
+        //     $availableBalance = $fund->balance;
+        //     if ($expense->expenseable_type === $modelType && $expense->expenseable_id === $modelId) {
+        //       $availableBalance += $expense->amount;
+        //     }
 
-            if ($value > $availableBalance) {
-              $fail("The requested amount ({$value}) exceeds the maximum available balance. Maximum allowed is: {$availableBalance}.");
-            }
-          }
-        },
+        //     if ($value > $availableBalance) {
+        //       $fail("The requested amount ({$value}) exceeds the maximum available balance. Maximum allowed is: {$availableBalance}.");
+        //     }
+        //   }
+        // },
       ],
       'is_posted'        => ['nullable', 'boolean'],
       'user_id'          => ['sometimes', 'exists:users,id'],
