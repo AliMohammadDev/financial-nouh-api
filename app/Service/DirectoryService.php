@@ -27,14 +27,25 @@ class DirectoryService
 
     $filters = [
       AllowedFilter::callback('search', function ($query, $value) {
-        $query->where('dir_name', 'like', "%{$value}%");
+        $query->where(function ($q) use ($value) {
+          $q->where('dir_name', 'like', "%{$value}%")
+            ->orWhere('dir_path', 'like', "%{$value}%");
+        });
       }),
       AllowedFilter::exact('project_id'),
+
+      AllowedFilter::exact('parent_dir_id'),
     ];
 
     $query = QueryBuilder::for(Directory::class)
       ->with(['project', 'children.media', 'media'])
-      ->allowedFilters(...$filters);
+      ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'dir_name',
+        'dir_path'
+      );
 
     $query->whereNull('parent_dir_id');
 

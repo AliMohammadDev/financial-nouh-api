@@ -5,6 +5,9 @@ namespace App\Service;
 use App\Models\AuditLog;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class AuditLogService
 {
@@ -27,27 +30,35 @@ class AuditLogService
     bool $paginate = false,
     int $perPage = 10,
     int $page = 1,
-    array $filters = [],
     array $columns = ["*"]
   ): LengthAwarePaginator|Collection {
 
-    $query = AuditLog::with('user')
-      ->when(!empty($filters['user_id']), function ($q) use ($filters) {
-        $q->where('user_id', $filters['user_id']);
-      })
-      ->when(!empty($filters['action_type']), function ($q) use ($filters) {
-        $q->where('action_type', 'like', '%' . $filters['action_type'] . '%');
-      })
-      ->when(!empty($filters['affected_table']), function ($q) use ($filters) {
-        $q->where('affected_table', 'like', '%' . $filters['affected_table'] . '%');
-      })
-      ->when(!empty($filters['description']), function ($q) use ($filters) {
-        $q->where('description', 'like', '%' . $filters['description'] . '%');
-      })
-      ->when(!empty($filters['created_at']), function ($q) use ($filters) {
-        $q->whereDate('created_at', $filters['created_at']);
-      })
-      ->latest('created_at');
+    $filters = [
+      AllowedFilter::exact('user_id'),
+      AllowedFilter::partial('action_type'),
+      AllowedFilter::partial('affected_table'),
+      AllowedFilter::partial('description'),
+      AllowedFilter::callback('created_at', function ($query, $value) {
+        $query->whereDate('created_at', $value);
+      }),
+    ];
+
+    $query = QueryBuilder::for(AuditLog::class)
+      ->select('audit_logs.*')
+      ->with('user')
+      ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'action_type',
+        'affected_table',
+        AllowedSort::callback('user_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users', 'audit_logs.user_id', '=', 'users.id')
+            ->orderBy('users.name', $direction);
+        })
+      )
+      ->defaultSort('-created_at');
 
     if ($paginate) {
       return $query->paginate(

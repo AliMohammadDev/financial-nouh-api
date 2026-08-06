@@ -25,8 +25,6 @@ class CreateTrusteeRequest extends FormRequest
    */
   public function rules(): array
   {
-    return array_merge($this->userCreateRules(), [
-      'kinship_relation' => ['required', 'string', 'max:255'],
-    ]);
+    return array_merge($this->userCreateRules(), []);
   }
 }

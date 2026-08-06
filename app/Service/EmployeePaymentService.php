@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class EmployeePaymentService
@@ -31,11 +32,35 @@ class EmployeePaymentService
             ->orWhere('email', 'like', "%{$value}%");
         });
       }),
+
+      AllowedFilter::exact('employee_id'),
+      AllowedFilter::exact('payment_date'),
+      AllowedFilter::callback('date_from', function ($query, $value) {
+        $query->whereDate('payment_date', '>=', $value);
+      }),
+      AllowedFilter::callback('date_to', function ($query, $value) {
+        $query->whereDate('payment_date', '<=', $value);
+      }),
+
     ];
 
     $query = QueryBuilder::for(EmployeePayment::class)
       ->with(['employee.user', 'companyFundCurrency.companyFund', 'companyFundCurrency.currency'])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'amount',
+        'bonuses',
+        'deductions',
+        'payment_date',
+        AllowedSort::callback('employee_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('employees', 'employee_payments.employee_id', '=', 'employees.id')
+            ->join('users', 'employees.user_id', '=', 'users.id')
+            ->orderBy('users.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {

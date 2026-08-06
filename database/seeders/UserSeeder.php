@@ -54,7 +54,6 @@ class UserSeeder extends Seeder
     User::factory(3)->create()->each(function ($user) {
       Trustee::create([
         'user_id'          => $user->id,
-        'kinship_relation' => fake()->randomElement(['Brother', 'Father', 'Partner']),
       ]);
     });
   }

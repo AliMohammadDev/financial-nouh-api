@@ -16,7 +16,6 @@ return new class extends Migration
       $table->id();
       $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
 
-      $table->string('kinship_relation');
       $table->timestamps();
     });
   }

@@ -78,7 +78,7 @@ class UserRoleSeeder extends Seeder
       ['model' => Engineer::class, 'name_en' => 'engineer', 'count' => 4, 'extra' => ['job_title' => 'مهندس مدني', 'base_salary' => 1200.00]],
       ['model' => Investor::class, 'name_en' => 'investor', 'count' => 4, 'extra' => ['investment_ratio' => 25.00]],
       ['model' => Supplier::class, 'name_en' => 'supplier', 'count' => 4, 'extra' => []],
-      ['model' => Trustee::class, 'name_en' => 'trustee', 'count' => 4, 'extra' => ['kinship_relation' => 'أخ']],
+      ['model' => Trustee::class, 'name_en' => 'trustee', 'count' => 4, 'extra' => []],
     ];
 
     $counter = 1;

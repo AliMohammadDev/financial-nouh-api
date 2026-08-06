@@ -10,6 +10,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ExpenseService
@@ -18,8 +19,6 @@ class ExpenseService
   public function __construct(
     private AuditLogService $auditLogService
   ) {}
-
-
 
   public function findAll(
     bool $paginate = false,
@@ -30,10 +29,24 @@ class ExpenseService
 
     $filters = [
       AllowedFilter::callback('search', function ($query, $value) {
-        $query->whereHas('user', function ($q) use ($value) {
-          $q->where('name', 'like', "%{$value}%")
-            ->orWhere('email', 'like', "%{$value}%");
-        });
+        $query->where('description', 'like', "%{$value}%")
+          ->orWhereHas('user', function ($q) use ($value) {
+            $q->where('name', 'like', "%{$value}%")
+              ->orWhere('email', 'like', "%{$value}%");
+          });
+      }),
+
+      AllowedFilter::exact('is_posted'),
+
+      AllowedFilter::exact('user_id'),
+
+      AllowedFilter::exact('created_by'),
+
+      AllowedFilter::callback('date_from', function ($query, $value) {
+        $query->whereDate('created_at', '>=', $value);
+      }),
+      AllowedFilter::callback('date_to', function ($query, $value) {
+        $query->whereDate('created_at', '<=', $value);
       }),
 
       AllowedFilter::callback('fund_id', function ($query, $value) {
@@ -80,10 +93,37 @@ class ExpenseService
         'user.craftsmen',
         'user.supplier',
         'user.trustee',
+        'user.investor',
+        'user.dailyWorker',
+
         'expenseable',
-        'creator',
+        'creator.client',
+        'creator.employee',
+        'creator.admin',
+        'creator.engineer',
+        'creator.craftsmen',
+        'creator.supplier',
+        'creator.trustee',
+        'creator.investor',
+        'creator.dailyWorker',
       ])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'amount',
+        'is_posted',
+        AllowedSort::callback('user_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users as u', 'expenses.user_id', '=', 'u.id')
+            ->orderBy('u.name', $direction);
+        }),
+        AllowedSort::callback('creator_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users as c', 'expenses.created_by', '=', 'c.id')
+            ->orderBy('c.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {

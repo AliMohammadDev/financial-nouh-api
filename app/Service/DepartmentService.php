@@ -34,6 +34,12 @@ class DepartmentService
 
     $query = QueryBuilder::for(Department::class)
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'Name',
+        'Main_Manager'
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {

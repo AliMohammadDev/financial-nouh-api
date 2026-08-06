@@ -10,6 +10,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class TrusteeService
@@ -33,7 +34,7 @@ class TrusteeService
           $q->where('name', 'like', "%{$value}%")
             ->orWhere('email', 'like', "%{$value}%")
             ->orWhere('phone_number', 'like', "%{$value}%");
-        })->orWhere('kinship_relation', 'like', "%{$value}%");
+        });
       }),
     ];
 
@@ -42,6 +43,16 @@ class TrusteeService
         'user.funds.currencies',
       ])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        AllowedSort::callback('user_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users', 'trustees.user_id', '=', 'users.id')
+            ->orderBy('users.name', $direction)
+            ->select('trustees.*');
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {
@@ -69,12 +80,11 @@ class TrusteeService
 
       $trustee = Trustee::create([
         'user_id'          => $user->id,
-        'kinship_relation' => $data['kinship_relation'] ?? null,
       ]);
 
       $this->auditLogService->log(
         actionType: 'إضافة',
-        description: "قام بتسجيل وصي جديد: {$user->name} (صلة القرابة: {$trustee->kinship_relation})",
+        description: "قام بتسجيل وصي جديد: {$user->name})",
         affectedTable: 'trustees'
       );
 
@@ -91,11 +101,8 @@ class TrusteeService
         unset($data['password']);
       }
 
-      $trustee->user->update(collect($data)->except(['kinship_relation'])->toArray());
+      $trustee->user->update(collect($data)->toArray());
 
-      if (isset($data['kinship_relation'])) {
-        $trustee->update(collect($data)->only(['kinship_relation'])->toArray());
-      }
 
       $trustee->load('user');
 

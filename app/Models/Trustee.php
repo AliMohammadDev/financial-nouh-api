@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'kinship_relation'])]
+#[Fillable(['user_id'])]
 class Trustee extends Model
 {
   use HasFactory;

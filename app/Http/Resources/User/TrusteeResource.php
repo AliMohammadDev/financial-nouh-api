@@ -16,7 +16,6 @@ class TrusteeResource extends JsonResource
   {
     return [
       'id'               => $this->id,
-      'kinship_relation' => $this->kinship_relation,
       'user'             => new UserResource($this->whenLoaded('user')),
       'created_at'       => $this->created_at?->toIso8601String(),
     ];

@@ -29,8 +29,6 @@ class UpdateTrusteeRequest extends FormRequest
     $trustee = $this->route('trustee');
     $userId = $trustee?->user_id;
 
-    return array_merge($this->userUpdateRules($userId), [
-      'kinship_relation' => ['sometimes', 'required', 'string', 'max:255'],
-    ]);
+    return array_merge($this->userUpdateRules($userId), []);
   }
 }

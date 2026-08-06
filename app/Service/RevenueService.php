@@ -10,6 +10,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 
@@ -29,10 +30,24 @@ class RevenueService
 
     $filters = [
       AllowedFilter::callback('search', function ($query, $value) {
-        $query->whereHas('user', function ($q) use ($value) {
-          $q->where('name', 'like', "%{$value}%")
-            ->orWhere('email', 'like', "%{$value}%");
-        });
+        $query->where('description', 'like', "%{$value}%")
+          ->orWhereHas('user', function ($q) use ($value) {
+            $q->where('name', 'like', "%{$value}%")
+              ->orWhere('email', 'like', "%{$value}%");
+          });
+      }),
+
+      AllowedFilter::exact('is_posted'),
+
+      AllowedFilter::exact('user_id'),
+
+      AllowedFilter::exact('received_by'),
+
+      AllowedFilter::callback('date_from', function ($query, $value) {
+        $query->whereDate('created_at', '>=', $value);
+      }),
+      AllowedFilter::callback('date_to', function ($query, $value) {
+        $query->whereDate('created_at', '<=', $value);
       }),
 
       AllowedFilter::callback('fund_id', function ($query, $value) {
@@ -71,8 +86,44 @@ class RevenueService
     ];
 
     $query = QueryBuilder::for(Revenue::class)
-      ->with(['user', 'receiver', 'revenueable'])
+      ->with([
+        'user.client',
+        'user.employee',
+        'user.admin',
+        'user.engineer',
+        'user.craftsmen',
+        'user.supplier',
+        'user.trustee',
+        'user.investor',
+        'user.dailyWorker',
+        'revenueable',
+        'receiver.client',
+        'receiver.employee',
+        'receiver.admin',
+        'receiver.engineer',
+        'receiver.craftsmen',
+        'receiver.supplier',
+        'receiver.trustee',
+        'receiver.investor',
+        'receiver.dailyWorker',
+      ])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'amount',
+        'is_posted',
+        AllowedSort::callback('user_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users as u', 'revenues.user_id', '=', 'u.id')
+            ->orderBy('u.name', $direction);
+        }),
+        AllowedSort::callback('receiver_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users as r', 'revenues.received_by', '=', 'r.id')
+            ->orderBy('r.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {
@@ -149,7 +200,6 @@ class RevenueService
       'receiver.investor',
       'receiver.dailyWorker',
 
-      'receiver',
     ]);
 
     $revenue->loadMorph('revenueable', [

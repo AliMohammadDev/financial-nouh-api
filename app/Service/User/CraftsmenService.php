@@ -10,6 +10,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class CraftsmenService
@@ -42,6 +43,16 @@ class CraftsmenService
         'user.funds.currencies',
       ])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        AllowedSort::callback('user_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users', 'craftsmens.user_id', '=', 'users.id')
+            ->orderBy('users.name', $direction)
+            ->select('craftsmens.*');
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {

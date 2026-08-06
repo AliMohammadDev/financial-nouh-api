@@ -33,6 +33,12 @@ class CurrencyService
 
     $query = QueryBuilder::for(Currency::class)
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'currency',
+        'symbol'
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {
