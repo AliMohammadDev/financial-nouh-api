@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class InvoiceService
@@ -84,6 +85,22 @@ class InvoiceService
         }
       ])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'invoice_number',
+        'is_posted',
+        AllowedSort::callback('item_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('items', 'invoices.item_id', '=', 'items.id')
+            ->orderBy('items.name', $direction);
+        }),
+        AllowedSort::callback('supplier_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users as suppliers', 'invoices.supplier_id', '=', 'suppliers.id')
+            ->orderBy('suppliers.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {

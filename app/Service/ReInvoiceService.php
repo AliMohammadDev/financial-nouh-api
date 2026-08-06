@@ -10,6 +10,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ReInvoiceService
@@ -79,6 +80,25 @@ class ReInvoiceService
     $query = QueryBuilder::for(ReInvoice::class)
       ->with(['item', 'supplier', 'reinvoiceable'])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'reinvoice_number',
+        'date',
+        'final_total',
+        'is_posted',
+        'is_visible_to_client',
+        AllowedSort::callback('item_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('items', 're_invoices.item_id', '=', 'items.id')
+            ->orderBy('items.name', $direction);
+        }),
+        AllowedSort::callback('supplier_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users as suppliers', 're_invoices.supplier_id', '=', 'suppliers.id')
+            ->orderBy('suppliers.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     $morphRelations = [

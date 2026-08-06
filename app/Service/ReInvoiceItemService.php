@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ReInvoiceItemService
@@ -38,6 +39,20 @@ class ReInvoiceItemService
     $query = QueryBuilder::for(ReInvoiceItem::class)
       ->with(['material', 'reInvoice'])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'item_description',
+        'unit',
+        'quantity',
+        'unit_price',
+        'total_price',
+        AllowedSort::callback('material_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('materials', 're_invoice_items.material_id', '=', 'materials.id')
+            ->orderBy('materials.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {
