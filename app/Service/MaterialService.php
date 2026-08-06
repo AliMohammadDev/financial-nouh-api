@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Spatie\QueryBuilder\AllowedSort;
 
 class MaterialService
 {
@@ -38,6 +39,18 @@ class MaterialService
     $query = QueryBuilder::for(Material::class)
       ->with('item')
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'name',
+        'description',
+        'unit',
+        AllowedSort::callback('item_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('items', 'materials.item_id', '=', 'items.id')
+            ->orderBy('items.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {

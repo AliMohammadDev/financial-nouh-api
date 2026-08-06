@@ -35,7 +35,13 @@ class ItemService
     $query = QueryBuilder::for(Item::class)
       ->with('materials')
       ->allowedFilters(...$filters)
-      ->defaultSort('-created_at');
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'name',
+        'description'
+      )
+      ->defaultSort('-created_at'); 
 
     if ($paginate) {
       return $query->paginate(
