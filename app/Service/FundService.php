@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class FundService
@@ -35,6 +36,16 @@ class FundService
     $query = QueryBuilder::for(Fund::class)
       ->with(['user', 'currencies'])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'name',
+        AllowedSort::callback('user_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users', 'funds.user_id', '=', 'users.id')
+            ->orderBy('users.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {

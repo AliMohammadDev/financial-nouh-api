@@ -6,6 +6,9 @@ use App\Models\ProjectFund;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class ProjectFundService
 {
@@ -22,8 +25,31 @@ class ProjectFundService
     array $columns = ["*"]
   ): LengthAwarePaginator|Collection {
 
-    $query = ProjectFund::with(['project', 'currencies'])
-      ->latest();
+    $filters = [
+      AllowedFilter::callback('search', function ($query, $value) {
+        $query->where('name', 'like', "%{$value}%")
+          ->orWhereHas('project', function ($q) use ($value) {
+            $q->where('name', 'like', "%{$value}%");
+          });
+      }),
+      AllowedFilter::exact('project_id'),
+    ];
+
+    $query = QueryBuilder::for(ProjectFund::class)
+      ->select('project_funds.*')
+      ->with(['project', 'currencies'])
+      ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'name',
+        AllowedSort::callback('project_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('projects', 'project_funds.project_id', '=', 'projects.id')
+            ->orderBy('projects.name', $direction);
+        })
+      )
+      ->defaultSort('-created_at');
 
     if ($paginate) {
       return $query->paginate(
@@ -102,7 +128,7 @@ class ProjectFundService
       $this->auditLogService->log(
         actionType: 'إضافة',
         description: "قام بربط عملة جديدة (برصيد: {$data['balance']}) بالصندوق: {$projectFund->name}",
-        affectedTable: 'project_fund_currencies' 
+        affectedTable: 'project_fund_currencies'
       );
 
 

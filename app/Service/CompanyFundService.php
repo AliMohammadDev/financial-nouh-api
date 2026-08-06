@@ -6,6 +6,8 @@ use App\Models\CompanyFund;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class CompanyFundService
 {
@@ -21,10 +23,23 @@ class CompanyFundService
     int $page = 1,
     array $columns = ["*"]
   ): LengthAwarePaginator|Collection {
+    $filters = [
+      AllowedFilter::callback('search', function ($query, $value) {
+        $query->where('name', 'like', "%{$value}%");
+      }),
+      AllowedFilter::partial('name'),
+    ];
 
-    $query = CompanyFund::with(['currencies'])
-      ->latest();
-
+    $query = QueryBuilder::for(CompanyFund::class)
+      ->select('company_funds.*')
+      ->with(['currencies'])
+      ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'name'
+      )
+      ->defaultSort('-created_at');
     if ($paginate) {
       return $query->paginate(
         perPage: $perPage,
