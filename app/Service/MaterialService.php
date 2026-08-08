@@ -29,7 +29,6 @@ class MaterialService
       AllowedFilter::callback('search', function ($query, $value) {
         $query->where('name', 'like', "%{$value}%")
           ->orWhere('description', 'like', "%{$value}%")
-          ->orWhere('unit', 'like', "%{$value}%")
           ->orWhereHas('item', function ($q) use ($value) {
             $q->where('name', 'like', "%{$value}%");
           });
