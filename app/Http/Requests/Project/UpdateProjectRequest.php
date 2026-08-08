@@ -24,7 +24,8 @@ class UpdateProjectRequest extends FormRequest
   {
     return [
       'client_id'     => 'sometimes|required|exists:clients,id',
-      'department_id' => 'sometimes|required|exists:departments,id',
+      // 'department_id' => 'sometimes|required|exists:departments,id',
+
       'name'          => 'sometimes|required|string|max:255',
       'expected_cost' => 'sometimes|required|numeric|min:0',
       'status'        => 'sometimes|required|string|in:pending,in_progress,completed,cancelled',

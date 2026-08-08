@@ -89,6 +89,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
   // ==========================================
   Route::apiResource('departments', DepartmentController::class);
   Route::apiResource('projects', ProjectController::class);
+
+  Route::post('projects/{project}/departments/attach', [ProjectController::class, 'attachDepartments']);
+  Route::post('projects/{project}/departments/detach', [ProjectController::class, 'detachDepartments']);
+
   Route::apiResource('project-funds', ProjectFundController::class);
   Route::post('project-funds/{projectFund}/currencies', [ProjectFundController::class, 'attachCurrency']);
   Route::apiResource('project-teams', ProjectTeamController::class);

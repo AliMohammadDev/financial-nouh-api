@@ -35,16 +35,20 @@ class ProjectService
           });
       }),
       AllowedFilter::exact('client_id'),
-      AllowedFilter::exact('department_id'),
+      AllowedFilter::callback('department_id', function ($query, $value) {
+        $query->whereHas('departments', function ($q) use ($value) {
+          $q->where('departments.id', $value);
+        });
+      }),
       AllowedFilter::exact('status'),
     ];
 
     $query = QueryBuilder::for(Project::class)
       ->select('projects.*')
-      ->with(['client.user', 'projectFunds', 'department'])
+      ->with(['client.user', 'projectFunds', 'departments'])
       ->allowedFilters(...$filters)
       ->allowedSorts(
-        'created_at',
+        AllowedSort::field('created_at', 'projects.created_at'),
         'id',
         'name',
         'status',
@@ -123,6 +127,36 @@ class ProjectService
       }
 
       return $deleted;
+    });
+  }
+
+  public function attachDepartments(Project $project, array $departmentIds): Project
+  {
+    return DB::transaction(function () use ($project, $departmentIds) {
+      $project->departments()->syncWithoutDetaching($departmentIds);
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بإضافة أقسام للمشروع: {$project->name}",
+        affectedTable: 'projects'
+      );
+
+      return $project->load(['client.user', 'projectFunds', 'departments']);
+    });
+  }
+
+  public function detachDepartments(Project $project, array $departmentIds): Project
+  {
+    return DB::transaction(function () use ($project, $departmentIds) {
+      $project->departments()->detach($departmentIds);
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بإزالة أقسام من المشروع: {$project->name}",
+        affectedTable: 'projects'
+      );
+
+      return $project->load(['client.user', 'projectFunds', 'departments']);
     });
   }
 }

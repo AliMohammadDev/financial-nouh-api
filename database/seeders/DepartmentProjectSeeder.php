@@ -79,11 +79,13 @@ class DepartmentProjectSeeder extends Seeder
     foreach ($projectsData as $index => $proj) {
       $project = Project::create([
         'name'          => $proj['name'],
-        'department_id' => $createdDepartments[$index % count($createdDepartments)]->id,
         'client_id'     => $clientIds[array_rand($clientIds)],
         'expected_cost' => $proj['expected_cost'],
         'status'        => $proj['status'],
       ]);
+
+      $departmentId = $createdDepartments[$index % count($createdDepartments)]->id;
+      $project->departments()->attach($departmentId);
 
       $projectFund = ProjectFund::create([
         'project_id' => $project->id,

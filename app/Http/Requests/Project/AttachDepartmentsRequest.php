@@ -5,7 +5,7 @@ namespace App\Http\Requests\Project;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateProjectRequest extends FormRequest
+class AttachDepartmentsRequest extends FormRequest
 {
   /**
    * Determine if the user is authorized to make this request.
@@ -23,12 +23,8 @@ class CreateProjectRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'client_id'     => 'required|exists:clients,id',
-      // 'department_id' => 'required|exists:departments,id',
-
-      'name'          => 'required|string|max:255',
-      'expected_cost' => 'required|numeric|min:0',
-      'status'        => 'nullable|string|in:pending,in_progress,completed,cancelled',
+      'department_ids'   => 'nullable|array',
+      'department_ids.*' => 'exists:departments,id',
     ];
   }
 }

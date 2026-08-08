@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Project\AttachDepartmentsRequest;
 use App\Http\Requests\Project\CreateProjectRequest;
 use App\Http\Requests\Project\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
@@ -54,5 +55,17 @@ class ProjectController extends Controller
     return response()->json([
       'message' => 'تم حذف المشروع بنجاح'
     ], Response::HTTP_OK);
+  }
+
+  public function attachDepartments(AttachDepartmentsRequest $request, Project $project): JsonResponse
+  {
+    $updatedProject = $this->projectService->attachDepartments($project, $request->validated('department_ids'));
+    return response()->json(new ProjectResource($updatedProject));
+  }
+
+  public function detachDepartments(AttachDepartmentsRequest $request, Project $project): JsonResponse
+  {
+    $updatedProject = $this->projectService->detachDepartments($project, $request->validated('department_ids'));
+    return response()->json(new ProjectResource($updatedProject));
   }
 }
