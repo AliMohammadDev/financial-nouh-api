@@ -36,12 +36,13 @@ class MaterialService
     ];
 
     $query = QueryBuilder::for(Material::class)
+      ->select('materials.*')
       ->with('item')
       ->allowedFilters(...$filters)
       ->allowedSorts(
         'created_at',
         'id',
-        'name',
+        AllowedSort::field('name', 'materials.name'),
         'description',
         AllowedSort::callback('item_name', function ($query, $descending) {
           $direction = $descending ? 'desc' : 'asc';
