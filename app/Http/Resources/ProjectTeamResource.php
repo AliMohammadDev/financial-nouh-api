@@ -23,7 +23,6 @@ class ProjectTeamResource extends JsonResource
       'user'       => new UserResource($this->whenLoaded('user')),
       'project'    => new ProjectResource($this->whenLoaded('project')),
       'created_at' => $this->created_at?->format('Y-m-d'),
-
     ];
   }
 }

@@ -56,6 +56,8 @@ class ExpenseResource extends JsonResource
       'amount'            => (float) $this->amount,
       'is_posted'         => (bool) $this->is_posted,
 
+      'invoices_count'    => $this->whenHas('invoices_count', $this->invoices_count, $this->whenLoaded('invoices', fn() => $this->invoices->count(), 0)),
+
       'invoices'          => $this->whenLoaded('invoices', function () {
         return $this->invoices->map(function ($invoice) {
           return [

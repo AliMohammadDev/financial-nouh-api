@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class StageTimelineService
@@ -30,17 +31,32 @@ class StageTimelineService
           ->orWhere('status', 'like', "%{$value}%");
       }),
       AllowedFilter::exact('project_stage_id'),
-      AllowedFilter::exact('status'),
+      AllowedFilter::exact(''),
       AllowedFilter::callback('project_id', function ($query, $value) {
         $query->whereHas('projectStage.project', function ($q) use ($value) {
           $q->where('project_id', $value);
         });
       }),
     ];
-
     $query = QueryBuilder::for(StageTimeline::class)
+      ->select('stage_timelines.*')
       ->with(['projectStage.project'])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'stage_name',
+        'status',
+        'stage_progress',
+        'start_date',
+        'expected_end_date',
+        'actual_end_date',
+        AllowedSort::callback('project_stage_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('project_stages', 'stage_timelines.project_stage_id', '=', 'project_stages.id')
+            ->orderBy('project_stages.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {

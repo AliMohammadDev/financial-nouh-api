@@ -10,6 +10,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class TransactionService
@@ -89,7 +90,15 @@ class TransactionService
       AllowedFilter::callback('search', function ($query, $value) {
         $query->where('name', 'like', "%{$value}%");
       }),
+      AllowedFilter::exact('is_posted'),
+      AllowedFilter::exact('created_by'),
 
+      AllowedFilter::callback('date_from', function ($query, $value) {
+        $query->whereDate('created_at', '>=', $value);
+      }),
+      AllowedFilter::callback('date_to', function ($query, $value) {
+        $query->whereDate('created_at', '<=', $value);
+      }),
 
       AllowedFilter::callback('fund_id', function ($query, $value) {
         $query->where(function ($q) use ($value) {
@@ -178,12 +187,33 @@ class TransactionService
     ];
 
     $query = QueryBuilder::for(Transaction::class)
+      ->select('transactions.*')
       ->with([
-        'creator',
+        'creator.client',
+        'creator.employee',
+        'creator.admin',
+        'creator.engineer',
+        'creator.craftsmen',
+        'creator.supplier',
+        'creator.trustee',
+        'creator.investor',
+        'creator.dailyWorker',
         'morphFrom',
         'morphToFund',
       ])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'amount',
+        'is_posted',
+        'name',
+        AllowedSort::callback('creator_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users as c', 'transactions.created_by', '=', 'c.id')
+            ->orderBy('c.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     $morphRelationsMap = [

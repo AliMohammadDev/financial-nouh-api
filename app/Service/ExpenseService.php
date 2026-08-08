@@ -85,6 +85,8 @@ class ExpenseService
     ];
 
     $query = QueryBuilder::for(Expense::class)
+      ->select('expenses.*')
+      ->withCount('invoices')
       ->with([
         'user.client',
         'user.employee',
@@ -95,6 +97,7 @@ class ExpenseService
         'user.trustee',
         'user.investor',
         'user.dailyWorker',
+
 
         'expenseable',
         'creator.client',
@@ -109,7 +112,7 @@ class ExpenseService
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
-        'created_at',
+        AllowedSort::field('created_at', 'expenses.created_at'),
         'id',
         'amount',
         'is_posted',

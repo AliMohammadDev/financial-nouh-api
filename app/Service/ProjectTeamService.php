@@ -7,6 +7,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ProjectTeamService
@@ -34,6 +35,7 @@ class ProjectTeamService
     ];
 
     $query = QueryBuilder::for(ProjectTeam::class)
+      ->select('project_teams.*')
       ->with([
         'user.admin',
         'user.client',
@@ -44,6 +46,21 @@ class ProjectTeamService
         'project'
       ])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'name',
+        AllowedSort::callback('user_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('users', 'project_teams.user_id', '=', 'users.id')
+            ->orderBy('users.name', $direction);
+        }),
+        AllowedSort::callback('project_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('projects', 'project_teams.project_id', '=', 'projects.id')
+            ->orderBy('projects.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {

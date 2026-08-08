@@ -86,6 +86,7 @@ class RevenueService
     ];
 
     $query = QueryBuilder::for(Revenue::class)
+      ->select('revenues.*')
       ->with([
         'user.client',
         'user.employee',
@@ -109,7 +110,7 @@ class RevenueService
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
-        'created_at',
+        AllowedSort::field('created_at', 'revenues.created_at'),
         'id',
         'amount',
         'is_posted',

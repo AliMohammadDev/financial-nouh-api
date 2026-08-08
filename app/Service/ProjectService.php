@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 use Illuminate\Validation\ValidationException;
+use Spatie\QueryBuilder\AllowedSort;
 
 class ProjectService
 {
@@ -33,11 +34,27 @@ class ProjectService
               ->orWhere('email', 'like', "%{$value}%");
           });
       }),
+      AllowedFilter::exact('client_id'),
+      AllowedFilter::exact('department_id'),
+      AllowedFilter::exact('status'),
     ];
 
     $query = QueryBuilder::for(Project::class)
+      ->select('projects.*')
       ->with(['client.user', 'projectFunds', 'department'])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'name',
+        'status',
+        AllowedSort::callback('client_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('clients', 'projects.client_id', '=', 'clients.id')
+            ->join('users', 'clients.user_id', '=', 'users.id')
+            ->orderBy('users.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {

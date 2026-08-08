@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\AllowedFilter;
+use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ProjectStageService
@@ -34,8 +35,24 @@ class ProjectStageService
     ];
 
     $query = QueryBuilder::for(ProjectStage::class)
+      ->select('project_stages.*')
       ->with(['project'])
       ->allowedFilters(...$filters)
+      ->allowedSorts(
+        'created_at',
+        'id',
+        'name',
+        'status',
+        'stage_progress',
+        'start_date',
+        'expected_end_date',
+        'actual_end_date',
+        AllowedSort::callback('project_name', function ($query, $descending) {
+          $direction = $descending ? 'desc' : 'asc';
+          $query->join('projects', 'project_stages.project_id', '=', 'projects.id')
+            ->orderBy('projects.name', $direction);
+        })
+      )
       ->defaultSort('-created_at');
 
     if ($paginate) {
