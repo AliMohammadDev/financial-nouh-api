@@ -44,7 +44,6 @@ class MaterialService
         'id',
         'name',
         'description',
-        'unit',
         AllowedSort::callback('item_name', function ($query, $descending) {
           $direction = $descending ? 'desc' : 'asc';
           $query->join('items', 'materials.item_id', '=', 'items.id')
