@@ -51,7 +51,7 @@ class ProjectFundController extends Controller
   {
     $this->fundService->delete($id);
     return response()->json([
-      'message' => 'تم حذف تمويل المشروع بنجاح'
+      'message' => 'تم حذف صندوق المشروع بنجاح'
     ], Response::HTTP_OK);
   }
 

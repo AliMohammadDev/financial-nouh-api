@@ -53,7 +53,7 @@ class CompanyFundController extends Controller
   {
     $this->companyFundService->delete($id);
     return response()->json([
-      'message' => 'تم حذف تمويل الشركة بنجاح'
+      'message' => 'تم حذف صندوق الشركة بنجاح'
     ], Response::HTTP_OK);
   }
 
