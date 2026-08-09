@@ -29,7 +29,20 @@ class DirectoryService
       AllowedFilter::callback('search', function ($query, $value) {
         $query->where(function ($q) use ($value) {
           $q->where('dir_name', 'like', "%{$value}%")
-            ->orWhere('dir_path', 'like', "%{$value}%");
+            ->orWhere('dir_path', 'like', "%{$value}%")
+
+            ->orWhereHas('media', function ($mediaQuery) use ($value) {
+              $mediaQuery->where('file_name', 'like', "%{$value}%")
+                ->orWhere('name', 'like', "%{$value}%");
+            })
+
+            ->orWhereHas('children', function ($childQuery) use ($value) {
+              $childQuery->where('dir_name', 'like', "%{$value}%")
+                ->orWhereHas('media', function ($mediaQuery) use ($value) {
+                  $mediaQuery->where('file_name', 'like', "%{$value}%")
+                    ->orWhere('name', 'like', "%{$value}%");
+                });
+            });
         });
       }),
       AllowedFilter::exact('project_id'),
