@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\InvoiceItemController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\MaterialController;
+use App\Http\Controllers\Api\MoneyExchangeController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectFundController;
@@ -131,4 +132,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::apiResource('revenues', RevenueController::class);
   Route::apiResource('expenses', ExpenseController::class);
   Route::get('/audit-logs', [AuditLogController::class, 'index']);
+  Route::apiResource('money-exchanges', MoneyExchangeController::class);
 });

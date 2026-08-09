@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyFund\AttachCompanyFundRequest;
 use App\Http\Requests\CompanyFund\CreateCompanyFundRequest;
 use App\Http\Requests\CompanyFund\UpdateCompanyFundRequest;
-use App\Http\Requests\ProjectFund\AttachProjectFundRequest;
 use App\Http\Resources\CompanyFundResource;
 use App\Models\CompanyFund;
 use App\Service\CompanyFundService;
