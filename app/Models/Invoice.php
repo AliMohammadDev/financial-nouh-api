@@ -46,7 +46,7 @@ class Invoice extends Model
 
   public function supplier(): BelongsTo
   {
-    return $this->belongsTo(User::class);
+    return $this->belongsTo(Supplier::class);
   }
 
   public function invoiceItems(): HasMany

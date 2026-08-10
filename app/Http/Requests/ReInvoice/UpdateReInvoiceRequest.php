@@ -24,7 +24,7 @@ class UpdateReInvoiceRequest extends FormRequest
   {
     return [
       'item_id'              => ['sometimes', 'exists:items,id'],
-      'supplier_id'          => ['nullable', 'exists:users,id'],
+      'supplier_id'          => ['nullable', 'exists:suppliers,id'],
       'reinvoiceable_type'   => ['sometimes', 'string'],
       'reinvoiceable_id'     => ['sometimes', 'integer'],
       'date'                 => ['nullable', 'date'],

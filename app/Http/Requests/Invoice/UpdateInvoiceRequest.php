@@ -25,7 +25,7 @@ class UpdateInvoiceRequest extends FormRequest
     return [
       'item_id'              => ['sometimes', 'exists:items,id'],
       'expense_id'         => ['nullable', 'exists:expenses,id'],
-      'supplier_id'          => ['sometimes', 'exists:users,id'],
+      'supplier_id'          => ['sometimes', 'exists:suppliers,id'],
       'invoice_number'       => ['sometimes', 'string', 'unique:invoices,invoice_number'],
       'date'                 => ['nullable', 'date'],
       'discount'             => ['nullable', 'numeric', 'min:0'],

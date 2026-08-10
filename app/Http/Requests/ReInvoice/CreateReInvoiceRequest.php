@@ -24,7 +24,7 @@ class CreateReInvoiceRequest extends FormRequest
   {
     return [
       'item_id'              => ['required', 'exists:items,id'],
-      'supplier_id'          => ['nullable', 'exists:users,id'],
+      'supplier_id'          => ['nullable', 'exists:suppliers,id'],
       'reinvoiceable_type'   => ['required', 'string'],
       'reinvoiceable_id'     => ['required', 'integer'],
       'date'                 => ['nullable', 'date'],

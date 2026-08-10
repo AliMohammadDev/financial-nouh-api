@@ -27,8 +27,12 @@ class InvoiceResource extends JsonResource
       'is_visible_to_client' => (bool) $this->is_visible_to_client,
 
       'item'                 => new ItemResource($this->whenLoaded('item')),
-      'supplier'             => $this->whenLoaded('supplier', function () {
-        return $this->supplier?->name;
+      'supplier' => $this->whenLoaded('supplier', function () {
+        return [
+          'id'   => $this->supplier->id,
+          'name' => $this->supplier->user?->name, // الوصول لاسم المستخدم المرتبط بالمورد (الذي هو ID رقم 29)
+          'email' => $this->supplier->user?->email,
+        ];
       }),
 
       'invoice_items'        => InvoiceItemResource::collection($this->whenLoaded('invoiceItems')),
