@@ -137,15 +137,7 @@ class ReInvoiceService
   {
     $reInvoice->load([
       'item',
-      'supplier.client',
-      'supplier.employee',
-      'supplier.admin',
-      'supplier.engineer',
-      'supplier.craftsmen',
-      'supplier.supplier',
-      'supplier.trustee',
-      'supplier.investor',
-      'supplier.dailyWorker',
+      'supplier.user',
     ]);
 
     $reInvoice->loadMorph('reinvoiceable', [
