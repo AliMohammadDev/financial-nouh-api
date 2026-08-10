@@ -27,6 +27,8 @@ class UpdateDirectoryRequest extends FormRequest
       'dir_path'      => ['nullable', 'string', 'max:255'],
       'parent_dir_id' => ['nullable', 'exists:directories,id'],
       'project_id'    => ['nullable', 'exists:projects,id'],
+      'user_id'    => ['nullable', 'exists:users,id'],
+      'is_locked'     => ['nullable', 'boolean'],
     ];
   }
 }

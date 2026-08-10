@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
       DepartmentProjectSeeder::class,
       CompanyFundSeeder::class,
       ItemMaterialSeeder::class,
+      DirectorySeeder::class
     ]);
   }
 }

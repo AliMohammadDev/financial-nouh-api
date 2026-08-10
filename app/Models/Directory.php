@@ -18,6 +18,8 @@ use Spatie\MediaLibrary\Support\PathGenerator\PathGeneratorFactory;
   'dir_path',
   'parent_dir_id',
   'project_id',
+  'user_id',
+  'is_locked',
 ])]
 class Directory extends Model implements HasMedia
 {
@@ -50,6 +52,11 @@ class Directory extends Model implements HasMedia
   public function project(): BelongsTo
   {
     return $this->belongsTo(Project::class);
+  }
+
+  public function user(): BelongsTo
+  {
+    return $this->belongsTo(User::class);
   }
 
   public function parent(): BelongsTo

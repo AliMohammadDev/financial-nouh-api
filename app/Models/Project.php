@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['client_id', 'name', 'expected_cost', 'status'])]
+#[Fillable(['client_id', 'name', 'expected_cost', 'status', 'is_locked'])]
 class Project extends Model
 {
   use HasFactory;

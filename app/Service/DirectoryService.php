@@ -46,12 +46,13 @@ class DirectoryService
         });
       }),
       AllowedFilter::exact('project_id'),
+      AllowedFilter::exact('user_id'),
 
       AllowedFilter::exact('parent_dir_id'),
     ];
 
     $query = QueryBuilder::for(Directory::class)
-      ->with(['project', 'children.media', 'media'])
+      ->with(['project', 'children.project', 'children.media', 'media'])
       ->allowedFilters(...$filters)
       ->allowedSorts(
         'created_at',
@@ -60,7 +61,10 @@ class DirectoryService
         'dir_path'
       );
 
-    $query->whereNull('parent_dir_id');
+    // $query->whereNull('parent_dir_id');
+    if (!request()->has('filter.project_id') && !request()->has('filter.parent_dir_id')) {
+      $query->whereNull('parent_dir_id');
+    }
 
     $query->defaultSort('-created_at');
 
@@ -75,6 +79,7 @@ class DirectoryService
   {
     return $directory->load([
       'project',
+      'user',
       'parent.parent.parent',
       'children.media',
       'media'
@@ -97,6 +102,9 @@ class DirectoryService
 
   public function update(Directory $directory, array $data): Directory
   {
+    if ($directory->is_locked) {
+      abort(403, 'لا يمكن تعديل هذا المجلد لأنه مجلد مقفل من قبل النظام.');
+    }
     return DB::transaction(function () use ($directory, $data) {
       $directory->update($data);
 
@@ -112,6 +120,9 @@ class DirectoryService
 
   public function delete(Directory $directory): bool
   {
+    if ($directory->is_locked) {
+      abort(403, 'لا يمكن حذف هذا المجلد لأنه مجلد مقفل من قبل النظام.');
+    }
     return DB::transaction(function () use ($directory) {
       $dirName = $directory->dir_name ?? 'غير معروف';
 
