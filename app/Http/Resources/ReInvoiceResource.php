@@ -75,7 +75,13 @@ class ReInvoiceResource extends JsonResource
       'item'                 => $this->whenLoaded('item', function () {
         return $this->item?->name;
       }),
-      'supplier'             => new UserResource($this->whenLoaded('supplier')),
+      'supplier' => $this->whenLoaded('supplier', function () {
+        return [
+          'id'   => $this->supplier->id,
+          'name' => $this->supplier->user?->name,
+          'email' => $this->supplier->user?->email,
+        ];
+      }),
       'created_at'           => $this->created_at?->format('Y-m-d'),
     ];
   }

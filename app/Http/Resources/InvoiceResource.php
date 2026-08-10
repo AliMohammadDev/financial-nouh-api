@@ -30,7 +30,7 @@ class InvoiceResource extends JsonResource
       'supplier' => $this->whenLoaded('supplier', function () {
         return [
           'id'   => $this->supplier->id,
-          'name' => $this->supplier->user?->name, // الوصول لاسم المستخدم المرتبط بالمورد (الذي هو ID رقم 29)
+          'name' => $this->supplier->user?->name, 
           'email' => $this->supplier->user?->email,
         ];
       }),
