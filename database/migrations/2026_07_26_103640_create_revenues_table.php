@@ -17,10 +17,8 @@ return new class extends Migration
       $table->morphs('revenueable');
       $table->text('statement');
       $table->decimal('amount', 15, 2);
-      $table->boolean('is_posted')->default(false);
 
-      $table->foreignIdFor(User::class)
-        ->constrained();
+      $table->text('note')->nullable();
 
       $table->foreignId('received_by')
         ->nullable()

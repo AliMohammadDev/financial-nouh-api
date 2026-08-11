@@ -35,13 +35,8 @@ class ExpenseService
               ->orWhere('email', 'like', "%{$value}%");
           });
       }),
-
       AllowedFilter::exact('is_posted'),
-
-      AllowedFilter::exact('user_id'),
-
       AllowedFilter::exact('created_by'),
-
       AllowedFilter::callback('date_from', function ($query, $value) {
         $query->whereDate('created_at', '>=', $value);
       }),
@@ -116,11 +111,6 @@ class ExpenseService
         'id',
         'amount',
         'is_posted',
-        AllowedSort::callback('user_name', function ($query, $descending) {
-          $direction = $descending ? 'desc' : 'asc';
-          $query->join('users as u', 'expenses.user_id', '=', 'u.id')
-            ->orderBy('u.name', $direction);
-        }),
         AllowedSort::callback('creator_name', function ($query, $descending) {
           $direction = $descending ? 'desc' : 'asc';
           $query->join('users as c', 'expenses.created_by', '=', 'c.id')
@@ -183,17 +173,6 @@ class ExpenseService
   public function findOne(Expense $expense): Expense
   {
     $expense->load([
-      'user.client',
-      'user.employee',
-      'user.admin',
-      'user.engineer',
-      'user.craftsmen',
-      'user.supplier',
-      'user.trustee',
-      'user.investor',
-      'user.dailyWorker',
-
-
       'creator.client',
       'creator.employee',
       'creator.admin',
@@ -236,7 +215,7 @@ class ExpenseService
     return DB::transaction(function () use ($data) {
 
       $expense = Expense::create($data);
-      $expense->load(['user', 'creator', 'expenseable']);
+      $expense->load(['creator', 'expenseable']);
 
       $amount = $expense->amount ?? 'مبلغ';
 
@@ -254,7 +233,7 @@ class ExpenseService
   {
     return DB::transaction(function () use ($expense, $data) {
       $expense->update($data);
-      $expense->load(['user', 'creator', 'expenseable']);
+      $expense->load(['creator', 'expenseable']);
 
       $amount = $expense->amount ?? 'مبلغ';
 

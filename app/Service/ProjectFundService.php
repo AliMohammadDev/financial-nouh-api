@@ -12,11 +12,9 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ProjectFundService
 {
-
   public function __construct(
     private AuditLogService $auditLogService
   ) {}
-
 
   public function findAll(
     bool $paginate = false,
@@ -102,6 +100,9 @@ class ProjectFundService
   public function delete(int $id): bool
   {
     $fund = ProjectFund::findOrFail($id);
+    if ($fund->currencies()->exists()) {
+      abort(422, 'لا يمكن حذف صندوق المشروع لأنه يحتوي على أرصدة مالية مسجلة.');
+    }
 
     return DB::transaction(function () use ($fund) {
       $fundName = $fund->name ?? 'صندوق';

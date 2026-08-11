@@ -36,13 +36,8 @@ class RevenueService
               ->orWhere('email', 'like', "%{$value}%");
           });
       }),
-
       AllowedFilter::exact('is_posted'),
-
-      AllowedFilter::exact('user_id'),
-
       AllowedFilter::exact('received_by'),
-
       AllowedFilter::callback('date_from', function ($query, $value) {
         $query->whereDate('created_at', '>=', $value);
       }),
@@ -88,15 +83,6 @@ class RevenueService
     $query = QueryBuilder::for(Revenue::class)
       ->select('revenues.*')
       ->with([
-        'user.client',
-        'user.employee',
-        'user.admin',
-        'user.engineer',
-        'user.craftsmen',
-        'user.supplier',
-        'user.trustee',
-        'user.investor',
-        'user.dailyWorker',
         'revenueable',
         'receiver.client',
         'receiver.employee',
@@ -114,11 +100,6 @@ class RevenueService
         'id',
         'amount',
         'is_posted',
-        AllowedSort::callback('user_name', function ($query, $descending) {
-          $direction = $descending ? 'desc' : 'asc';
-          $query->join('users as u', 'revenues.user_id', '=', 'u.id')
-            ->orderBy('u.name', $direction);
-        }),
         AllowedSort::callback('receiver_name', function ($query, $descending) {
           $direction = $descending ? 'desc' : 'asc';
           $query->join('users as r', 'revenues.received_by', '=', 'r.id')
@@ -230,7 +211,7 @@ class RevenueService
   {
     return DB::transaction(function () use ($data) {
       $revenue = Revenue::create($data);
-      $revenue->load(['user', 'receiver', 'revenueable']);
+      $revenue->load(['receiver', 'revenueable']);
 
       $amount = $revenue->amount ?? 'مبلغ';
 
@@ -248,7 +229,7 @@ class RevenueService
   {
     return DB::transaction(function () use ($revenue, $data) {
       $revenue->update($data);
-      $revenue->load(['user', 'receiver', 'revenueable']);
+      $revenue->load(['receiver', 'revenueable']);
 
       $amount = $revenue->amount ?? 'مبلغ';
 

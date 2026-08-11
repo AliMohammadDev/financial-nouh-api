@@ -6,6 +6,38 @@ use App\Models\Revenue;
 
 class RevenueObserver
 {
+
+  protected function isFundLocked($fundCurrency): bool
+  {
+    if (!$fundCurrency) {
+      return false;
+    }
+
+    $mainFund = null;
+
+    if (method_exists($fundCurrency, 'companyFund')) {
+      $mainFund = $fundCurrency->companyFund;
+    } elseif (method_exists($fundCurrency, 'projectFund')) {
+      $mainFund = $fundCurrency->projectFund;
+    } elseif (method_exists($fundCurrency, 'fund')) {
+      $mainFund = $fundCurrency->fund;
+    }
+
+    return $mainFund && isset($mainFund->is_locked) && $mainFund->is_locked;
+  }
+  /**
+   * Handle the Revenue "creating" event.
+   */
+  public function creating(Revenue $revenue): bool|null
+  {
+    $fund = $revenue->revenueable;
+
+    if ($this->isFundLocked($fund)) {
+      throw new \Exception('لا يمكن إضافة إيراد، لأن الصندوق مقفل حالياً.');
+    }
+
+    return true;
+  }
   /**
    * Handle the Revenue "created" event.
    */
@@ -18,6 +50,19 @@ class RevenueObserver
     }
   }
 
+  /**
+   * Handle the Revenue "updating" event.
+   */
+  public function updating(Revenue $revenue): bool|null
+  {
+    $fund = $revenue->revenueable;
+
+    if ($this->isFundLocked($fund)) {
+      throw new \Exception('لا يمكن تعديل الإيراد، لأن الصندوق مقفل حالياً.');
+    }
+
+    return true;
+  }
   /**
    * Handle the Revenue "updated" event.
    */

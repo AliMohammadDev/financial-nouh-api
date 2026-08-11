@@ -8,6 +8,37 @@ use App\Notifications\FundBalanceAlertNotification;
 
 class ExpenseObserver
 {
+
+  protected function isFundLocked($fundCurrency): bool
+  {
+    if (!$fundCurrency) {
+      return false;
+    }
+
+    $mainFund = null;
+
+    if (method_exists($fundCurrency, 'companyFund')) {
+      $mainFund = $fundCurrency->companyFund;
+    } elseif (method_exists($fundCurrency, 'projectFund')) {
+      $mainFund = $fundCurrency->projectFund;
+    } elseif (method_exists($fundCurrency, 'fund')) {
+      $mainFund = $fundCurrency->fund;
+    }
+
+    return $mainFund && isset($mainFund->is_locked) && $mainFund->is_locked;
+  }
+  /**
+   * Handle the Expense "creating" event.
+   */
+  public function creating(Expense $expense): bool|null
+  {
+    $fund = $expense->expenseable;
+
+    if ($this->isFundLocked($fund)) {
+      throw new \Exception('لا يمكن إضافة مصروف، لأن الصندوق مقفل حالياً.');
+    }
+    return true;
+  }
   /**
    * Handle the Expense "created" event.
    */
@@ -19,6 +50,20 @@ class ExpenseObserver
       $fund->decrement('balance', $expense->amount);
       $this->checkAndNotify($fund);
     }
+  }
+
+  /**
+   * Handle the Expense "updating" event.
+   */
+  public function updating(Expense $expense): bool|null
+  {
+    $fund = $expense->expenseable;
+
+    if ($this->isFundLocked($fund)) {
+      throw new \Exception('لا يمكن تعديل المصروف، لأن الصندوق مقفل حالياً.');
+    }
+
+    return true;
   }
 
   /**
@@ -73,14 +118,23 @@ class ExpenseObserver
     //
   }
 
-  protected function checkAndNotify($fund): void
+  protected function checkAndNotify($fundCurrency): void
   {
-    if ($fund->balance <= 100) {
+    $mainFund = null;
 
+    if (method_exists($fundCurrency, 'companyFund')) {
+      $mainFund = $fundCurrency->companyFund;
+    } elseif (method_exists($fundCurrency, 'projectFund')) {
+      $mainFund = $fundCurrency->projectFund;
+    } elseif (method_exists($fundCurrency, 'fund')) {
+      $mainFund = $fundCurrency->fund;
+    }
+
+    if ($mainFund && !is_null($mainFund->threshold) && $fundCurrency->balance <= $mainFund->threshold) {
       $admins = User::whereHas('admin')->get();
 
       foreach ($admins as $admin) {
-        $admin->notify(new FundBalanceAlertNotification($fund));
+        $admin->notify(new FundBalanceAlertNotification($fundCurrency));
       }
     }
   }

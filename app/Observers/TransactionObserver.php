@@ -8,6 +8,43 @@ use App\Notifications\FundBalanceAlertNotification;
 
 class TransactionObserver
 {
+
+  protected function isFundLocked($fundCurrency): bool
+  {
+    if (!$fundCurrency) {
+      return false;
+    }
+
+    $mainFund = null;
+
+    if (method_exists($fundCurrency, 'companyFund')) {
+      $mainFund = $fundCurrency->companyFund;
+    } elseif (method_exists($fundCurrency, 'projectFund')) {
+      $mainFund = $fundCurrency->projectFund;
+    } elseif (method_exists($fundCurrency, 'fund')) {
+      $mainFund = $fundCurrency->fund;
+    }
+
+    return $mainFund && isset($mainFund->is_locked) && $mainFund->is_locked;
+  }
+  /**
+   * Handle the Transaction "creating" event.
+   */
+  public function creating(Transaction $transaction): bool|null
+  {
+    $fromFund = $transaction->morphFrom;
+    $toFund   = $transaction->morphToFund;
+
+    if ($this->isFundLocked($fromFund)) {
+      throw new \Exception('لا يمكن إتمام التحويل، لأن صندوق المصدر مقفل حالياً.');
+    }
+
+    if ($this->isFundLocked($toFund)) {
+      throw new \Exception('لا يمكن إتمام التحويل، لأن صندوق الوجهة مقفل حالياً.');
+    }
+
+    return true;
+  }
   /**
    * Handle the Transaction "created" event.
    */
@@ -28,11 +65,29 @@ class TransactionObserver
   }
 
   /**
+   * Handle the Transaction "updating" event.
+   */
+  public function updating(Transaction $transaction): bool|null
+  {
+    $fromFund = $transaction->morphFrom;
+    $toFund   = $transaction->morphToFund;
+
+    if ($this->isFundLocked($fromFund)) {
+      throw new \Exception('لا يمكن تعديل الحركة، لأن صندوق المصدر مقفل حالياً.');
+    }
+
+    if ($this->isFundLocked($toFund)) {
+      throw new \Exception('لا يمكن تعديل الحركة، لأن صندوق الوجهة مقفل حالياً.');
+    }
+
+    return true;
+  }
+
+  /**
    * Handle the Transaction "updated" event.
    */
   public function updated(Transaction $transaction): void
   {
-    // التحقق مما إذا تم تغير القيمة أو أحد الصناديق (سواء المصدر أو الوجهة)
     if (
       $transaction->wasChanged('amount') ||
       $transaction->wasChanged('morph_from_id') ||
@@ -41,14 +96,12 @@ class TransactionObserver
       $transaction->wasChanged('morph_to_type')
     ) {
 
-      // الخطوة أ: إعادة الوضع القديم كما كان قبل التعديل (عكس العملية القديمة)
       $oldFromType   = $transaction->getOriginal('morph_from_type');
       $oldFromId     = $transaction->getOriginal('morph_from_id');
       $oldToType     = $transaction->getOriginal('morph_to_type');
       $oldToId       = $transaction->getOriginal('morph_to_id');
       $oldAmount     = $transaction->getOriginal('amount');
 
-      // إرجاع المبلغ للصندوق القديم الذي تم الخصم منه
       if ($oldFromType && $oldFromId) {
         $oldFromFund = $oldFromType::find($oldFromId);
         if ($oldFromFund && isset($oldFromFund->balance)) {
@@ -56,7 +109,6 @@ class TransactionObserver
         }
       }
 
-      // خصم المبلغ من الصندوق القديم الذي أُضيف إليه
       if ($oldToType && $oldToId) {
         $oldToFund = $oldToType::find($oldToId);
         if ($oldToFund && isset($oldToFund->balance)) {
@@ -64,7 +116,6 @@ class TransactionObserver
         }
       }
 
-      // الخطوة ب: تطبيق التعديلات الجديدة (الخصم والإضافة بناءً على القيم الجديدة)
       $newFromFund = $transaction->morphFrom;
       if ($newFromFund && isset($newFromFund->balance)) {
         $newFromFund->decrement('balance', $transaction->amount);
@@ -83,7 +134,6 @@ class TransactionObserver
    */
   public function deleted(Transaction $transaction): void
   {
-    // عند حذف المعاملة بالكامل، نعكس الأرصدة لعكس ما تم أثناء الإنشاء
 
     // 1. إعادة المبلغ للصندوق الذي تم الخصم منه
     $fromFund = $transaction->morphFrom;
@@ -114,16 +164,24 @@ class TransactionObserver
     //
   }
 
-  /**
-   * فحص رصيد صندوق المصدر وإرسال تنبيه إن انخفض عن الحد الأدنى
-   */
-  protected function checkAndNotify($fund): void
+
+  protected function checkAndNotify($fundCurrency): void
   {
-    if ($fund->balance <= 100) {
+    $mainFund = null;
+
+    if (method_exists($fundCurrency, 'companyFund')) {
+      $mainFund = $fundCurrency->companyFund;
+    } elseif (method_exists($fundCurrency, 'projectFund')) {
+      $mainFund = $fundCurrency->projectFund;
+    } elseif (method_exists($fundCurrency, 'fund')) {
+      $mainFund = $fundCurrency->fund;
+    }
+
+    if ($mainFund && !is_null($mainFund->threshold) && $fundCurrency->balance <= $mainFund->threshold) {
       $admins = User::whereHas('admin')->get();
 
       foreach ($admins as $admin) {
-        $admin->notify(new FundBalanceAlertNotification($fund));
+        $admin->notify(new FundBalanceAlertNotification($fundCurrency));
       }
     }
   }

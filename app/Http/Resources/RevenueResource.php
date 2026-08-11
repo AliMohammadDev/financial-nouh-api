@@ -68,8 +68,7 @@ class RevenueResource extends JsonResource
       'revenueable_info'  => $revenueableInfo,
       'statement'         => $this->statement,
       'amount'            => (float) $this->amount,
-      'is_posted'         => (bool) $this->is_posted,
-      'user'              => new UserResource($this->whenLoaded('user')),
+      'note'              => $this->note,
       'received_by'       => new UserResource($this->whenLoaded('receiver')),
       'created_at'        => $this->created_at?->format('Y-m-d'),
     ];

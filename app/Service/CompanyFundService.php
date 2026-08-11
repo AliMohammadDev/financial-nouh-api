@@ -91,7 +91,9 @@ class CompanyFundService
   public function delete(int $id): bool
   {
     $fund = CompanyFund::findOrFail($id);
-
+    if ($fund->currencies()->exists()) {
+      abort(422, 'لا يمكن حذف صندوق الشركة لأنه يحتوي على أرصدة مالية مسجلة.');
+    }
     return DB::transaction(function () use ($fund) {
       $fundName = $fund->name ?? 'صندوق الشركة';
 

@@ -8,7 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['name'])]
+#[Fillable([
+  'name',
+  'is_locked',
+  'status',
+  'threshold',
+  'description',
+])]
 class CompanyFund extends Model
 {
   use HasFactory;

@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
   'statement',
   'amount',
   'is_posted',
-  'user_id',
+  'note',
   'received_by',
 ])]
 class Revenue extends Model
@@ -36,15 +36,8 @@ class Revenue extends Model
     return $this->morphTo();
   }
 
-  public function user(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'user_id');
-  }
-
   public function receiver(): BelongsTo
   {
     return $this->belongsTo(User::class, 'received_by');
   }
-
-
 }

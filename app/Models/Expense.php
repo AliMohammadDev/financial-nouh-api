@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
   'description',
   'amount',
   'is_posted',
-  'user_id',
+  'note',
   'created_by',
 ])]
 class Expense extends Model
@@ -33,11 +33,6 @@ class Expense extends Model
   public function expenseable(): MorphTo
   {
     return $this->morphTo();
-  }
-
-  public function user(): BelongsTo
-  {
-    return $this->belongsTo(User::class, 'user_id');
   }
 
   public function creator(): BelongsTo

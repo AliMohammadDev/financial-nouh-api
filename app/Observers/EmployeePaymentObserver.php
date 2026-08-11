@@ -8,6 +8,17 @@ use App\Models\EmployeePayment;
 class EmployeePaymentObserver
 {
 
+  protected function isFundLocked($fundCurrency): bool
+  {
+    if (!$fundCurrency) {
+      return false;
+    }
+
+    $mainFund = method_exists($fundCurrency, 'companyFund') ? $fundCurrency->companyFund : null;
+
+    return $mainFund && isset($mainFund->is_locked) && $mainFund->is_locked;
+  }
+
   private function calculateTotalAmount(EmployeePayment $payment): float
   {
     $amount = (float) $payment->amount;
@@ -17,6 +28,19 @@ class EmployeePaymentObserver
     return $amount + $bonuses - $deductions;
   }
 
+  /**
+   * Handle the EmployeePayment "creating" event.
+   */
+  public function creating(EmployeePayment $employeePayment): bool|null
+  {
+    $fundCurrency = $employeePayment->companyFundCurrency;
+
+    if ($this->isFundLocked($fundCurrency)) {
+      throw new \Exception('لا يمكن إضافة دفعة للموظف، لأن صندوق الصرف مقفل حالياً.');
+    }
+
+    return true;
+  }
   /**
    * Handle the EmployeePayment "created" event.
    */
@@ -28,6 +52,19 @@ class EmployeePaymentObserver
     }
   }
 
+  /**
+   * Handle the EmployeePayment "updating" event.
+   */
+  public function updating(EmployeePayment $employeePayment): bool|null
+  {
+    $fundCurrency = $employeePayment->companyFundCurrency;
+
+    if ($this->isFundLocked($fundCurrency)) {
+      throw new \Exception('لا يمكن تعديل دفعة الموظف، لأن صندوق الصرف مقفل حالياً.');
+    }
+
+    return true;
+  }
   /**
    * Handle the EmployeePayment "updated" event.
    */

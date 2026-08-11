@@ -27,8 +27,7 @@ class UpdateRevenueRequest extends FormRequest
       'revenueable_id'   => ['sometimes', 'integer'],
       'statement'        => ['sometimes', 'string'],
       'amount'           => ['sometimes', 'numeric', 'min:0.01'],
-      'is_posted'        => ['nullable', 'boolean'],
-      'user_id'          => ['sometimes', 'exists:users,id'],
+      'note' => ['nullable', 'string'],
       'received_by'      => ['sometimes', 'exists:users,id'],
     ];
   }

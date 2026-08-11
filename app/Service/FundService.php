@@ -96,6 +96,10 @@ class FundService
 
   public function delete(Fund $fund): bool
   {
+
+    if ($fund->currencies()->exists()) {
+      abort(422, 'لا يمكن حذف الصندوق لأنه يحتوي على أرصدة مالية مسجلة.');
+    }
     return DB::transaction(function () use ($fund) {
       $fundName = $fund->name ?? 'صندوق';
 

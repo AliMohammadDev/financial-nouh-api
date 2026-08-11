@@ -74,7 +74,7 @@ class ExpenseResource extends JsonResource
         });
       }),
 
-      'user'              => new UserResource($this->whenLoaded('user')),
+      'note'              => $this->note,
       'created_by'        => new UserResource($this->whenLoaded('creator')),
       'created_at'        => $this->created_at?->format('Y-m-d'),
     ];
@@ -82,13 +82,13 @@ class ExpenseResource extends JsonResource
 
   private function determineRoleType($user): string
   {
-    if ($user->relationLoaded('admin') && $user->admin) return 'admin';
-    if ($user->relationLoaded('client') && $user->client) return 'client';
-    if ($user->relationLoaded('employee') && $user->employee) return 'employee';
-    if ($user->relationLoaded('craftsmen') && $user->craftsmen) return 'craftsmen';
-    if ($user->relationLoaded('engineer') && $user->engineer) return 'engineer';
-    if ($user->relationLoaded('supplier') && $user->supplier) return 'supplier';
-    if ($user->relationLoaded('trustee') && $user->trustee) return 'trustee';
+    $roles = ['admin', 'client', 'employee', 'craftsmen', 'engineer', 'supplier', 'trustee'];
+
+    foreach ($roles as $role) {
+      if ($user->relationLoaded($role) && $user->{$role}) {
+        return $role;
+      }
+    }
 
     return 'user';
   }

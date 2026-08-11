@@ -27,8 +27,7 @@ class CreateRevenueRequest extends FormRequest
       'revenueable_id'   => ['required', 'integer'],
       'statement'        => ['required', 'string'],
       'amount'           => ['required', 'numeric', 'min:0.01'],
-      'is_posted'        => ['nullable', 'boolean'],
-      'user_id'          => ['nullable', 'exists:users,id'],
+      'note' => ['nullable', 'string'],
       'received_by'      => ['nullable', 'exists:users,id'],
     ];
   }

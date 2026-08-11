@@ -9,7 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['project_id', 'name'])]
+#[Fillable([
+  'project_id',
+  'name',
+  'is_locked',
+  'status',
+  'threshold',
+  'description',
+])]
 class ProjectFund extends Model
 {
   use HasFactory;

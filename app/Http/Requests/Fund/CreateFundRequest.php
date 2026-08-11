@@ -23,8 +23,12 @@ class CreateFundRequest extends FormRequest
   public function rules(): array
   {
     return [
-      'user_id' => 'required|exists:users,id',
-      'name'    => 'required|string|max:255',
+      'user_id'     => ['required', 'exists:users,id'],
+      'name'        => ['required', 'string', 'max:255'],
+      'is_locked'   => ['nullable', 'boolean'],
+      'status'      => ['nullable', 'string', 'in:complete,pending,canceled'],
+      'threshold'   => ['nullable', 'numeric', 'min:0'],
+      'description' => ['nullable', 'string'],
     ];
   }
 }

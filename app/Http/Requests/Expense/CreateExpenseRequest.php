@@ -49,8 +49,8 @@ class CreateExpenseRequest extends FormRequest
         //   }
         // },
       ],
+      'note' => ['nullable', 'string'],
       'is_posted'        => ['nullable', 'boolean'],
-      'user_id'          => ['nullable', 'exists:users,id'],
       'created_by'       => ['nullable', 'exists:users,id'],
     ];
   }

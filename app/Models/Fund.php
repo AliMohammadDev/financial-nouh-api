@@ -9,10 +9,25 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'name'])]
+#[Fillable([
+  'user_id',
+  'name',
+  'is_locked',
+  'status',
+  'threshold',
+  'description',
+])]
 class Fund extends Model
 {
   use HasFactory;
+
+  protected function casts(): array
+  {
+    return [
+      'is_locked' => 'boolean',
+      'threshold' => 'decimal:2',
+    ];
+  }
 
   public function user(): BelongsTo
   {
