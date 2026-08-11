@@ -31,6 +31,7 @@ class RevenueService
     $filters = [
       AllowedFilter::callback('search', function ($query, $value) {
         $query->where('statement', 'like', "%{$value}%")
+          ->orWhere('note', 'like', "%{$value}%")
           ->orWhereHas('user', function ($q) use ($value) {
             $q->where('name', 'like', "%{$value}%")
               ->orWhere('email', 'like', "%{$value}%");
