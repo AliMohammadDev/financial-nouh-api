@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Invoice\BulkUpdateIsPostedRequest;
 use App\Http\Requests\Invoice\CreateInvoiceRequest;
 use App\Http\Requests\Invoice\UpdateInvoiceRequest;
 use App\Http\Resources\InvoiceResource;
@@ -52,6 +53,19 @@ class InvoiceController extends Controller
     $this->invoiceService->delete($invoice);
     return response()->json([
       'message' => 'تم حذف  الفاتورة بنجاح'
+    ], Response::HTTP_OK);
+  }
+
+  public function bulkUpdateIsPosted(BulkUpdateIsPostedRequest $request): JsonResponse
+  {
+    $count = $this->invoiceService->bulkUpdateIsPosted(
+      $request->input('ids'),
+      $request->boolean('is_posted')
+    );
+
+    return response()->json([
+      'message' => "تم تحديث حالة الترحيل لـ {$count} فاتورة بنجاح",
+      'updated_count' => $count
     ], Response::HTTP_OK);
   }
 }

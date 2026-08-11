@@ -190,4 +190,19 @@ class InvoiceService
       return $deleted;
     });
   }
+
+  public function bulkUpdateIsPosted(array $ids, bool $isPosted): int
+  {
+    return DB::transaction(function () use ($ids, $isPosted) {
+      $updatedCount = Invoice::whereIn('id', $ids)->update(['is_posted' => $isPosted]);
+
+      $this->auditLogService->log(
+        actionType: 'تعديل',
+        description: "قام بتعديل حالة الترحيل (is_posted) جماعياً لـ {$updatedCount} فواتير",
+        affectedTable: 'invoices'
+      );
+
+      return $updatedCount;
+    });
+  }
 }

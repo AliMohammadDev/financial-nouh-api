@@ -116,6 +116,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
   // ==========================================
   Route::apiResource('items', ItemController::class);
   Route::apiResource('materials', MaterialController::class);
+  Route::patch('invoices/bulk-update-is-posted', [InvoiceController::class, 'bulkUpdateIsPosted']);
   Route::apiResource('invoices', InvoiceController::class);
   Route::apiResource('invoice-items', InvoiceItemController::class);
   Route::apiResource('re-invoice-items', ReInvoiceItemController::class);
