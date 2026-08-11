@@ -31,7 +31,7 @@ class ExpenseService
       AllowedFilter::callback('search', function ($query, $value) {
         $query->where('description', 'like', "%{$value}%")
           ->orWhere('note', 'like', "%{$value}%")
-          ->orWhereHas('user', function ($q) use ($value) {
+          ->orWhereHas('creator', function ($q) use ($value) {
             $q->where('name', 'like', "%{$value}%")
               ->orWhere('email', 'like', "%{$value}%");
           });
@@ -84,17 +84,6 @@ class ExpenseService
       ->select('expenses.*')
       ->withCount('invoices')
       ->with([
-        'user.client',
-        'user.employee',
-        'user.admin',
-        'user.engineer',
-        'user.craftsmen',
-        'user.supplier',
-        'user.trustee',
-        'user.investor',
-        'user.dailyWorker',
-
-
         'expenseable',
         'creator.client',
         'creator.employee',
