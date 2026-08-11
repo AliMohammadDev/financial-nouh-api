@@ -25,6 +25,10 @@ class CreateProjectFundRequest extends FormRequest
     return [
       'project_id'  => 'required|exists:projects,id',
       'name'        => 'required|string|max:255',
+      'is_locked'   => ['nullable', 'boolean'],
+      'status'      => ['nullable', 'string', 'in:complete,pending,canceled'],
+      'threshold'   => ['nullable', 'numeric', 'min:0'],
+      'description' => ['nullable', 'string'],
     ];
   }
 }
