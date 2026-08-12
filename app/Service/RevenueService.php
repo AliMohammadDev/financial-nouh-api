@@ -161,18 +161,7 @@ class RevenueService
   }
   public function findOne(Revenue $revenue): Revenue
   {
-
     $revenue->load([
-      'user.client',
-      'user.employee',
-      'user.admin',
-      'user.engineer',
-      'user.craftsmen',
-      'user.supplier',
-      'user.trustee',
-      'user.investor',
-      'user.dailyWorker',
-
       'receiver.client',
       'receiver.employee',
       'receiver.admin',
