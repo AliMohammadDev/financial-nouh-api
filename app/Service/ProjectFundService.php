@@ -136,4 +136,19 @@ class ProjectFundService
       return $projectFund->load(['project', 'currencies']);
     });
   }
+
+  public function detachCurrency(ProjectFund $projectFund, array $data): ProjectFund
+  {
+    return DB::transaction(function () use ($projectFund, $data) {
+      $projectFund->currencies()->detach($data['currency_id']);
+
+      $this->auditLogService->log(
+        actionType: 'حذف',
+        description: "قام بفك ارتباط العملة عن صندوق المشروع: {$projectFund->name}",
+        affectedTable: 'project_fund_currencies'
+      );
+
+      return $projectFund->load(['project', 'currencies']);
+    });
+  }
 }

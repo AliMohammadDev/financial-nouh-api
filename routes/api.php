@@ -96,6 +96,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
   Route::apiResource('project-funds', ProjectFundController::class);
   Route::post('project-funds/{projectFund}/currencies', [ProjectFundController::class, 'attachCurrency']);
+  Route::post('project-funds/{projectFund}/detach-currency', [ProjectFundController::class, 'detachCurrency']); 
   Route::apiResource('project-teams', ProjectTeamController::class);
   Route::apiResource('project-stages', ProjectStageController::class);
   Route::apiResource('stage-timelines', StageTimelineController::class);
@@ -105,11 +106,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
   // ==========================================
   Route::apiResource('funds', FundController::class);
   Route::post('funds/{fund}/currencies', [FundController::class, 'attachCurrency']);
+  Route::post('funds/{fund}/detach-currency', [FundController::class, 'detachCurrency']);
 
   Route::apiResource('transactions', TransactionController::class);
 
   Route::apiResource('company-funds', CompanyFundController::class);
   Route::post('company-funds/{companyFund}/currencies', [CompanyFundController::class, 'attachCurrency']);
+  Route::post('company-funds/{companyFund}/detach-currency', [CompanyFundController::class, 'detachCurrency']);
 
   // ==========================================
   // Inventory & Invoicing Management

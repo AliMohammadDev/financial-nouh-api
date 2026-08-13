@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyFund\AttachCompanyFundRequest;
 use App\Http\Requests\CompanyFund\CreateCompanyFundRequest;
+use App\Http\Requests\CompanyFund\DetachCompanyFundRequest;
 use App\Http\Requests\CompanyFund\UpdateCompanyFundRequest;
 use App\Http\Resources\CompanyFundResource;
 use App\Models\CompanyFund;
@@ -62,6 +63,17 @@ class CompanyFundController extends Controller
 
     return response()->json([
       'message' => 'تم ربط العملة بالصندوق الشركة بنجاح',
+      'data'    => new CompanyFundResource($updatedFund)
+    ], Response::HTTP_OK);
+  }
+
+
+  public function detachCurrency(DetachCompanyFundRequest $request, CompanyFund $companyFund): JsonResponse
+  {
+    $updatedFund = $this->companyFundService->detachCurrency($companyFund, $request->validated());
+
+    return response()->json([
+      'message' => 'تم فك ارتباط العملة عن صندوق الشركة بنجاح',
       'data'    => new CompanyFundResource($updatedFund)
     ], Response::HTTP_OK);
   }

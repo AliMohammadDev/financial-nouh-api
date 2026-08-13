@@ -98,7 +98,7 @@ class FundService
   {
 
     if ($fund->currencies()->exists()) {
-      abort(422, 'لا يمكن حذف الصندوق لأنه يحتوي على أرصدة مالية مسجلة.');
+      abort(422, 'لا يمكن حذف الصندوق لأنه مرتبط بعلمات مالية. يجب عليك فك ارتباط العملات  أولاً قبل محاولة حذف الصندوق.');
     }
     return DB::transaction(function () use ($fund) {
       $fundName = $fund->name ?? 'صندوق';
@@ -127,6 +127,21 @@ class FundService
       $this->auditLogService->log(
         actionType: 'إضافة',
         description: "قام بربط عملة جديدة (برصيد: {$data['balance']}) بالصندوق: {$fund->name}",
+        affectedTable: 'fund_currencies'
+      );
+
+      return $fund->load(['user', 'currencies']);
+    });
+  }
+
+  public function detachCurrency(Fund $fund, array $data): Fund
+  {
+    return DB::transaction(function () use ($fund, $data) {
+      $fund->currencies()->detach($data['currency_id']);
+
+      $this->auditLogService->log(
+        actionType: 'حذف',
+        description: "قام بفك ارتباط العملة من الصندوق: {$fund->name}",
         affectedTable: 'fund_currencies'
       );
 

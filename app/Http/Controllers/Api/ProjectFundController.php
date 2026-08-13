@@ -6,6 +6,7 @@ use App\Http\Requests\ProjectFund\CreateProjectFundRequest;
 use App\Http\Requests\ProjectFund\UpdateProjectFundRequest;
 use App\Http\Resources\ProjectFundResource;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Project\DetachProjectFundRequest;
 use App\Http\Requests\ProjectFund\AttachProjectFundRequest;
 use App\Models\ProjectFund;
 use App\Service\ProjectFundService;
@@ -61,6 +62,16 @@ class ProjectFundController extends Controller
 
     return response()->json([
       'message' => 'تم ربط العملة بصندوق المشروع بنجاح',
+      'data'    => new ProjectFundResource($updatedFund)
+    ], Response::HTTP_OK);
+  }
+
+  public function detachCurrency(DetachProjectFundRequest $request, ProjectFund $projectFund): JsonResponse
+  {
+    $updatedFund = $this->fundService->detachCurrency($projectFund, $request->validated());
+
+    return response()->json([
+      'message' => 'تم فك ارتباط العملة عن صندوق المشروع بنجاح',
       'data'    => new ProjectFundResource($updatedFund)
     ], Response::HTTP_OK);
   }

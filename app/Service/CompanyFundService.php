@@ -127,4 +127,19 @@ class CompanyFundService
       return $companyFund->load(['currencies']);
     });
   }
+
+  public function detachCurrency(CompanyFund $companyFund, array $data): CompanyFund
+  {
+    return DB::transaction(function () use ($companyFund, $data) {
+      $companyFund->currencies()->detach($data['currency_id']);
+
+      $this->auditLogService->log(
+        actionType: 'حذف',
+        description: "قام بفك ارتباط العملة عن صندوق الشركة: {$companyFund->name}",
+        affectedTable: 'company_fund_currencies'
+      );
+
+      return $companyFund->load(['currencies']);
+    });
+  }
 }

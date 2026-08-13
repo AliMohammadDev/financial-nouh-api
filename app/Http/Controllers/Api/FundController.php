@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Fund\AttachCurrencyRequest;
 use App\Http\Requests\Fund\CreateFundRequest;
+use App\Http\Requests\Fund\DetachFundRequest;
 use App\Http\Requests\Fund\UpdateFundRequest;
 use App\Http\Resources\FundResource;
 use App\Models\Fund;
@@ -62,6 +63,16 @@ class FundController extends Controller
 
     return response()->json([
       'message' => 'تم ربط العملة بالصندوق بنجاح',
+      'data'    => new FundResource($updatedFund)
+    ], Response::HTTP_OK);
+  }
+
+  public function detachCurrency(DetachFundRequest $request, Fund $fund): JsonResponse
+  {
+    $updatedFund = $this->fundService->detachCurrency($fund, $request->validated());
+
+    return response()->json([
+      'message' => 'تم فك ارتباط العملة عن الصندوق بنجاح',
       'data'    => new FundResource($updatedFund)
     ], Response::HTTP_OK);
   }
