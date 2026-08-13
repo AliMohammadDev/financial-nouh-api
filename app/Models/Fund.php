@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 #[Fillable([
   'user_id',
   'name',
-  'is_locked',
   'status',
   'threshold',
   'description',
@@ -24,7 +23,6 @@ class Fund extends Model
   protected function casts(): array
   {
     return [
-      'is_locked' => 'boolean',
       'threshold' => 'decimal:2',
     ];
   }

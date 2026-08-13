@@ -41,6 +41,7 @@ class CraftsmenService
     $query = QueryBuilder::for(Craftsmen::class)
       ->with([
         'user.funds.currencies',
+        'user.media',
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
@@ -68,15 +69,19 @@ class CraftsmenService
 
   public function findOne(Craftsmen $craftsmen): Craftsmen
   {
-    return $craftsmen->load('user.funds.currencies');
+    return $craftsmen->load(['user.funds.currencies', 'user.media']);
   }
 
-  public function create(array $data): Craftsmen
+  public function create(array $data, $imageFiles = null): Craftsmen
   {
-    return DB::transaction(function () use ($data) {
+    return DB::transaction(function () use ($data, $imageFiles) {
       $data['password'] = Hash::make($data['password']);
 
       $user = User::create($data);
+
+      if ($imageFiles) {
+        $this->attachMedia($user, $imageFiles);
+      }
 
       $craftsmen = Craftsmen::create([
         'user_id' => $user->id,
@@ -88,21 +93,33 @@ class CraftsmenService
         affectedTable: 'craftsmen'
       );
 
-      return $craftsmen->load('user');
+      return $craftsmen->load('user.media');
     });
   }
 
-  public function update(Craftsmen $craftsmen, array $data): Craftsmen
+  public function update(Craftsmen $craftsmen, array $data, $imageFiles = null, array $deletedMediaIds = []): Craftsmen
   {
-    DB::transaction(function () use ($craftsmen, $data) {
+    DB::transaction(function () use ($craftsmen, $data, $imageFiles, $deletedMediaIds) {
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
       } else {
         unset($data['password']);
       }
 
-      $craftsmen->user()->update($data);
-      $craftsmen->load('user');
+      $craftsmen->user()->update(collect($data)->except(['images', 'deleted_media_ids'])->toArray());
+
+      if (!empty($deletedMediaIds)) {
+        $mediaItems = $craftsmen->user->media()->whereIn('id', $deletedMediaIds)->get();
+        foreach ($mediaItems as $media) {
+          $media->delete();
+        }
+      }
+
+      if ($imageFiles) {
+        $this->attachMedia($craftsmen->user, $imageFiles);
+      }
+
+      $craftsmen->load('user.media');
 
       $this->auditLogService->log(
         actionType: 'تعديل',
@@ -111,7 +128,7 @@ class CraftsmenService
       );
     });
 
-    return $craftsmen->load('user');
+    return $craftsmen->load('user.media');
   }
 
   public function delete(Craftsmen $craftsmen): bool
@@ -131,5 +148,16 @@ class CraftsmenService
 
       return $deleted;
     });
+  }
+
+  private function attachMedia(User $user, $imageFiles)
+  {
+    $files = is_array($imageFiles) ? $imageFiles : [$imageFiles];
+
+    foreach ($files as $file) {
+      if ($file) {
+        $user->addMedia($file)->toMediaCollection('users_files');
+      }
+    }
   }
 }

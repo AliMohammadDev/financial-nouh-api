@@ -12,11 +12,13 @@ class ProjectObserver
   public function created(Project $project): void
   {
     $project->projectFunds()->create([
-      'name' => 'الصندوق الأساسي',
-      'is_locked' => false,
-      'status' => 'active',
-      'threshold' => 1000,
+      'name'        => 'الصندوق الأساسي',
+      'status'      => 'active',
+      'threshold'   => 1000,
       'description' => 'صندوق المشروع: ' . $project->name,
+    ])->currencies()->attach([
+      1 => ['balance' => 0],
+      2 => ['balance' => 0],
     ]);
   }
 

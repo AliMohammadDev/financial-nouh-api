@@ -39,7 +39,8 @@ class ClientService
     $query = QueryBuilder::for(Client::class)
       ->with([
         'user.funds.currencies',
-        'projects'
+        'projects',
+        'user.media',
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
@@ -74,15 +75,19 @@ class ClientService
 
   public function findOne(Client $client): Client
   {
-    return $client->load(['user.funds.currencies', 'projects']);
+    return $client->load(['user.funds.currencies', 'projects', 'user.media']);
   }
 
-  public function create(array $data): Client
+  public function create(array $data, $imageFiles = null): Client
   {
-    return DB::transaction(function () use ($data) {
+    return DB::transaction(function () use ($data, $imageFiles) {
       $data['password'] = Hash::make($data['password']);
 
       $user = User::create($data);
+
+      if ($imageFiles) {
+        $this->attachMedia($user, $imageFiles);
+      }
 
       $client = Client::create([
         'user_id' => $user->id,
@@ -94,21 +99,33 @@ class ClientService
         affectedTable: 'clients'
       );
 
-      return $client->load(['user', 'projects']);
+      return $client->load(['user.media', 'projects']);
     });
   }
 
-  public function update(Client $client, array $data): Client
+  public function update(Client $client, array $data, $imageFiles = null, array $deletedMediaIds = []): Client
   {
-    DB::transaction(function () use ($client, $data) {
+    DB::transaction(function () use ($client, $data, $imageFiles, $deletedMediaIds) {
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
       } else {
         unset($data['password']);
       }
 
-      $client->user()->update($data);
-      $client->load('user');
+      $client->user()->update(collect($data)->except(['images', 'deleted_media_ids'])->toArray());
+
+      if (!empty($deletedMediaIds)) {
+        $mediaItems = $client->user->media()->whereIn('id', $deletedMediaIds)->get();
+        foreach ($mediaItems as $media) {
+          $media->delete();
+        }
+      }
+
+      if ($imageFiles) {
+        $this->attachMedia($client->user, $imageFiles);
+      }
+
+      $client->load('user.media');
 
       $this->auditLogService->log(
         actionType: 'تعديل',
@@ -117,7 +134,7 @@ class ClientService
       );
     });
 
-    return $client->load(['user', 'projects']);
+    return $client->load(['user.media', 'projects']);
   }
 
   public function delete(Client $client): bool
@@ -137,5 +154,16 @@ class ClientService
 
       return $deleted;
     });
+  }
+
+  private function attachMedia(User $user, $imageFiles)
+  {
+    $files = is_array($imageFiles) ? $imageFiles : [$imageFiles];
+
+    foreach ($files as $file) {
+      if ($file) {
+        $user->addMedia($file)->toMediaCollection('users_files');
+      }
+    }
   }
 }

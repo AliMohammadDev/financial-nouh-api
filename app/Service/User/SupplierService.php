@@ -42,18 +42,17 @@ class SupplierService
     $query = QueryBuilder::for(Supplier::class)
       ->with([
         'user.funds.currencies',
+        'user.media',
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
         'created_at',
         'id',
-        'job_title',
-        'base_salary',
         AllowedSort::callback('user_name', function ($query, $descending) {
           $direction = $descending ? 'desc' : 'asc';
-          $query->join('users', 'engineers.user_id', '=', 'users.id')
+          $query->join('users', 'suppliers.user_id', '=', 'users.id')
             ->orderBy('users.name', $direction)
-            ->select('engineers.*');
+            ->select('suppliers.*');
         })
       )
       ->defaultSort('-created_at');
@@ -71,15 +70,19 @@ class SupplierService
 
   public function findOne(Supplier $supplier): Supplier
   {
-    return $supplier->load('user.funds.currencies');
+    return $supplier->load(['user.funds.currencies', 'user.media']);
   }
 
-  public function create(array $data): Supplier
+  public function create(array $data, $imageFiles = null): Supplier
   {
-    return DB::transaction(function () use ($data) {
+    return DB::transaction(function () use ($data, $imageFiles) {
       $data['password'] = Hash::make($data['password']);
 
       $user = User::create($data);
+
+      if ($imageFiles) {
+        $this->attachMedia($user, $imageFiles);
+      }
 
       $supplier = Supplier::create([
         'user_id' => $user->id,
@@ -91,20 +94,33 @@ class SupplierService
         affectedTable: 'suppliers'
       );
 
-      return $supplier->load('user');
+      return $supplier->load('user.media');
     });
   }
 
-  public function update(Supplier $supplier, array $data): Supplier
+  public function update(Supplier $supplier, array $data, $imageFiles = null, array $deletedMediaIds = []): Supplier
   {
-    DB::transaction(function () use ($supplier, $data) {
+    DB::transaction(function () use ($supplier, $data, $imageFiles, $deletedMediaIds) {
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
       } else {
         unset($data['password']);
       }
-      $supplier->user()->update($data);
-      $supplier->load('user');
+
+      $supplier->user()->update(collect($data)->except(['images', 'deleted_media_ids'])->toArray());
+
+      if (!empty($deletedMediaIds)) {
+        $mediaItems = $supplier->user->media()->whereIn('id', $deletedMediaIds)->get();
+        foreach ($mediaItems as $media) {
+          $media->delete();
+        }
+      }
+
+      if ($imageFiles) {
+        $this->attachMedia($supplier->user, $imageFiles);
+      }
+
+      $supplier->load('user.media');
 
       $this->auditLogService->log(
         actionType: 'تعديل',
@@ -113,7 +129,7 @@ class SupplierService
       );
     });
 
-    return $supplier->load('user');
+    return $supplier->load('user.media');
   }
 
   public function delete(Supplier $supplier): bool
@@ -133,5 +149,16 @@ class SupplierService
 
       return $deleted;
     });
+  }
+
+  private function attachMedia(User $user, $imageFiles)
+  {
+    $files = is_array($imageFiles) ? $imageFiles : [$imageFiles];
+
+    foreach ($files as $file) {
+      if ($file) {
+        $user->addMedia($file)->toMediaCollection('users_files');
+      }
+    }
   }
 }

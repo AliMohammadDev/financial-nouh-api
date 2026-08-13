@@ -31,7 +31,10 @@ class EmployeeController extends Controller
 
   public function store(CreateEmployeeRequest $request): JsonResponse
   {
-    $employee = $this->employeeService->create($request->validated());
+    $employee = $this->employeeService->create(
+      $request->validated(),
+      $request->file('images')
+    );
     return response()->json(new EmployeeResource($employee), Response::HTTP_CREATED);
   }
 
@@ -43,7 +46,15 @@ class EmployeeController extends Controller
 
   public function update(UpdateEmployeeRequest $request, Employee $employee): JsonResponse
   {
-    $updatedEmployee = $this->employeeService->update($employee, $request->validated());
+    $deletedMediaIds = $request->input('deleted_media_ids', []);
+
+    $updatedEmployee = $this->employeeService->update(
+      $employee,
+      $request->validated(),
+      $request->file('images'),
+      $deletedMediaIds
+    );
+
     return response()->json(new EmployeeResource($updatedEmployee));
   }
 

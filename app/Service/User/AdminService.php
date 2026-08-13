@@ -41,6 +41,7 @@ class AdminService
     $query = QueryBuilder::for(Admin::class)
       ->with([
         'user.funds.currencies',
+        'user.media',
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
@@ -68,16 +69,20 @@ class AdminService
 
   public function findOne(Admin $admin): Admin
   {
-    return $admin->load('user.funds.currencies');
+    return $admin->load(['user.funds.currencies', 'user.media']);
   }
 
-  public function create(array $data): Admin
+  public function create(array $data, $imageFiles = null): Admin
   {
-    return DB::transaction(function () use ($data) {
+    return DB::transaction(function () use ($data, $imageFiles) {
       $data['password'] = Hash::make($data['password']);
       $user = User::create($data);
 
-      $admin = Admin::create(['user_id' => $user->id])->load('user');
+      if ($imageFiles) {
+        $this->attachMedia($user, $imageFiles);
+      }
+
+      $admin = Admin::create(['user_id' => $user->id])->load('user.media');
 
       $this->auditLogService->log(
         actionType: 'إضافة',
@@ -89,16 +94,29 @@ class AdminService
     });
   }
 
-  public function update(Admin $admin, array $data): Admin
+  public function update(Admin $admin, array $data, $imageFiles = null, array $deletedMediaIds = []): Admin
   {
-    DB::transaction(function () use ($admin, $data) {
+    DB::transaction(function () use ($admin, $data, $imageFiles, $deletedMediaIds) {
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
       } else {
         unset($data['password']);
       }
-      $admin->user()->update($data);
-      $admin->load('user');
+
+      $admin->user()->update(collect($data)->except(['images', 'deleted_media_ids'])->toArray());
+
+      if (!empty($deletedMediaIds)) {
+        $mediaItems = $admin->user->media()->whereIn('id', $deletedMediaIds)->get();
+        foreach ($mediaItems as $media) {
+          $media->delete();
+        }
+      }
+
+      if ($imageFiles) {
+        $this->attachMedia($admin->user, $imageFiles);
+      }
+
+      $admin->load('user.media');
 
       $this->auditLogService->log(
         actionType: 'تعديل',
@@ -127,5 +145,16 @@ class AdminService
 
       return $deleted;
     });
+  }
+
+  private function attachMedia(User $user, $imageFiles)
+  {
+    $files = is_array($imageFiles) ? $imageFiles : [$imageFiles];
+
+    foreach ($files as $file) {
+      if ($file) {
+        $user->addMedia($file)->toMediaCollection('users_files');
+      }
+    }
   }
 }

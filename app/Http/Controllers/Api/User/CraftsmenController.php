@@ -31,7 +31,10 @@ class CraftsmenController extends Controller
 
   public function store(CreateCraftsmenRequest $request): JsonResponse
   {
-    $craftsman = $this->craftsmenService->create($request->validated());
+    $craftsman = $this->craftsmenService->create(
+      $request->validated(),
+      $request->file('images')
+    );
     return response()->json(new CraftsmenResource($craftsman), Response::HTTP_CREATED);
   }
 
@@ -43,10 +46,17 @@ class CraftsmenController extends Controller
 
   public function update(UpdateCraftsmenRequest $request, Craftsmen $craftsman): JsonResponse
   {
-    $updatedCraftsman = $this->craftsmenService->update($craftsman, $request->validated());
+    $deletedMediaIds = $request->input('deleted_media_ids', []);
+
+    $updatedCraftsman = $this->craftsmenService->update(
+      $craftsman,
+      $request->validated(),
+      $request->file('images'),
+      $deletedMediaIds
+    );
+
     return response()->json(new CraftsmenResource($updatedCraftsman));
   }
-
   public function destroy(Craftsmen $craftsman): JsonResponse
   {
     $this->craftsmenService->delete($craftsman);

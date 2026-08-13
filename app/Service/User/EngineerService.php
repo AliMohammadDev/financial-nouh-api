@@ -40,6 +40,7 @@ class EngineerService
     $query = QueryBuilder::for(Engineer::class)
       ->with([
         'user.funds.currencies',
+        'user.media',
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
@@ -69,15 +70,19 @@ class EngineerService
 
   public function findOne(Engineer $engineer): Engineer
   {
-    return $engineer->load('user.funds.currencies');
+    return $engineer->load(['user.funds.currencies', 'user.media']);
   }
 
-  public function create(array $data): Engineer
+  public function create(array $data, $imageFiles = null): Engineer
   {
-    return DB::transaction(function () use ($data) {
+    return DB::transaction(function () use ($data, $imageFiles) {
       $data['password'] = Hash::make($data['password']);
 
       $user = User::create($data);
+
+      if ($imageFiles) {
+        $this->attachMedia($user, $imageFiles);
+      }
 
       $engineer = Engineer::create([
         'user_id'     => $user->id,
@@ -91,26 +96,37 @@ class EngineerService
         affectedTable: 'engineers'
       );
 
-      return $engineer->load('user');
+      return $engineer->load('user.media');
     });
   }
 
-  public function update(Engineer $engineer, array $data): Engineer
+  public function update(Engineer $engineer, array $data, $imageFiles = null, array $deletedMediaIds = []): Engineer
   {
-    DB::transaction(function () use ($engineer, $data) {
+    DB::transaction(function () use ($engineer, $data, $imageFiles, $deletedMediaIds) {
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
       } else {
         unset($data['password']);
       }
 
-      $engineer->user->update(collect($data)->except(['job_title', 'base_salary'])->toArray());
+      $engineer->user->update(collect($data)->except(['job_title', 'base_salary', 'images', 'deleted_media_ids'])->toArray());
 
+      // تحديث حقول المهندس إن وجدت
       $engineer->update(collect($data)->only(['job_title', 'base_salary'])->toArray());
 
-      $engineer->load('user');
+      if (!empty($deletedMediaIds)) {
+        $mediaItems = $engineer->user->media()->whereIn('id', $deletedMediaIds)->get();
+        foreach ($mediaItems as $media) {
+          $media->delete();
+        }
+      }
 
-      // تسجيل عملية التعديل في الـ Audit Log
+      if ($imageFiles) {
+        $this->attachMedia($engineer->user, $imageFiles);
+      }
+
+      $engineer->load('user.media');
+
       $this->auditLogService->log(
         actionType: 'تعديل',
         description: "قام بتعديل بيانات المهندس: {$engineer->user->name}",
@@ -118,7 +134,7 @@ class EngineerService
       );
     });
 
-    return $engineer->load('user');
+    return $engineer->load('user.media');
   }
 
   public function delete(Engineer $engineer): bool
@@ -129,7 +145,6 @@ class EngineerService
       $deleted = (bool) $engineer->user()->delete();
 
       if ($deleted) {
-        // تسجيل عملية الحذف في الـ Audit Log
         $this->auditLogService->log(
           actionType: 'حذف',
           description: "قام بحذف المهندس: {$engineerName}",
@@ -139,5 +154,16 @@ class EngineerService
 
       return $deleted;
     });
+  }
+
+  private function attachMedia(User $user, $imageFiles)
+  {
+    $files = is_array($imageFiles) ? $imageFiles : [$imageFiles];
+
+    foreach ($files as $file) {
+      if ($file) {
+        $user->addMedia($file)->toMediaCollection('users_files');
+      }
+    }
   }
 }

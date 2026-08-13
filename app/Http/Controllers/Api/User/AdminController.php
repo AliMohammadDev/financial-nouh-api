@@ -29,7 +29,10 @@ class AdminController extends Controller
 
   public function store(CreateAdminRequest $request): JsonResponse
   {
-    $admin = $this->adminService->create($request->validated());
+    $admin = $this->adminService->create(
+      $request->validated(),
+      $request->file('images')
+    );
     return response()->json(new AdminResource($admin), Response::HTTP_CREATED);
   }
 
@@ -41,7 +44,15 @@ class AdminController extends Controller
 
   public function update(UpdateAdminRequest $request, Admin $admin): JsonResponse
   {
-    $updatedAdmin = $this->adminService->update($admin, $request->validated());
+    $deletedMediaIds = $request->input('deleted_media_ids', []);
+
+    $updatedAdmin = $this->adminService->update(
+      $admin,
+      $request->validated(),
+      $request->file('images'),
+      $deletedMediaIds
+    );
+
     return response()->json(new AdminResource($updatedAdmin));
   }
 

@@ -13,6 +13,8 @@ trait HasUserValidation
       'password'     => ['required', 'string', 'min:8'],
       'phone_number' => ['nullable', 'string', 'max:20'],
       'address'      => ['nullable', 'string', 'max:255'],
+      'images'       => ['nullable', 'array'],
+      'images.*'     => ['image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
     ];
   }
 
@@ -25,6 +27,11 @@ trait HasUserValidation
       'password'     => ['sometimes', 'nullable', 'string', 'min:8'],
       'phone_number' => ['nullable', 'string', 'max:20'],
       'address'      => ['nullable', 'string', 'max:255'],
+      'images'       => ['nullable', 'array'],
+      'images.*'     => ['image', 'mimes:jpeg,png,jpg,webp', 'max:10240'],
+
+      'deleted_media_ids'   => ['nullable', 'array'],
+      'deleted_media_ids.*' => ['integer', 'exists:media,id'],
     ];
   }
 }

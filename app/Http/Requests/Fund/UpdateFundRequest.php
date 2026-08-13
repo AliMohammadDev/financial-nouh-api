@@ -25,7 +25,6 @@ class UpdateFundRequest extends FormRequest
     return [
       'user_id'     => ['sometimes', 'required', 'exists:users,id'],
       'name'        => ['sometimes', 'required', 'string', 'max:255'],
-      'is_locked'   => ['sometimes', 'boolean'],
       'status'      => ['sometimes', 'string', 'in:complete,pending,canceled'],
       'threshold'   => ['sometimes', 'nullable', 'numeric', 'min:0'],
       'description' => ['sometimes', 'nullable', 'string'],

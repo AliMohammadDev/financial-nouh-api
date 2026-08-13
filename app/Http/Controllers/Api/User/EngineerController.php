@@ -31,7 +31,10 @@ class EngineerController extends Controller
 
   public function store(CreateEngineerRequest $request): JsonResponse
   {
-    $engineer = $this->engineerService->create($request->validated());
+    $engineer = $this->engineerService->create(
+      $request->validated(),
+      $request->file('images')
+    );
     return response()->json(new EngineerResource($engineer), Response::HTTP_CREATED);
   }
 
@@ -43,7 +46,15 @@ class EngineerController extends Controller
 
   public function update(UpdateEngineerRequest $request, Engineer $engineer): JsonResponse
   {
-    $updatedEngineer = $this->engineerService->update($engineer, $request->validated());
+    $deletedMediaIds = $request->input('deleted_media_ids', []);
+
+    $updatedEngineer = $this->engineerService->update(
+      $engineer,
+      $request->validated(),
+      $request->file('images'),
+      $deletedMediaIds
+    );
+
     return response()->json(new EngineerResource($updatedEngineer));
   }
 

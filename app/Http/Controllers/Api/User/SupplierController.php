@@ -31,7 +31,10 @@ class SupplierController extends Controller
 
   public function store(CreateSupplierRequest $request): JsonResponse
   {
-    $supplier = $this->supplierService->create($request->validated());
+    $supplier = $this->supplierService->create(
+      $request->validated(),
+      $request->file('images')
+    );
     return response()->json(new SupplierResource($supplier), Response::HTTP_CREATED);
   }
 
@@ -43,10 +46,17 @@ class SupplierController extends Controller
 
   public function update(UpdateSupplierRequest $request, Supplier $supplier): JsonResponse
   {
-    $updatedSupplier = $this->supplierService->update($supplier, $request->validated());
+    $deletedMediaIds = $request->input('deleted_media_ids', []);
+
+    $updatedSupplier = $this->supplierService->update(
+      $supplier,
+      $request->validated(),
+      $request->file('images'),
+      $deletedMediaIds
+    );
+
     return response()->json(new SupplierResource($updatedSupplier));
   }
-
   public function destroy(Supplier $supplier): JsonResponse
   {
     $this->supplierService->delete($supplier);

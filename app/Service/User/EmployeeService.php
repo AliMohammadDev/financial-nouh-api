@@ -41,6 +41,7 @@ class EmployeeService
     $query = QueryBuilder::for(Employee::class)
       ->with([
         'user.funds.currencies',
+        'user.media',
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
@@ -69,15 +70,19 @@ class EmployeeService
 
   public function findOne(Employee $employee): Employee
   {
-    return $employee->load('user.funds.currencies');
+    return $employee->load(['user.funds.currencies', 'user.media']);
   }
 
-  public function create(array $data): Employee
+  public function create(array $data, $imageFiles = null): Employee
   {
-    return DB::transaction(function () use ($data) {
+    return DB::transaction(function () use ($data, $imageFiles) {
       $data['password'] = Hash::make($data['password']);
 
       $user = User::create($data);
+
+      if ($imageFiles) {
+        $this->attachMedia($user, $imageFiles);
+      }
 
       $employee = Employee::create([
         'user_id'   => $user->id,
@@ -90,26 +95,37 @@ class EmployeeService
         affectedTable: 'employees'
       );
 
-      return $employee->load('user');
+      return $employee->load('user.media');
     });
   }
 
-  public function update(Employee $employee, array $data): Employee
+  public function update(Employee $employee, array $data, $imageFiles = null, array $deletedMediaIds = []): Employee
   {
-    DB::transaction(function () use ($employee, $data) {
+    DB::transaction(function () use ($employee, $data, $imageFiles, $deletedMediaIds) {
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
       } else {
         unset($data['password']);
       }
 
-      $employee->user->update(collect($data)->except(['job_title'])->toArray());
+      $employee->user->update(collect($data)->except(['job_title', 'images', 'deleted_media_ids'])->toArray());
 
       if (isset($data['job_title'])) {
         $employee->update(collect($data)->only(['job_title'])->toArray());
       }
 
-      $employee->load('user');
+      if (!empty($deletedMediaIds)) {
+        $mediaItems = $employee->user->media()->whereIn('id', $deletedMediaIds)->get();
+        foreach ($mediaItems as $media) {
+          $media->delete();
+        }
+      }
+
+      if ($imageFiles) {
+        $this->attachMedia($employee->user, $imageFiles);
+      }
+
+      $employee->load('user.media');
 
       $this->auditLogService->log(
         actionType: 'تعديل',
@@ -118,7 +134,7 @@ class EmployeeService
       );
     });
 
-    return $employee->load('user');
+    return $employee->load('user.media');
   }
 
   public function delete(Employee $employee): bool
@@ -138,5 +154,16 @@ class EmployeeService
 
       return $deleted;
     });
+  }
+
+  private function attachMedia(User $user, $imageFiles)
+  {
+    $files = is_array($imageFiles) ? $imageFiles : [$imageFiles];
+
+    foreach ($files as $file) {
+      if ($file) {
+        $user->addMedia($file)->toMediaCollection('users_files');
+      }
+    }
   }
 }

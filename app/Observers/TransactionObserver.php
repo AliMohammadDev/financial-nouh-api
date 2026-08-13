@@ -9,24 +9,7 @@ use App\Notifications\FundBalanceAlertNotification;
 class TransactionObserver
 {
 
-  protected function isFundLocked($fundCurrency): bool
-  {
-    if (!$fundCurrency) {
-      return false;
-    }
 
-    $mainFund = null;
-
-    if (method_exists($fundCurrency, 'companyFund')) {
-      $mainFund = $fundCurrency->companyFund;
-    } elseif (method_exists($fundCurrency, 'projectFund')) {
-      $mainFund = $fundCurrency->projectFund;
-    } elseif (method_exists($fundCurrency, 'fund')) {
-      $mainFund = $fundCurrency->fund;
-    }
-
-    return $mainFund && isset($mainFund->is_locked) && $mainFund->is_locked;
-  }
   /**
    * Handle the Transaction "creating" event.
    */
@@ -35,13 +18,6 @@ class TransactionObserver
     $fromFund = $transaction->morphFrom;
     $toFund   = $transaction->morphToFund;
 
-    if ($this->isFundLocked($fromFund)) {
-      throw new \Exception('لا يمكن إتمام التحويل، لأن صندوق المصدر مقفل حالياً.');
-    }
-
-    if ($this->isFundLocked($toFund)) {
-      throw new \Exception('لا يمكن إتمام التحويل، لأن صندوق الوجهة مقفل حالياً.');
-    }
 
     return true;
   }
@@ -72,13 +48,6 @@ class TransactionObserver
     $fromFund = $transaction->morphFrom;
     $toFund   = $transaction->morphToFund;
 
-    if ($this->isFundLocked($fromFund)) {
-      throw new \Exception('لا يمكن تعديل الحركة، لأن صندوق المصدر مقفل حالياً.');
-    }
-
-    if ($this->isFundLocked($toFund)) {
-      throw new \Exception('لا يمكن تعديل الحركة، لأن صندوق الوجهة مقفل حالياً.');
-    }
 
     return true;
   }

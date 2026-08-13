@@ -41,6 +41,7 @@ class InvestorService
     $query = QueryBuilder::for(Investor::class)
       ->with([
         'user.funds.currencies',
+        'user.media',
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
@@ -68,45 +69,61 @@ class InvestorService
 
   public function findOne(Investor $investor): Investor
   {
-    return $investor->load('user.funds.currencies');
+    return $investor->load(['user.funds.currencies', 'user.media']);
   }
 
-  public function create(array $data): Investor
+  public function create(array $data, $imageFiles = null): Investor
   {
-    return DB::transaction(function () use ($data) {
+    return DB::transaction(function () use ($data, $imageFiles) {
       $data['password'] = Hash::make($data['password']);
       $user = User::create($data);
+
+      if ($imageFiles) {
+        $this->attachMedia($user, $imageFiles);
+      }
 
       $investor = Investor::create([
         'user_id'          => $user->id,
         'investment_ratio' => $data['investment_ratio'] ?? null
       ]);
+
       $this->auditLogService->log(
         actionType: 'إضافة',
         description: "قام بتسجيل مستثمر جديد: {$user->name} (نسبة الاستثمار: {$investor->investment_ratio}%)",
         affectedTable: 'investors'
       );
 
-      return $investor->load('user');
+      return $investor->load('user.media');
     });
   }
 
-  public function update(Investor $investor, array $data): Investor
+  public function update(Investor $investor, array $data, $imageFiles = null, array $deletedMediaIds = []): Investor
   {
-    DB::transaction(function () use ($investor, $data) {
+    DB::transaction(function () use ($investor, $data, $imageFiles, $deletedMediaIds) {
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
       } else {
         unset($data['password']);
       }
 
-      $investor->user()->update(array_diff_key($data, ['investment_ratio' => 1]));
+      $investor->user()->update(collect($data)->except(['investment_ratio', 'images', 'deleted_media_ids'])->toArray());
 
       if (isset($data['investment_ratio'])) {
         $investor->update(['investment_ratio' => $data['investment_ratio']]);
       }
 
-      $investor->load('user');
+      if (!empty($deletedMediaIds)) {
+        $mediaItems = $investor->user->media()->whereIn('id', $deletedMediaIds)->get();
+        foreach ($mediaItems as $media) {
+          $media->delete();
+        }
+      }
+
+      if ($imageFiles) {
+        $this->attachMedia($investor->user, $imageFiles);
+      }
+
+      $investor->load('user.media');
 
       $this->auditLogService->log(
         actionType: 'تعديل',
@@ -115,7 +132,7 @@ class InvestorService
       );
     });
 
-    return $investor->load('user');
+    return $investor->load('user.media');
   }
 
   public function delete(Investor $investor): bool
@@ -135,5 +152,16 @@ class InvestorService
 
       return $deleted;
     });
+  }
+
+  private function attachMedia(User $user, $imageFiles)
+  {
+    $files = is_array($imageFiles) ? $imageFiles : [$imageFiles];
+
+    foreach ($files as $file) {
+      if ($file) {
+        $user->addMedia($file)->toMediaCollection('users_files');
+      }
+    }
   }
 }

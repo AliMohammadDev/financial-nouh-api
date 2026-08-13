@@ -17,7 +17,11 @@
         $table->foreignId('from_currency')->constrained('currencies');
         $table->foreignId('to_currency')->constrained('currencies');
         $table->text('amount')->nullable();
-        $table->decimal('exchange_rate', 15, 4);
+        $table->decimal('exchange_rate', 15, 2);
+        $table->enum('operation', ['multiply', 'divide'])->default('multiply');
+        $table->decimal('converted_amount', 15, 2)->default(0.00);
+        $table->decimal('exp', 15, 4)->nullable();
+        $table->text('notes')->nullable();
         $table->foreignId('created_by')
           ->constrained('users');
         $table->timestamps();

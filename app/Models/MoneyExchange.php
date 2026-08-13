@@ -15,16 +15,23 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
   'to_currency',
   'amount',
   'exchange_rate',
+  'converted_amount',
+  'operation',
+  'exp',
   'created_by',
 ])]
 class MoneyExchange extends Model
 {
   use HasFactory;
 
+  protected $table = 'money_exchanges';
+
   protected function casts(): array
   {
     return [
-      'exchange_rate' => 'decimal:4',
+      'amount' => 'decimal:2',
+      'exchange_rate' => 'decimal:2',
+      'converted_amount' => 'decimal:2',
     ];
   }
 

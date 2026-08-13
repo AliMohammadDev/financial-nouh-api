@@ -27,8 +27,10 @@ class CreateMoneyExchangeRequest extends FormRequest
       'exchangeable_id'   => ['required', 'integer'],
       'from_currency'     => ['required', 'integer', 'exists:currencies,id'],
       'to_currency'       => ['required', 'integer', 'exists:currencies,id', 'different:from_currency'],
-      'amount'            => ['nullable', 'string'],
+      'amount'            => ['required', 'numeric', 'min:0'],
       'exchange_rate'     => ['required', 'numeric', 'min:0'],
+      'operation'         => ['required', 'in:multiply,divide'],
+      'exp'               => ['nullable', 'integer'],
     ];
   }
 }

@@ -18,7 +18,6 @@ return new class extends Migration
       $table->id();
       $table->foreignIdFor(Project::class)->constrained()->cascadeOnDelete();
       $table->string('name');
-      $table->boolean('is_locked')->default(false);
       $table->string('status')->default('pending');
       $table->decimal('threshold', 15, 2)->nullable()->default(0);
       $table->text('description')->nullable();

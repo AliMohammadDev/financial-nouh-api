@@ -22,6 +22,16 @@ class UserResource extends JsonResource
       'phone_number' => $this->phone_number,
       'address'      => $this->address,
 
+      'first_image'  => $this->getFirstMediaUrl('users_files'),
+      'all_images'   => $this->getMedia('users_files')->map(function ($media) {
+        return [
+          'id'  => $media->id,
+          'url' => $media->getUrl(), 
+          'name' => $media->file_name,
+        ];
+      }),
+
+
       'role_type'    => $this->getRoleType(),
       'role_details' => $this->getRoleDetails(),
 

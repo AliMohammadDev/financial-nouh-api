@@ -12,7 +12,6 @@ class ProjectFundResource extends JsonResource
     return [
       'id'          => $this->id,
       'name'        => $this->name,
-      'is_locked'   => (bool) $this->is_locked,
       'status'      => $this->status,
       'threshold'   => $this->threshold,
       'description' => $this->description,

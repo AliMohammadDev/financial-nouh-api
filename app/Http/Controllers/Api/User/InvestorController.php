@@ -29,10 +29,12 @@ class InvestorController extends Controller
 
   public function store(CreateInvestorRequest $request): JsonResponse
   {
-    $investor = $this->investorService->create($request->validated());
+    $investor = $this->investorService->create(
+      $request->validated(),
+      $request->file('images')
+    );
     return response()->json(new InvestorResource($investor), Response::HTTP_CREATED);
   }
-
   public function show(Investor $investor): JsonResponse
   {
     $investorWithRelations = $this->investorService->findOne($investor);
@@ -41,7 +43,15 @@ class InvestorController extends Controller
 
   public function update(UpdateInvestorRequest $request, Investor $investor): JsonResponse
   {
-    $updatedInvestor = $this->investorService->update($investor, $request->validated());
+    $deletedMediaIds = $request->input('deleted_media_ids', []);
+
+    $updatedInvestor = $this->investorService->update(
+      $investor,
+      $request->validated(),
+      $request->file('images'),
+      $deletedMediaIds
+    );
+
     return response()->json(new InvestorResource($updatedInvestor));
   }
 

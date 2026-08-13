@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable([
   'name',
-  'is_locked',
   'status',
   'threshold',
   'description',

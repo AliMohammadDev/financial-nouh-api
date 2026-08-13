@@ -41,6 +41,7 @@ class TrusteeService
     $query = QueryBuilder::for(Trustee::class)
       ->with([
         'user.funds.currencies',
+        'user.media',
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
@@ -68,43 +69,60 @@ class TrusteeService
 
   public function findOne(Trustee $trustee): Trustee
   {
-    return $trustee->load('user.funds.currencies');
+    return $trustee->load(['user.funds.currencies', 'user.media']);
   }
 
-  public function create(array $data): Trustee
+  public function create(array $data, $imageFiles = null): Trustee
   {
-    return DB::transaction(function () use ($data) {
+    return DB::transaction(function () use ($data, $imageFiles) {
       $data['password'] = Hash::make($data['password']);
 
       $user = User::create($data);
 
+      if ($imageFiles) {
+        $this->attachMedia($user, $imageFiles);
+      }
+
       $trustee = Trustee::create([
-        'user_id'          => $user->id,
+        'user_id' => $user->id,
       ]);
 
       $this->auditLogService->log(
         actionType: 'إضافة',
-        description: "قام بتسجيل وصي جديد: {$user->name})",
+        description: "قام بتسجيل وصي جديد: {$user->name}",
         affectedTable: 'trustees'
       );
 
-      return $trustee->load('user');
+      return $trustee->load('user.media');
     });
   }
 
-  public function update(Trustee $trustee, array $data): Trustee
+  public function update(Trustee $trustee, array $data, $imageFiles = null, array $deletedMediaIds = []): Trustee
   {
-    DB::transaction(function () use ($trustee, $data) {
+    DB::transaction(function () use ($trustee, $data, $imageFiles, $deletedMediaIds) {
       if (!empty($data['password'])) {
         $data['password'] = Hash::make($data['password']);
       } else {
         unset($data['password']);
       }
 
-      $trustee->user->update(collect($data)->toArray());
+      // تحديث بيانات جدول users مع استبعاد حقول الوسائط ومصفوفة الحذف
+      $trustee->user->update(collect($data)->except(['images', 'deleted_media_ids'])->toArray());
 
+      // 1. حذف الوسائط المحددة بناءً على الـ IDs المرسلة
+      if (!empty($deletedMediaIds)) {
+        $mediaItems = $trustee->user->media()->whereIn('id', $deletedMediaIds)->get();
+        foreach ($mediaItems as $media) {
+          $media->delete();
+        }
+      }
 
-      $trustee->load('user');
+      // 2. إرفاق الصور الجديدة إن وجدت
+      if ($imageFiles) {
+        $this->attachMedia($trustee->user, $imageFiles);
+      }
+
+      $trustee->load('user.media');
 
       $this->auditLogService->log(
         actionType: 'تعديل',
@@ -113,7 +131,7 @@ class TrusteeService
       );
     });
 
-    return $trustee->load('user');
+    return $trustee->load('user.media');
   }
 
   public function delete(Trustee $trustee): bool
@@ -133,5 +151,16 @@ class TrusteeService
 
       return $deleted;
     });
+  }
+
+  private function attachMedia(User $user, $imageFiles)
+  {
+    $files = is_array($imageFiles) ? $imageFiles : [$imageFiles];
+
+    foreach ($files as $file) {
+      if ($file) {
+        $user->addMedia($file)->toMediaCollection('users_files');
+      }
+    }
   }
 }

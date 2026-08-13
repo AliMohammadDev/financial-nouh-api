@@ -31,7 +31,10 @@ class TrusteeController extends Controller
 
   public function store(CreateTrusteeRequest $request): JsonResponse
   {
-    $trustee = $this->trusteeService->create($request->validated());
+    $trustee = $this->trusteeService->create(
+      $request->validated(),
+      $request->file('images')
+    );
     return response()->json(new TrusteeResource($trustee), Response::HTTP_CREATED);
   }
 
@@ -43,7 +46,15 @@ class TrusteeController extends Controller
 
   public function update(UpdateTrusteeRequest $request, Trustee $trustee): JsonResponse
   {
-    $updatedTrustee = $this->trusteeService->update($trustee, $request->validated());
+    $deletedMediaIds = $request->input('deleted_media_ids', []);
+
+    $updatedTrustee = $this->trusteeService->update(
+      $trustee,
+      $request->validated(),
+      $request->file('images'),
+      $deletedMediaIds
+    );
+
     return response()->json(new TrusteeResource($updatedTrustee));
   }
 

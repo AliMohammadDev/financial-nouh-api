@@ -28,10 +28,12 @@ class MoneyExchangeService
 
     $filters = [
       AllowedFilter::callback('search', function ($query, $value) {
-        $query->where('amount', 'like', "%{$value}%");
+        $query->where('amount', 'like', "%{$value}%")
+          ->orWhere('converted_amount', 'like', "%{$value}%");
       }),
       AllowedFilter::exact('from_currency'),
       AllowedFilter::exact('to_currency'),
+      AllowedFilter::exact('operation'),
 
       AllowedFilter::callback('currency_fund_id', function ($query, $value) {
         $query->where('exchangeable_type', CurrencyFund::class)
@@ -68,6 +70,8 @@ class MoneyExchangeService
         AllowedSort::field('created_at', 'money_exchanges.created_at'),
         'id',
         'exchange_rate',
+        'converted_amount',
+        'operation',
         AllowedSort::callback('creator_name', function ($query, $descending) {
           $direction = $descending ? 'desc' : 'asc';
           $query->join('users as c', 'money_exchanges.created_by', '=', 'c.id')

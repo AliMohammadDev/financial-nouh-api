@@ -12,14 +12,15 @@ class UserObserver
   public function created(User $user): void
   {
     $user->funds()->create([
-      'name' => 'الصندوق الأساسي',
-      'is_locked' => false,
-      'status' => 'active',
-      'threshold' => 0,
+      'name'        => 'الصندوق الأساسي',
+      'status'      => 'active',
+      'threshold'   => 0,
       'description' => 'صندوق المستخدم: ' . $user->name,
+    ])->currencies()->attach([
+      1 => ['balance' => 0],
+      2 => ['balance' => 0],
     ]);
   }
-
   /**
    * Handle the User "updated" event.
    */

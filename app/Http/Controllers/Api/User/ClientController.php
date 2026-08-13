@@ -31,7 +31,10 @@ class ClientController extends Controller
 
   public function store(CreateClientRequest $request): JsonResponse
   {
-    $client = $this->clientService->create($request->validated());
+    $client = $this->clientService->create(
+      $request->validated(),
+      $request->file('images')
+    );
     return response()->json(new ClientResource($client), Response::HTTP_CREATED);
   }
 
@@ -43,7 +46,15 @@ class ClientController extends Controller
 
   public function update(UpdateClientRequest $request, Client $client): JsonResponse
   {
-    $updatedClient = $this->clientService->update($client, $request->validated());
+    $deletedMediaIds = $request->input('deleted_media_ids', []);
+
+    $updatedClient = $this->clientService->update(
+      $client,
+      $request->validated(),
+      $request->file('images'),
+      $deletedMediaIds
+    );
+
     return response()->json(new ClientResource($updatedClient));
   }
 

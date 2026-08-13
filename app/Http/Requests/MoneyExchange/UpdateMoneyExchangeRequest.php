@@ -27,8 +27,11 @@ class UpdateMoneyExchangeRequest extends FormRequest
       'exchangeable_id'   => ['sometimes', 'integer'],
       'from_currency'     => ['sometimes', 'integer', 'exists:currencies,id'],
       'to_currency'       => ['sometimes', 'integer', 'exists:currencies,id', 'different:from_currency'],
-      'amount'            => ['nullable', 'string'],
+      'amount'            => ['sometimes', 'numeric', 'min:0'],
       'exchange_rate'     => ['sometimes', 'numeric', 'min:0'],
+      'converted_amount' => ['sometimes', 'numeric', 'min:0'],
+      'operation'         => ['sometimes', 'in:multiply,divide'],
+      'exp'               => ['nullable', 'integer'],
     ];
   }
 }

@@ -25,7 +25,6 @@ class UpdateProjectFundRequest extends FormRequest
     return [
       'project_id'  => 'sometimes|exists:projects,id',
       'name'        => 'sometimes|string|max:255',
-      'is_locked'   => ['sometimes', 'boolean'],
       'status'      => ['sometimes', 'string', 'in:complete,pending,canceled'],
       'threshold'   => ['sometimes', 'nullable', 'numeric', 'min:0'],
       'description' => ['sometimes', 'nullable', 'string'],

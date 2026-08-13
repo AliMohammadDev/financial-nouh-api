@@ -11,6 +11,8 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class ProjectFundCurrency extends Pivot
 {
   protected $table = 'project_fund_currencies';
+  protected $primaryKey = 'id';
+  public $incrementing = true;
 
   public function projectFund(): BelongsTo
   {

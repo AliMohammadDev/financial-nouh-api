@@ -56,6 +56,9 @@ class MoneyExchangeResource extends JsonResource
       'to_currency'       => new CurrencyResource($this->whenLoaded('toCurrency')),
       'amount'            => $this->amount,
       'exchange_rate'     => (float) $this->exchange_rate,
+      'operation'         => $this->operation,
+      'converted_amount' => (float) $this->converted_amount,
+      'exp'               => $this->exp,
       'created_by'        => new UserResource($this->whenLoaded('creator')),
       'created_at'        => $this->created_at?->format('Y-m-d'),
     ];
@@ -63,13 +66,13 @@ class MoneyExchangeResource extends JsonResource
 
   private function determineRoleType($user): string
   {
-    if ($user->relationLoaded('admin') && $user->admin) return 'admin';
-    if ($user->relationLoaded('client') && $user->client) return 'client';
-    if ($user->relationLoaded('employee') && $user->employee) return 'employee';
-    if ($user->relationLoaded('craftsmen') && $user->craftsmen) return 'craftsmen';
-    if ($user->relationLoaded('engineer') && $user->engineer) return 'engineer';
-    if ($user->relationLoaded('supplier') && $user->supplier) return 'supplier';
-    if ($user->relationLoaded('trustee') && $user->trustee) return 'trustee';
+    $roles = ['admin', 'client', 'employee', 'craftsmen', 'engineer', 'supplier', 'trustee'];
+
+    foreach ($roles as $role) {
+      if ($user->relationLoaded($role) && $user->{$role}) {
+        return $role;
+      }
+    }
 
     return 'user';
   }
