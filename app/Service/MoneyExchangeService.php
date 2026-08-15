@@ -35,6 +35,13 @@ class MoneyExchangeService
       AllowedFilter::exact('to_currency'),
       AllowedFilter::exact('operation'),
 
+      AllowedFilter::callback('date_from', function ($query, $value) {
+        $query->whereDate('created_at', '>=', $value);
+      }),
+      AllowedFilter::callback('date_to', function ($query, $value) {
+        $query->whereDate('created_at', '<=', $value);
+      }),
+
       AllowedFilter::callback('currency_fund_id', function ($query, $value) {
         $query->where('exchangeable_type', CurrencyFund::class)
           ->where('exchangeable_id', $value);
@@ -79,6 +86,7 @@ class MoneyExchangeService
         })
       )
       ->defaultSort('-money_exchanges.created_at');
+
 
     if ($paginate) {
       $paginator = $query->paginate(perPage: $perPage, page: $page, columns: $columns);
