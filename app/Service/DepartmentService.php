@@ -55,7 +55,7 @@ class DepartmentService
 
   public function findOne(Department $department): Department
   {
-    return $department;
+    return $department->load(['employees.user.media', 'projects', 'engineers.user.media']);
   }
 
   public function create(array $data): Department

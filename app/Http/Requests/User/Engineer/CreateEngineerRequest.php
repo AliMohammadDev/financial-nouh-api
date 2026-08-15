@@ -26,6 +26,7 @@ class CreateEngineerRequest extends FormRequest
   public function rules(): array
   {
     return array_merge($this->userCreateRules(), [
+      'department_id' => ['required', 'exists:departments,id'],
       'job_title'   => ['required', 'string', 'max:255'],
       'base_salary' => ['required', 'numeric', 'min:0'],
     ]);

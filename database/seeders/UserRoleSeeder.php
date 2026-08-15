@@ -7,6 +7,7 @@ use App\Models\Client;
 use App\Models\Craftsmen;
 use App\Models\Currency;
 use App\Models\DailyWorker;
+use App\Models\Department; // 1. أضف الـ Use هنا
 use App\Models\Employee;
 use App\Models\Engineer;
 use App\Models\Fund;
@@ -63,6 +64,18 @@ class UserRoleSeeder extends Seeder
     shuffle($arabicNames);
     $nameIndex = 0;
 
+    // جلب كل الأقسام المتاحة (لربط الموظفين والمهندسين بها)
+    $departments = Department::pluck('id')->toArray();
+
+    // إذا لم تكن الأقسام قد أُنشئت بعد، ننشئ قسماً افتراضياً احتياطياً
+    if (empty($departments)) {
+      $defaultDept = Department::create([
+        'name' => 'الإدارة العامة',
+        'main_manager' => 'المدير العام'
+      ]);
+      $departments = [$defaultDept->id];
+    }
+
     // جلب عملة الدولار (USD) للتأكد من وجودها
     $usdCurrency = Currency::firstOrCreate(
       ['currency' => 'USD'],
@@ -74,8 +87,18 @@ class UserRoleSeeder extends Seeder
       ['model' => Client::class, 'name_en' => 'client', 'count' => 4, 'extra' => []],
       ['model' => Craftsmen::class, 'name_en' => 'craftsmen', 'count' => 4, 'extra' => []],
       ['model' => DailyWorker::class, 'name_en' => 'worker', 'count' => 4, 'extra' => []],
-      ['model' => Employee::class, 'name_en' => 'employee', 'count' => 4, 'extra' => ['job_title' => 'محاسب عام']],
-      ['model' => Engineer::class, 'name_en' => 'engineer', 'count' => 4, 'extra' => ['job_title' => 'مهندس مدني', 'base_salary' => 1200.00]],
+
+      // إضافة department_id عشوائي للموظف
+      ['model' => Employee::class, 'name_en' => 'employee', 'count' => 4, 'extra' => [
+        'job_title' => 'محاسب عام'
+      ]],
+
+      // إضافة department_id عشوائي للمهندس
+      ['model' => Engineer::class, 'name_en' => 'engineer', 'count' => 4, 'extra' => [
+        'job_title' => 'مهندس مدني',
+        'base_salary' => 1200.00
+      ]],
+
       ['model' => Investor::class, 'name_en' => 'investor', 'count' => 4, 'extra' => ['investment_ratio' => 25.00]],
       ['model' => Supplier::class, 'name_en' => 'supplier', 'count' => 4, 'extra' => []],
       ['model' => Trustee::class, 'name_en' => 'trustee', 'count' => 4, 'extra' => []],
@@ -86,7 +109,6 @@ class UserRoleSeeder extends Seeder
     foreach ($roles as $roleData) {
       for ($i = 0; $i < $roleData['count']; $i++) {
         $name = $arabicNames[$nameIndex++];
-
         $englishEmail = $roleData['name_en'] . '_' . $counter++ . '@example.com';
 
         $user = User::create([
@@ -98,7 +120,13 @@ class UserRoleSeeder extends Seeder
           'email_verified_at' => now(),
         ]);
 
-        $data = array_merge(['user_id' => $user->id], $roleData['extra']);
+        $extraData = $roleData['extra'];
+
+        if (in_array($roleData['model'], [Employee::class, Engineer::class])) {
+          $extraData['department_id'] = $departments[array_rand($departments)];
+        }
+
+        $data = array_merge(['user_id' => $user->id], $extraData);
         $roleData['model']::create($data);
 
         // إنشاء الصندوق للمستخدم

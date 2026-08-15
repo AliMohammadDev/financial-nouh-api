@@ -30,6 +30,7 @@ class UpdateEngineerRequest extends FormRequest
     $userId = $engineer?->user_id;
 
     return array_merge($this->userUpdateRules($userId), [
+      'department_id' => ['sometimes', 'required', 'exists:departments,id'],
       'job_title'   => ['sometimes', 'required', 'string', 'max:255'],
       'base_salary' => ['sometimes', 'required', 'numeric', 'min:0'],
     ]);

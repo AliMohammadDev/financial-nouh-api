@@ -15,6 +15,7 @@ class UserObserver
       'name'        => 'الصندوق الأساسي',
       'status'      => 'active',
       'threshold'   => 0,
+      'type' => 'الرئيسي',
       'description' => 'صندوق المستخدم: ' . $user->name,
     ])->currencies()->attach([
       1 => ['balance' => 0],

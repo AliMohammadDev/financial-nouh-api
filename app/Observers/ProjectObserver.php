@@ -15,6 +15,7 @@ class ProjectObserver
       'name'        => 'الصندوق الأساسي',
       'status'      => 'active',
       'threshold'   => 1000,
+      'type' => 'الرئيسي',
       'description' => 'صندوق المشروع: ' . $project->name,
     ])->currencies()->attach([
       1 => ['balance' => 0],

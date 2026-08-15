@@ -42,6 +42,7 @@ class EmployeeService
       ->with([
         'user.funds.currencies',
         'user.media',
+        'department'
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
@@ -70,7 +71,7 @@ class EmployeeService
 
   public function findOne(Employee $employee): Employee
   {
-    return $employee->load(['user.funds.currencies', 'user.media']);
+    return $employee->load(['user.funds.currencies', 'user.media', 'department']);
   }
 
   public function create(array $data, $imageFiles = null): Employee
@@ -86,7 +87,8 @@ class EmployeeService
 
       $employee = Employee::create([
         'user_id'   => $user->id,
-        'job_title' => $data['job_title']
+        'job_title' => $data['job_title'],
+        'department_id' => $data['department_id'],
       ]);
 
       $this->auditLogService->log(
@@ -108,10 +110,10 @@ class EmployeeService
         unset($data['password']);
       }
 
-      $employee->user->update(collect($data)->except(['job_title', 'images', 'deleted_media_ids'])->toArray());
+      $employee->user->update(collect($data)->except(['job_title', 'department_id', 'status', 'images', 'deleted_media_ids'])->toArray());
 
-      if (isset($data['job_title'])) {
-        $employee->update(collect($data)->only(['job_title'])->toArray());
+      if (isset($data['job_title']) || isset($data['department_id']) || isset($data['status'])) {
+        $employee->update(collect($data)->only(['job_title', 'department_id', 'status'])->toArray());
       }
 
       if (!empty($deletedMediaIds)) {

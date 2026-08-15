@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\User;
 
+use App\Http\Resources\DepartmentResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,6 +20,7 @@ class EmployeeResource extends JsonResource
       'job_title'  => $this->job_title,
       'status' => $this->status,
       'user'       => new UserResource($this->whenLoaded('user')),
+      'department'       => new DepartmentResource($this->whenLoaded('department')),
       'created_at' => $this->created_at?->format('Y-m-d'),
     ];
   }

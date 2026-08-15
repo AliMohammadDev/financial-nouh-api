@@ -41,6 +41,7 @@ class EngineerService
       ->with([
         'user.funds.currencies',
         'user.media',
+        'department'
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
@@ -70,7 +71,7 @@ class EngineerService
 
   public function findOne(Engineer $engineer): Engineer
   {
-    return $engineer->load(['user.funds.currencies', 'user.media']);
+    return $engineer->load(['user.funds.currencies', 'user.media', 'department']);
   }
 
   public function create(array $data, $imageFiles = null): Engineer
@@ -88,6 +89,7 @@ class EngineerService
         'user_id'     => $user->id,
         'job_title'   => $data['job_title'],
         'base_salary' => $data['base_salary'],
+        'department_id' => $data['department_id'],
       ]);
 
       $this->auditLogService->log(
@@ -109,16 +111,14 @@ class EngineerService
         unset($data['password']);
       }
 
-      $engineer->user->update(collect($data)->except(['job_title', 'base_salary', 'images', 'deleted_media_ids'])->toArray());
+      $engineer->user->update(
+        collect($data)->except(['job_title', 'base_salary', 'department_id', 'status', 'images', 'deleted_media_ids'])->toArray()
+      );
 
-      // تحديث حقول المهندس إن وجدت
-      $engineer->update(collect($data)->only(['job_title', 'base_salary'])->toArray());
-
-      if (!empty($deletedMediaIds)) {
-        $mediaItems = $engineer->user->media()->whereIn('id', $deletedMediaIds)->get();
-        foreach ($mediaItems as $media) {
-          $media->delete();
-        }
+      if (isset($data['job_title']) || isset($data['base_salary']) || isset($data['department_id']) || isset($data['status'])) {
+        $engineer->update(
+          collect($data)->only(['job_title', 'base_salary', 'department_id', 'status'])->toArray()
+        );
       }
 
       if ($imageFiles) {
