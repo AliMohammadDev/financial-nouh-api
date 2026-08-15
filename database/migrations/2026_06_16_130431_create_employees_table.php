@@ -16,6 +16,10 @@ return new class extends Migration
       $table->id();
       $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete();
       $table->string('job_title');
+
+      $table->enum('status', ['active', 'retired', 'resigned'])
+        ->default('active');
+
       $table->timestamps();
     });
   }

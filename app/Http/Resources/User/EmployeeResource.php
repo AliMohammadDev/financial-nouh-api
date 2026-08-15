@@ -17,6 +17,7 @@ class EmployeeResource extends JsonResource
     return [
       'id'         => $this->id,
       'job_title'  => $this->job_title,
+      'status' => $this->status,
       'user'       => new UserResource($this->whenLoaded('user')),
       'created_at' => $this->created_at?->format('Y-m-d'),
     ];

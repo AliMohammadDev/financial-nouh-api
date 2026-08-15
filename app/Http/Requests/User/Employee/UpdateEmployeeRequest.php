@@ -30,7 +30,8 @@ class UpdateEmployeeRequest extends FormRequest
     $userId = $employee?->user_id;
 
     return array_merge($this->userUpdateRules($userId), [
-      'job_title' => ['sometimes', 'required', 'string', 'max:255']
+      'job_title' => ['sometimes', 'required', 'string', 'max:255'],
+      'status'    => ['sometimes', 'string', 'in:active,retired,resigned'],
     ]);
   }
 }

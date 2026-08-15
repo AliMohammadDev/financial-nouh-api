@@ -27,6 +27,7 @@ class CreateEmployeeRequest extends FormRequest
   {
     return array_merge($this->userCreateRules(), [
       'job_title' => ['required', 'string', 'max:255'],
+      'status'    => ['sometimes', 'string', 'in:active,retired,resigned'],
     ]);
   }
 }
