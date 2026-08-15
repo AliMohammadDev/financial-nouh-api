@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\Route;
 
 // Public Authentication Routes
 Route::post('login', [AuthController::class, 'login']);
+Route::post('/update-password', [AuthController::class, 'updatePassword']);
 
 // Protected Routes
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -96,7 +97,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
   Route::apiResource('project-funds', ProjectFundController::class);
   Route::post('project-funds/{projectFund}/currencies', [ProjectFundController::class, 'attachCurrency']);
-  Route::post('project-funds/{projectFund}/detach-currency', [ProjectFundController::class, 'detachCurrency']); 
+  Route::post('project-funds/{projectFund}/detach-currency', [ProjectFundController::class, 'detachCurrency']);
   Route::apiResource('project-teams', ProjectTeamController::class);
   Route::apiResource('project-stages', ProjectStageController::class);
   Route::apiResource('stage-timelines', StageTimelineController::class);

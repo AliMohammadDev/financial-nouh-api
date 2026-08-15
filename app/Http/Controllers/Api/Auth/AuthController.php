@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Auth;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Resources\User\UserResource;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\UpdatePasswordRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Service\auth\AuthService;
 use App\Models\User;
@@ -76,6 +77,21 @@ class AuthController extends Controller
 
     return response()->json([
       'message' => 'تم تسجيل الخروج بنجاح',
+    ], 200);
+  }
+
+  public function updatePassword(UpdatePasswordRequest $request)
+  {
+    $updated = $this->authService->updatePasswordByEmail($request->validated());
+
+    if (!$updated) {
+      return response()->json([
+        'message' => 'حدث خطأ ما، البريد الإلكتروني غير موجود',
+      ], 404);
+    }
+
+    return response()->json([
+      'message' => 'تم تغيير كلمة المرور بنجاح',
     ], 200);
   }
 }
