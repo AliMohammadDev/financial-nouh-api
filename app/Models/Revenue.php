@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
   'is_posted',
   'note',
   'received_by',
+  'voucher_number',
 ])]
 class Revenue extends Model
 {

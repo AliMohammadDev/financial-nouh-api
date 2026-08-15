@@ -15,6 +15,7 @@ return new class extends Migration
   {
     Schema::create('expenses', function (Blueprint $table) {
       $table->id();
+      $table->string('voucher_number')->unique();
       $table->morphs('expenseable');
       $table->text('description');
       $table->decimal('amount', 15, 2);

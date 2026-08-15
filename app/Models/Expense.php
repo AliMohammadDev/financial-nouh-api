@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
   'is_posted',
   'note',
   'created_by',
+  'voucher_number'
 ])]
 class Expense extends Model
 {

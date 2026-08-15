@@ -63,6 +63,7 @@ class RevenueResource extends JsonResource
 
     return [
       'id'                => $this->id,
+      'voucher_number'    => $this->voucher_number,
       'revenueable_type'  => $this->revenueable_type,
       'revenueable_id'    => $this->revenueable_id,
       'revenueable_info'  => $revenueableInfo,

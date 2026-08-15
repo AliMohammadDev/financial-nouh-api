@@ -49,6 +49,7 @@ class ExpenseResource extends JsonResource
 
     return [
       'id'                => $this->id,
+      'voucher_number'    => $this->voucher_number,
       'expenseable_type'  => $this->expenseable_type,
       'expenseable_id'    => $this->expenseable_id,
       'expenseable_info'  => $expenseableInfo,

@@ -15,6 +15,24 @@ class RevenueObserver
   {
     $fund = $revenue->revenueable;
 
+    if (empty($expense->voucher_number)) {
+      $yearMonth = now()->format('y-m');
+
+      $startOfMonth = now()->startOfMonth();
+      $endOfMonth = now()->endOfMonth();
+
+      $lastExpense = Revenue::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+        ->orderBy('id', 'desc')
+        ->first();
+
+      $sequence = 1;
+      if ($lastExpense && preg_match('/-(\d+)$/', $lastExpense->voucher_number, $matches)) {
+        $sequence = intval($matches[1]) + 1;
+      }
+
+      $revenue->voucher_number = $yearMonth . '-exp-' . str_pad($sequence, 5, '0', STR_PAD_LEFT);
+    }
+
 
     return true;
   }
