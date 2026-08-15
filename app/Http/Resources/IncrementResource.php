@@ -17,7 +17,7 @@ class IncrementResource extends JsonResource
   {
     return [
       'id'          => $this->id,
-      'type'        => $this->type,
+      'date'        => $this->date?->format('Y-m-d'),
       'amount'      => (float) $this->amount,
       'reason'      => $this->reason,
       'employee'    => new EmployeeResource($this->whenLoaded('employee')),

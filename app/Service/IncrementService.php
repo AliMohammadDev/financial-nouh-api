@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Models\Increment;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -24,7 +25,7 @@ class IncrementService
 
     $filters = [
       AllowedFilter::callback('search', function ($query, $value) {
-        $query->where('type', 'like', "%{$value}%")
+        $query->where('date', 'like', "%{$value}%")
           ->orWhere('reason', 'like', "%{$value}%");
       }),
     ];
@@ -32,7 +33,7 @@ class IncrementService
     $query = QueryBuilder::for(Increment::class)
       ->with(['employee.user.media'])
       ->allowedFilters(...$filters)
-      ->allowedSorts('created_at', 'id', 'type', 'amount')
+      ->allowedSorts('created_at', 'id', 'date', 'amount')
       ->defaultSort('-created_at');
 
     if ($paginate) {
@@ -61,7 +62,7 @@ class IncrementService
         description: "قام بإضافة زيادة جديدة برقم: {$increment->id}",
         affectedTable: 'increments'
       );
-
+      $this->checkAndNotifyIncrement($increment);
       return $increment->load(['employee.user.media']);
     });
   }
@@ -97,5 +98,18 @@ class IncrementService
 
       return $deleted;
     });
+  }
+
+  protected function checkAndNotifyIncrement($increment): void
+  {
+    if ($increment->date->isToday()) {
+
+      $admins = User::whereHas('admin')->get();
+
+      foreach ($admins as $admin) {
+        // يمكنك إنشاء Notification خاصة بالزيادات واستدعائها هنا
+        // $admin->notify(new IncrementDateAlertNotification($increment));
+      }
+    }
   }
 }

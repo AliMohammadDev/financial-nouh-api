@@ -15,7 +15,7 @@ return new class extends Migration
     Schema::create('increments', function (Blueprint $table) {
       $table->id();
       $table->foreignIdFor(Employee::class)->constrained()->cascadeOnDelete();
-      $table->string('type');
+      $table->date('date');
       $table->decimal('amount', 15, 2);
       $table->text('reason')->nullable();
 

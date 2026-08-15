@@ -24,7 +24,7 @@ class CreateIncrementRequest extends FormRequest
   {
     return [
       'employee_id' => ['required', 'exists:employees,id'],
-      'type'        => ['required', 'string', 'max:255'],
+      'date'        => ['required', 'date'], 
       'amount'      => ['required', 'numeric', 'min:0'],
       'reason'      => ['nullable', 'string'],
     ];

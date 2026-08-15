@@ -24,7 +24,7 @@ class UpdateIncrementRequest extends FormRequest
   {
     return [
       'employee_id' => ['sometimes', 'required', 'exists:employees,id'],
-      'type'        => ['sometimes', 'required', 'string', 'max:255'],
+      'date'        => ['sometimes', 'date'],
       'amount'      => ['sometimes', 'required', 'numeric', 'min:0'],
       'reason'      => ['nullable', 'string'],
     ];

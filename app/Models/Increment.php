@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
   'employee_id',
-  'type',
+  'date',
   'amount',
   'reason',
 ])]
@@ -21,6 +21,7 @@ class Increment extends Model
   {
     return [
       'amount' => 'decimal:2',
+      'date'   => 'date',
     ];
   }
 
