@@ -90,6 +90,7 @@ class DepartmentProjectSeeder extends Seeder
       $projectFund = ProjectFund::create([
         'project_id' => $project->id,
         'name'       => 'صندوق مشروع ' . $project->name,
+        'type'       => 'الرئيسي',
       ]);
 
       $projectFund->currencies()->attach($usdCurrency->id, [

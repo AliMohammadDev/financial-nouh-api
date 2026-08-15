@@ -22,8 +22,8 @@ class CompanyFundSeeder extends Seeder
     foreach ($companyFunds as $fundName) {
       $fund = CompanyFund::create([
         'name' => $fundName,
+        'type' => 'الرئيسي',
       ]);
-
       $fund->currencies()->attach($usdCurrency->id, [
         'balance' => 10000.00,
       ]);

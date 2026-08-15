@@ -32,7 +32,10 @@ class AdminSeeder extends Seeder
 
     $fund = Fund::firstOrCreate(
       ['user_id' => $user->id],
-      ['name' => 'صندوق حاتم الصالح']
+      [
+        'name' => 'صندوق حاتم الصالح',
+        'type' => 'الرئيسي',
+      ]
     );
 
     $usdCurrency = Currency::where('currency', 'USD')->first();

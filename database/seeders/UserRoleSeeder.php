@@ -105,6 +105,7 @@ class UserRoleSeeder extends Seeder
         $fund = Fund::create([
           'user_id' => $user->id,
           'name'    => 'صندوق ' . $name,
+          'type'    => 'الرئيسي',
         ]);
 
         // ربط الصندوق بعملة الدولار مع إعطائه رصيد مبدئي 1000$
