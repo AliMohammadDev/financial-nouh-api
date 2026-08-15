@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
   'status',
   'threshold',
   'description',
+  'type'
 ])]
 class CompanyFund extends Model
 {

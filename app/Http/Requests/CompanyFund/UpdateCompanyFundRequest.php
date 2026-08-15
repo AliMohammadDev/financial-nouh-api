@@ -27,6 +27,7 @@ class UpdateCompanyFundRequest extends FormRequest
       'status'      => ['sometimes', 'string', 'in:complete,pending,canceled'],
       'threshold'   => ['sometimes', 'nullable', 'numeric', 'min:0'],
       'description' => ['sometimes', 'nullable', 'string'],
+      'type' => ['sometimes', 'string']
     ];
   }
 }

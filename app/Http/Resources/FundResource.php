@@ -20,6 +20,7 @@ class FundResource extends JsonResource
       'status'      => $this->status,
       'threshold'   => $this->threshold,
       'description' => $this->description,
+      'type' => $this->type,
 
       'user'       => $this->whenLoaded('user'),
       'currencies' => CurrencyResource::collection($this->whenLoaded('currencies')),

@@ -21,6 +21,7 @@ return new class extends Migration
       $table->string('status')->default('pending');
       $table->decimal('threshold', 15, 2)->nullable()->default(0);
       $table->text('description')->nullable();
+      $table->string('type');
       $table->timestamps();
     });
   }

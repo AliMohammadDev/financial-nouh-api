@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
   'status',
   'threshold',
   'description',
+  'type'
 ])]
 class ProjectFund extends Model
 {

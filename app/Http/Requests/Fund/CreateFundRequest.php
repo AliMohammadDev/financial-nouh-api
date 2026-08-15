@@ -28,6 +28,8 @@ class CreateFundRequest extends FormRequest
       'status'      => ['nullable', 'string', 'in:complete,pending,canceled'],
       'threshold'   => ['nullable', 'numeric', 'min:0'],
       'description' => ['nullable', 'string'],
+      'type' => ['required', 'string']
+
     ];
   }
 }

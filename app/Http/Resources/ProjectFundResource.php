@@ -15,6 +15,7 @@ class ProjectFundResource extends JsonResource
       'status'      => $this->status,
       'threshold'   => $this->threshold,
       'description' => $this->description,
+      'type' => $this->type,
       'project'     => new ProjectResource($this->whenLoaded('project')),
       'currencies'  => CurrencyResource::collection($this->whenLoaded('currencies')),
       'created_at'  => $this->created_at?->format('Y-m-d'),
