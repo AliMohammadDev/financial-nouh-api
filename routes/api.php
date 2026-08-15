@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\DirectoryController;
 use App\Http\Controllers\Api\EmployeePaymentController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\FundController;
+use App\Http\Controllers\Api\IncrementController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\InvoiceItemController;
 use App\Http\Controllers\Api\ItemController;
@@ -114,6 +115,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
   Route::apiResource('company-funds', CompanyFundController::class);
   Route::post('company-funds/{companyFund}/currencies', [CompanyFundController::class, 'attachCurrency']);
   Route::post('company-funds/{companyFund}/detach-currency', [CompanyFundController::class, 'detachCurrency']);
+
+  Route::apiResource('increments', IncrementController::class);
 
   // ==========================================
   // Inventory & Invoicing Management
