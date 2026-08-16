@@ -42,7 +42,10 @@ class EmployeeService
       ->with([
         'user.funds.currencies',
         'user.media',
-        'department'
+        'department',
+        'payments' => function ($q) {
+          $q->latest('payment_date')->limit(1);
+        }
       ])
       ->allowedFilters(...$filters)
       ->allowedSorts(
@@ -71,7 +74,9 @@ class EmployeeService
 
   public function findOne(Employee $employee): Employee
   {
-    return $employee->load(['user.funds.currencies', 'user.media', 'department']);
+    return $employee->load(['user.funds.currencies', 'user.media', 'department', 'payments' => function ($q) {
+      $q->latest('payment_date')->limit(1);
+    }]);
   }
 
   public function create(array $data, $imageFiles = null): Employee
